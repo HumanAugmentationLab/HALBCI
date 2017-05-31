@@ -11,7 +11,7 @@ myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[0.5 3.5]}, ...
            'Prediction', {'FeatureExtraction',{'FreqWindows',[7.5 8.5;9.25 10.25;11.39 12.39;14 15;17.17 18.17;21 22;25.75 26.75;31.5 32.5],'TimeWindows',[]}, ...
                           'MachineLearning',{'Learner','lda'}}}
 %}
-myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[1 4.5],'FIRFilter',[7 8 26 28]}};
+myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[0.5 3],'FIRFilter',[7 8 26 28]}};
 %finally we train the model on the data, specifying the target markers
 [trainloss,lastmodel,laststats] = bci_train('Data',traindata,'Approach',myapproach,'TargetMarkers',{'1','-1'}); 
 %this will display the results of the cross-validation tests

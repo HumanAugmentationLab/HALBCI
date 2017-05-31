@@ -15,7 +15,7 @@ while isempty(result)
     result = lsl_resolve_byprop(lib,'name',bci_stream_name,1,1); end
 inlet = lsl_inlet(result{1});
 disp('Now receiving data...');
-%this variable will catch each variable and append it onto itself
+%this variable will catch each variable 
 recorded = [0 0 0 0 0 0]
 while true
     % get data from the inlet (timeout: 1 second)
