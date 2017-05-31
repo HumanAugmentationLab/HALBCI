@@ -1,0 +1,17 @@
+%First we load the data set into matlab with io_loadset()
+traindata = io_loadset('C:\Users\gsteelman\Desktop\Summer Research\BCIIV\BCICIV_calib_ds1a.mat','channels',1:59);
+mydata = exp_eval(traindata)
+%here we specifiy the approach to detangle the data
+%this one is Filter Banked CSP with epochs from .5 to 3.5. 8 different 
+myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[0.5 3.5]}, ...
+           'Prediction', {'FeatureExtraction',{'FreqWindows',[],'TimeWindows',[7.5 8.5;9.25 10.25;11.39 12.39;14 15;17.17 18.17;21 22;25.75 26.75;31.5 32.5]}, ...
+                          'MachineLearning',{'Learner','lda'}}}
+
+[trainloss,lastmodel,laststats] = bci_train('Data',traindata,'Approach',myapproach,'TargetMarkers',{'1','-1'}); 
+disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
+bci_visualize(lastmodel)
+[prediction,loss,teststats,targets] = bci_predict(lastmodel,traindata);
+disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
+disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values
+disp(['  true classes     : ',num2str(round(targets)')]);
+[7.5 8.5;9.25 10.25;11.39 12.39;14 15;17.17 18.17;21 22;25.75 26.75;31.5 32.5];
