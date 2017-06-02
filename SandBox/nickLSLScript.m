@@ -4,8 +4,8 @@
 run_readlsl('DataStreamQuery','type=''EEG''', 'MarkerQuery','')
 bci_stream_name = 'museData'
 vis_stream(bci_stream_name)
-run_writedataset('laststream','NickMuseWaves4')
-
+run_writedataset('laststream','NickMuseWaves7.set')
+ 
 %in order to save the information to a file we must first grab the
 %socket(or inlet) of the stream
 %{
