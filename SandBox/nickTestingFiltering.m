@@ -13,7 +13,7 @@ disp('Now receiving data...');
 % load calibration set
 raw = io_loadset('calib.set')
 
-% apply a series of filter to it (the processed set now has a filter expression and initial state)
+% apply a ser'ies of filter to it (the processed set now has a filter expression and initial state)
 processed = exp_eval(flt_iir(flt_resample(raw,128),[0.5 1],'highpass'));
 
 % start streaming some data
