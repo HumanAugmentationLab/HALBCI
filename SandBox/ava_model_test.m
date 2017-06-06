@@ -1,7 +1,7 @@
 og_temp = io_loadset('C:\Users\alakmazaheri\Documents\BCI\BCI Competition IV Data\1AD Matlab\BCICIV_calib_ds1b.mat','channels',1:4);
 og = exp_eval(og_temp);
 
-streams = load_xdf('C:\Users\alakmazaheri\Desktop\test_long.xdf');
+streams = load_xdf('C:\Users\alakmazaheri\Desktop\avacado.xdf');
 markers = streams{2};
 markertimes = markers.time_stamps;
 markervals = markers.time_series;
