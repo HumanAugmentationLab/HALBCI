@@ -1,4 +1,4 @@
-EEG = pop_loadxdf('C:\Users\alakmazaheri\Desktop\actualdata.xdf', 'streamtype', 'signal');
+EEG = pop_loadxdf('C:\Users\alakmazaheri\Desktop\markertest1.xdf', 'streamtype', 'signal');
 
 x = EEG;
 
