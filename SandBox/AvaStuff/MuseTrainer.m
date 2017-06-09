@@ -10,7 +10,7 @@ disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
 
 % Test on itself
 [prediction,loss,teststats,targets] = bci_predict(lastmodel,EEG);
-
+ 
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
 disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values
 disp(['  true classes     : ',num2str(round(targets)')]);
