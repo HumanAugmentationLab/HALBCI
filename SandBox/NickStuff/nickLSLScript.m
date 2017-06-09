@@ -2,8 +2,9 @@
 %"EEG"
 %It will then visualize the data with vis_stream
 %
-traindata = io_loadset('C:\Users\gsteelman\Desktop\bob1.gdf','channels',1:4);
+traindata = io_loadset('C:\Users\gsteelman\Desktop\bob3.gdf','channels',1:4);
 mydata = exp_eval(traindata);
+%{
 answer = refactorFunc(mydata);
 for i = 1:length(mydata.event)
     if length(answer(:,1))>i
@@ -16,6 +17,7 @@ for i = 1:length(mydata.event)
         break
     end
 end
+%}
 %run_readdataset('Dataset',mydata);
 %bci_annotate('Model',lastmodel, laststream)
 %'Markers',{'68','69'}
@@ -39,11 +41,15 @@ onl_newpredictor('mypredictor',mymodel,bci_stream_name)
 t = 0
 t2 = 0
 %
+run_writevisualization('Model',lastmodel,'SourceStream',bci_stream_name,'VisFunction','bar(y);ylim([0 1])');
 while true
-   output = onl_predict('mypredictor','expectation') 
+   output = onl_predict('mypredictor','mode') 
    disp(output)
    if output > 1.5
        t = t+1;
+   elseif isnan(output)
+       
+       disp('NAN')
    else
        t2 = t2 + 1;
    end
@@ -52,7 +58,6 @@ while true
    
    pause(.1)
 end
-%run_writevisualization('Model',lastmodel,'VisFunction','bar(y);ylim([0 1])');
 %}
 
 %{

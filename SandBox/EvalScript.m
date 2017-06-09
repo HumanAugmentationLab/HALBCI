@@ -1,5 +1,5 @@
 %% Predict on pre-recorded data
-evaldataset = preprocess('C:\Users\alakmazaheri\Desktop\markertest2.xdf');
+evaldataset = preprocess('C:\Users\gsteelman\Desktop\SummerResearch\HALBCI\SandBox\AvaStuff\markertest1.xdf');
 [prediction,loss,teststats,targets] = bci_predict(lastmodel,evaldataset);
 
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);

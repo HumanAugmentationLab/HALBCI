@@ -1,7 +1,8 @@
 %First we load the data set into matlab with io_loadset()
-traindata = io_loadset('C:\Users\gsteelman\Desktop\bob1.gdf','channels',1:4);
+traindata = io_loadset('C:\Users\gsteelman\Desktop\bob3.gdf','channels',1:4);
 mydata = exp_eval(traindata);
-answer = refactorFunc(mydata);
+%answer = refactorFunc(mydata);
+%{
 for i = 1:length(mydata.event)
     if length(answer(:,1))>i
         mydata.event(i).type = char(answer(i,1));
@@ -13,7 +14,7 @@ for i = 1:length(mydata.event)
         break
     end
 end
-
+%}
 %here we specifiy the approach to detangle the data
 %this one is Filter Banked CSP with epochs from .5 to 3.5. 8 different
 %frequency bands were also selected to be processed
@@ -22,7 +23,7 @@ myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[0.5 3.5]}, ...
            'Prediction', {'FeatureExtraction',{'FreqWindows',[7.5 8.5;9.25 10.25;11.39 12.39;14 15;17.17 18.17;21 22;25.75 26.75;31.5 32.5],'TimeWindows',[]}, ...
                           'MachineLearning',{'Learner','lda'}}}
 %}
-myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[0 1]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2}}};
+myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[1.5 3.5]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2}}};
 %myapproach = {'ParadigmBandpower' 'SignalProcessing',{'FIRFilter',[6 8 14 15],'EpochExtraction',[.5 3.5]}};
 %myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[-1 1]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
 %myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[-1 1],'FIRFilter',[8 12 28 32]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2,'FreqWindows',[8 12;28 32]},'MachineLearning',{'learner','lda'}}};
@@ -30,7 +31,7 @@ myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[0 1]}, 'Prediction',{
 
 %myapproach = 'Spectralmeans'
 %finally we train the model on the data, specifying the target markers
-[trainloss,mymodel,laststats] = bci_train('Data',mydata,'Approach',myapproach,'TargetMarkers',{'68','69'},'EvaluationScheme',{'chron',5,5},'NoPrechecks', true); 
+[trainloss,mymodel,laststats] = bci_train('Data',traindata,'Approach',myapproach,'TargetMarkers',{'768','769'},'EvaluationScheme',{'chron',5,5},'NoPrechecks', true,'EvaluationMetric', 'mse'); 
 %this will display the results of the cross-validation tests
 %disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
 %this will visualize the results of the csp for this case
