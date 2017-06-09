@@ -2,7 +2,7 @@
 %"EEG"
 %It will then visualize the data with vis_stream
 %
-traindata = io_loadset('C:\Users\gsteelman\Desktop\bob2.gdf','channels',1:4);
+traindata = io_loadset('C:\Users\gsteelman\Desktop\bob1.gdf','channels',1:4);
 mydata = exp_eval(traindata);
 answer = refactorFunc(mydata);
 for i = 1:length(mydata.event)
@@ -19,7 +19,7 @@ end
 %run_readdataset('Dataset',mydata);
 %bci_annotate('Model',lastmodel, laststream)
 %'Markers',{'68','69'}
-[predictions,latencies] = onl_simulate(mydata, mymodel,'SamplingRate',1);
+[predictions,latencies] = onl_simulate(mydata, mymodel,'SamplingRate',1,'Shift',1,'Interval',[0 1]);
 [prediction,loss,teststats,targets] = bci_predict(mymodel,mydata);
 %this simply displays the information gotten from bci_predict
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
@@ -32,14 +32,15 @@ disp('Done')
 %run_writevisualization('Model',lastmodel, 'VisFunction','bar(y);ylim([0 1])');
 
 %{
-run_readlsl('DataStreamQuery','type=''EEG''', 'MarkerStreamQuery','');
+run_readlsl('MatlabStream','dopeStream','DataStreamQuery','type=''EEG''', 'MarkerStreamQuery','');
 bci_stream_name = 'dopeStream';
-
-onl_newpredictor('mypredictor',lastmodel,'laststream')
+%
+onl_newpredictor('mypredictor',mymodel,bci_stream_name)
 t = 0
 t2 = 0
+%
 while true
-   output = onl_predict('mypredictor', 'expectation') 
+   output = onl_predict('mypredictor','expectation') 
    disp(output)
    if output > 1.5
        t = t+1;
@@ -49,7 +50,7 @@ while true
    t
    t2
    
-   pause(1)
+   pause(.1)
 end
 %run_writevisualization('Model',lastmodel,'VisFunction','bar(y);ylim([0 1])');
 %}

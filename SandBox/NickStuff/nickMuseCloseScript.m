@@ -22,7 +22,7 @@ myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[0.5 3.5]}, ...
            'Prediction', {'FeatureExtraction',{'FreqWindows',[7.5 8.5;9.25 10.25;11.39 12.39;14 15;17.17 18.17;21 22;25.75 26.75;31.5 32.5],'TimeWindows',[]}, ...
                           'MachineLearning',{'Learner','lda'}}}
 %}
-myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[0 3]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2}}};
+myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[0 1]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2}}};
 %myapproach = {'ParadigmBandpower' 'SignalProcessing',{'FIRFilter',[6 8 14 15],'EpochExtraction',[.5 3.5]}};
 %myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[-1 1]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
 %myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[-1 1],'FIRFilter',[8 12 28 32]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2,'FreqWindows',[8 12;28 32]},'MachineLearning',{'learner','lda'}}};
@@ -30,7 +30,7 @@ myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[0 3]}, 'Prediction',{
 
 %myapproach = 'Spectralmeans'
 %finally we train the model on the data, specifying the target markers
-%[trainloss,mymodel,laststats] = bci_train('Data',mydata,'Approach',myapproach,'TargetMarkers',{'68','69'},'EvaluationScheme',{'chron',5,5},'NoPrechecks', true); 
+[trainloss,mymodel,laststats] = bci_train('Data',mydata,'Approach',myapproach,'TargetMarkers',{'68','69'},'EvaluationScheme',{'chron',5,5},'NoPrechecks', true); 
 %this will display the results of the cross-validation tests
 %disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
 %this will visualize the results of the csp for this case
