@@ -7,7 +7,7 @@ end
 
 % Select cleanest channels to display with markers
 figure; zoom xon
-plot(EEG.data([1 4],:)','DisplayName','EEG.data')
+plot(EEG.data([2],:)','k','DisplayName','EEG.data')
 
 count = 0;
 
