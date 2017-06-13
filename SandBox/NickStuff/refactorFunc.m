@@ -2,8 +2,8 @@ function [ answer ] = refactorFunc( mydata )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
     srate = 220
-    minoff = 5
-    maxoff = 15
+    minoff = 1.5
+    maxoff = 3.5
     rate = srate
     answer = cell(3)
     t = 1

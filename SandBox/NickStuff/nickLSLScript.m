@@ -1,9 +1,9 @@
 %this first statement is telling bcilab to look for an lsl stream of type
 %"EEG"
 %It will then visualize the data with vis_stream
-%
-traindata = io_loadset('C:\Users\gsteelman\Desktop\bob3.gdf','channels',1:4);
-mydata = exp_eval(traindata);
+%{
+traindata = preprocess('C:\Users\gsteelman\Desktop\SummerResearch\bob4.xdf');
+%mydata = exp_eval(traindata);
 %{
 answer = refactorFunc(mydata);
 for i = 1:length(mydata.event)
@@ -21,8 +21,9 @@ end
 %run_readdataset('Dataset',mydata);
 %bci_annotate('Model',lastmodel, laststream)
 %'Markers',{'68','69'}
-[predictions,latencies] = onl_simulate(mydata, mymodel,'SamplingRate',1,'Shift',1,'Interval',[0 1]);
-[prediction,loss,teststats,targets] = bci_predict(mymodel,mydata);
+%
+[predictions,latencies] = onl_simulate(traindata, mymodel,'SamplingRate',1);
+[prediction,loss,teststats,targets] = bci_predict(mymodel,traindata);
 %this simply displays the information gotten from bci_predict
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
 disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values
@@ -33,7 +34,8 @@ disp('Done')
 % process data in real time using lastmodel, and visualize outputs
 %run_writevisualization('Model',lastmodel, 'VisFunction','bar(y);ylim([0 1])');
 
-%{
+%}
+%
 run_readlsl('MatlabStream','dopeStream','DataStreamQuery','type=''EEG''', 'MarkerStreamQuery','');
 bci_stream_name = 'dopeStream';
 %
@@ -41,9 +43,9 @@ onl_newpredictor('mypredictor',mymodel,bci_stream_name)
 t = 0
 t2 = 0
 %
-run_writevisualization('Model',lastmodel,'SourceStream',bci_stream_name,'VisFunction','bar(y);ylim([0 1])');
+run_writevisualization('Model',mymodel,'SourceStream',bci_stream_name,'VisFunction','bar(y);ylim([0 1])');
 while true
-   output = onl_predict('mypredictor','mode') 
+   output = onl_predict('mypredictor','expectation') 
    disp(output)
    if output > 1.5
        t = t+1;
@@ -57,6 +59,10 @@ while true
    t2
    
    pause(.1)
+   if t + t2 > 200
+       t = 0
+       t2 = 0
+   end
 end
 %}
 
