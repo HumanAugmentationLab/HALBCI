@@ -28,15 +28,15 @@ myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[0.5 3.5]}, ...
 %myapproach = {'CSP' 'SignalProcessing',{'EpochExtraction',[1.5 4.5],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2}}};
 %myapproach = {'CSP' 'SignalProcessing',{'FeatureExtraction',{'PatternPairs',2}, 'EpochExtraction',[1.5 3.5],'FIRFilter',[7 8 28 32]}};
 
-%myapproach = {'ParadigmBandpower' 'SignalProcessing',{'FIRFilter',[8 12 16 32],'EpochExtraction',[1.5 4.5],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}};
-myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[1.5 4.5],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
+myapproach = {'ParadigmBandpower' 'SignalProcessing',{'FIRFilter',[8 12 16 32],'EpochExtraction',[1.5 4.5],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}};
+%myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[1.5 4.5],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','svm'}}};
 %myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[1.5 3.5],'FIRFilter',[8 12 16 32]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2,'FreqWindows',[8 12;16 32]},'MachineLearning',{'learner','lda'}}};
 %myapproach = {'Spectralmeans' 'SignalProcessing',{'FIRFilter',[8 12 16 32],'EpochExtraction',[1.5 4.5],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}},'Prediction', {'FeatureExtraction',{'FreqWindows',[2 6;8 12;28 32]}}};
 
 %myapproach = 'Spectralmeans'
 %finally we train the model on the data, specifying the target markers
 %[trainloss,mymodel,laststats] = bci_train('Data',traindata,'Approach',myapproach,'TargetMarkers',{'768','769'},'EvaluationScheme',{'chron',5,5},'NoPrechecks', true,'EvaluationMetric', 'mse'); 
-%[trainloss,mymodel,laststats] = bci_train('Data',{traindata traindata2 traindata3},'Approach',myapproach,'TargetMarkers',{'770','769'},'EvaluationMetric', 'mse'); 
+[trainloss,mymodel,laststats] = bci_train('Data',{traindata traindata3},'Approach',myapproach,'TargetMarkers',{'770','769'},'EvaluationMetric', 'mse'); 
 
 %this will display the results of the cross-validation tests
 %disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
