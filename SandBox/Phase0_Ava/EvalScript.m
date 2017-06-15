@@ -1,5 +1,5 @@
 %% Predict on pre-recorded data
-evaldataset = preprocess('C:\Users\gsteelman\Desktop\SummerResearch\HALBCI\SandBox\AvaStuff\markertest1.xdf');
+evaldataset = preprocess('C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Phase0_Ava\markertest1.xdf');
 [prediction,loss,teststats,targets] = bci_predict(lastmodel,evaldataset);
 
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
@@ -8,24 +8,20 @@ disp(['  true classes     : ',num2str(round(targets)')]);
 
 %% Predict on live data
 % stream EEG and markers over LSL
-%run_readlsl('DataStreamQuery','type=''EEG''', 'MarkerQuery','type=''Markers''');
-run_readlsl('DataStreamQuery','type=''EEG''', 'MarkerQuery','');
+run_readlsl('DataStreamQuery','name=''EEG''', 'MarkerQuery','name=''Markers''');
 
 % evaluate stream at each sample
-onl_newpredictor('mypredictor',lastmodel,'laststream')
+%onl_newpredictor('mypredictor',lastmodel,'laststream')
 
 % evaluate stream at markers
-%onl_newpredictor('mypredictor',lastmodel,'laststream', {'770', '769'})
+onl_newpredictor('mypredictor',lastmodel,'laststream', {'769','770'})
 
 % query predictive model
-lastout = 0;
 run_writevisualization('Model',lastmodel, 'VisFunction','bar(y);ylim([0 1])');
 
 while(true)
     output = onl_predict('mypredictor', 'mode');
-    if (output ~= lastout)
-        disp(output)
+    if ~isnan(output)
+         disp(output)
     end
-    pause(.01)
-    lastout = output;
 end

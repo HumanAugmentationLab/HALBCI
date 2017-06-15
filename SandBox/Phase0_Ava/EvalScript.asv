@@ -1,0 +1,64 @@
+%% Predict on pre-recorded data
+evaldataset = preprocess('C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Phase0_Ava\markertest1.xdf');
+[prediction,loss,teststats,targets] = bci_predict(lastmodel,evaldataset);
+
+disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
+disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values
+disp(['  true classes     : ',num2str(round(targets)')]);
+
+%% Nothing is working lol
+
+% read from an any EEG device on the network, and also acquire a marker stream
+run_readlsl('DataStreamQuery','name=''EEG''', 'MarkerQuery','name=''Markers''');
+
+% this time predict whenever there is a marker of the given type in the marker stream
+run_writevisualization('PredictorName','pred1', 'Model',lastmodel, 'PredictAt',{'770','769'});
+
+% make sure that the online processing gets terminated...
+disp('Click into the figure to stop online processing.'); 
+waitforbuttonpress; onl_clear; close(gcf);
+
+%% not2
+% alternatively use 'BCI-At-Markers' to display the marker-locked BCI stream
+bci_stream_name = 'BCI-At-Markers';  
+
+f=figure;
+lib = lsl_loadlib();
+disp('Resolving a BCI stream...');
+result = {};
+while isempty(result)
+    result = lsl_resolve_byprop(lib,'name',bci_stream_name,1,1); end
+inlet = lsl_inlet(result{1});
+disp('Now receiving data...');
+while true
+    % get data from the inlet (timeout: 1 second)
+    [data,timestamp] = inlet.pull_sample(0);
+    % and display it
+    if timestamp
+        fprintf('%.2f\n',data); 
+        bar([data-1,1-(data-1)]); ylim([0 1]); drawnow;
+    else
+        pause(0.01);
+    end
+end
+%% Predict on live data
+% stream EEG and markers over LSL
+%run_readlsl('mystream', 'name=''EEG''', 'name=''Markers''');
+%run_readlsl('StreamName', 'mystream', 'DataStreamQuery','type=''EEG''', 'MarkerQuery','type=''Markers''');
+run_readlsl('DataStreamQuery','name=''EEG''', 'MarkerQuery','name=''Markers''');
+
+% evaluate stream at each sample
+%onl_newpredictor('mypredictor',lastmodel,'laststream')
+
+% evaluate stream at markers
+onl_newpredictor('mypredictor',lastmodel,'laststream', {'769','770'})
+
+% query predictive model
+run_writevisualization('Model',lastmodel, 'VisFunction','bar(y);ylim([0 1])');
+
+while(true)
+    output = onl_predict('mypredictor', 'mode');
+    if ~isnan(output)
+         disp(output)
+    end
+end
