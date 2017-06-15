@@ -40,7 +40,7 @@ run_readlsl('MatlabStream','dopeStream','DataStreamQuery','type=''EEG''', 'Marke
 bci_stream_name = 'dopeStream';
 %
 
-run_writelsl('Model',mymodel,'SourceStream',bci_stream_name,'LabStreamName','Results','OutputForm','expectation','ChannelNames',{'open','closed'})
+run_writelsl('Model',mymodel,'SourceStream',bci_stream_name,'LabStreamName','Res','OutputForm','expectation','ChannelNames',{'open','closed'})
 %onl_newpredictor('mypredictor',mymodel,bci_stream_name)
 
 %{

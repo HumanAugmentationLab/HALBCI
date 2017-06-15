@@ -29,7 +29,7 @@ myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[0.5 3.5]}, ...
 %myapproach = {'CSP' 'SignalProcessing',{'FeatureExtraction',{'PatternPairs',2}, 'EpochExtraction',[1.5 3.5],'FIRFilter',[7 8 28 32]}};
 
 %myapproach = {'ParadigmBandpower' 'SignalProcessing',{'FIRFilter',[8 12 16 32],'EpochExtraction',[1.5 4.5],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}};
-myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[1.5 4.5],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
+myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[1.5 3.5],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
 %myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[1.5 3.5],'FIRFilter',[8 12 16 32]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2,'FreqWindows',[8 12;16 32]},'MachineLearning',{'learner','lda'}}};
 %myapproach = {'Spectralmeans' 'SignalProcessing',{'FIRFilter',[8 12 16 32],'EpochExtraction',[1.5 4.5],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}},'Prediction', {'FeatureExtraction',{'FreqWindows',[2 6;8 12;28 32]}}};
 
@@ -47,7 +47,7 @@ myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[1.5 4.5],'FIRFilt
 %classification accuracy. You may also use bci_annotate to find probaility
 %values of each
 %annotateData = bci_annotate(lastmodel, mydata)
-[prediction,loss,teststats,targets] = bci_predict(mymodel,traindata2);
+[prediction,loss,teststats,targets] = bci_predict(mymodel,traindata3);
 %this simply displays the information gotten from bci_predict
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
 disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values

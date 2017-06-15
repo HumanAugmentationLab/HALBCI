@@ -1,4 +1,4 @@
-bci_stream_name = 'Results'
+bci_stream_name = 'Res'
 lib = lsl_loadlib();
 disp('Resolving a BCI stream...');
 result = {}
@@ -18,3 +18,4 @@ while true
         pause(0.01);
     end
 end
+
