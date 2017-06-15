@@ -1,7 +1,7 @@
 traindata = preprocess('C:\Users\gsteelman\Desktop\SummerResearch\bobtestmark.xdf');
 %traindata = pop_loadxdf('C:\Users\gsteelman\Desktop\SummerResearch\bob6.xdf', 'streamtype', 'signal')
 mytempdata = traindata;
-thres = 1000
+thres = 1000;
 totaljit = 0
 nummarker = 0
 srate = 500
@@ -55,7 +55,7 @@ while i < length(mytempdata.event)
                 nummarker = nummarker + 1;
                 break
             elseif realDat(round(mytempdata.event(i).latency - j)) > thres
-                totaljit = totaljit + j
+                totaljit = totaljit - j
                 nummarker = nummarker + 1;
                 break
             end
