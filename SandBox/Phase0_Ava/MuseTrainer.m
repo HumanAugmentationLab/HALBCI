@@ -1,3 +1,7 @@
+ cd C:\Users\alakmazaheri\Documents\BCI\BCILAB
+ bcilab;
+ cd C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Phase0_Ava
+ 
 % Load EEG and Marker data from XDF
 EEG = preprocess('C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Phase0_Ava\markertest1.xdf');
 
