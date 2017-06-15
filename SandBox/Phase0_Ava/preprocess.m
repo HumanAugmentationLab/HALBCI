@@ -1,7 +1,7 @@
 function EEG = preprocess(filename)
     % Load EEG and Marker data from XDF
     EEG = pop_loadxdf(filename, 'streamtype', 'signal');
-    %
+    %{
     % Sync marker latencies
     x = EEG;
     eventlen = length(x.event);
