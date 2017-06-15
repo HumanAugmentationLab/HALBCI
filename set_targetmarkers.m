@@ -149,16 +149,11 @@ if ~isempty(signal.event)
         end
         % perform matching
         for t=1:length(typelist)
-            %for i = 1:length(types)
                 if any(typelist{t}=='?' | typelist{t}=='*')
                     matchidx(~cellfun('isempty',regexp(types,['^',strrep(strrep(typelist{t},'?','.'),'*','.{0,}'),'$']))) = t;
                 else
-                    disp(typelist{t})
-                    disp(types)
                     matchidx(strcmp(cellfun(@num2str,types,'un',0),typelist{t})) = t;
                 end
-              %disp(i)
-            %end
         end
     end
     
