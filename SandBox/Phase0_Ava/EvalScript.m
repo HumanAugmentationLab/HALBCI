@@ -6,12 +6,9 @@ disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
 disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values
 disp(['  true classes     : ',num2str(round(targets)')]);
 
-%% Predict on live data
+%% Predict live by markers
 % stream EEG and markers over LSL
 run_readlsl('DataStreamQuery','name=''EEG''', 'MarkerQuery','name=''Markers''');
-
-% evaluate stream at each sample
-%onl_newpredictor('mypredictor',lastmodel,'laststream')
 
 % evaluate stream at markers
 onl_newpredictor('mypredictor',lastmodel,'laststream', {'769','770'})
@@ -23,5 +20,27 @@ while(true)
     output = onl_predict('mypredictor', 'mode');
     if ~isnan(output)
          disp(output)
+    end
+end
+
+%% Predict live continuous, mark stimulus times
+% stream EEG and markers over LSL
+run_readlsl('DataStreamQuery','name=''EEG''', 'MarkerQuery','name=''Markers''');
+
+% evaluate stream at each sample
+onl_newpredictor('mypredictor',lastmodel,'laststream')
+
+markerinfo = [];
+
+while(true)
+    output = onl_predict('mypredictor', 'mode');
+    currmarker = laststream_marker_chunk.type;
+    
+    for i = 1: length(laststream_marker_chunk)
+        if (currmarker == 770 || currmarker == 769)
+            add = [currmarker; laststream.smax];
+            markerinfo = [markerinfo add]
+             disp(currmarker)
+        end
     end
 end
