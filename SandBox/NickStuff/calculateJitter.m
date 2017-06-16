@@ -1,6 +1,7 @@
-traindata = preprocess('C:\Users\gsteelman\Desktop\SummerResearch\bobtestmark.xdf');
+traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\bobtestmarker2.xdf');
 %traindata = pop_loadxdf('C:\Users\gsteelman\Desktop\SummerResearch\bob6.xdf', 'streamtype', 'signal')
-mytempdata = traindata;
+mytempdata = tryFindStart(traindata,3);
+%mytempdata = traindata;
 thres = 1000;
 totaljit = 0
 nummarker = 0
@@ -23,7 +24,7 @@ for i = 1:length(traindata.event)
 end
 %}
 figure
-realDat = traindata.data(4,:).';
+realDat = mytempdata.data(3,:).';
 %realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 %realDat(:,2) = realDat(:,2) - mean(realDat(:,2))
 %realDat(:,3) = realDat(:,3) - mean(realDat(:,3))
@@ -50,11 +51,11 @@ while i < length(mytempdata.event)
         j = 0;
         while 1
             j = j +1;
-            if realDat(round(mytempdata.event(i).latency + j)) > thres
+            if round(mytempdata.event(i).latency + j) < mytempdata.pnts && (round(mytempdata.event(i).latency + j)) > thres
                 totaljit = totaljit + j
                 nummarker = nummarker + 1;
                 break
-            elseif realDat(round(mytempdata.event(i).latency - j)) > thres
+            elseif round(mytempdata.event(i).latency - j) > 0 && round(mytempdata.event(i).latency + j) < mytempdata.pnts && realDat(round(mytempdata.event(i).latency - j)) > thres
                 totaljit = totaljit - j
                 nummarker = nummarker + 1;
                 break
