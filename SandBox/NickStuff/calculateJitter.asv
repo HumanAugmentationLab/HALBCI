@@ -8,7 +8,6 @@ nummarker = 0
 srate = 500
 sizeWindow = 500
 jitterPts = []
-deviations = 5
 %answer = refactorFunc(traindata);
 %{
 for i = 1:length(traindata.event)
@@ -54,23 +53,22 @@ while i < length(mytempdata.event)
         j = 0;
         
         while 1
-            a = round(mytempdata.event(i).latency)
-            if round(a + j-sizeWindow) > 0 && round(a + j) < mytempdata.pnts
-                window = realDat(a + j-sizeWindow:a + j);
-                if(realDat(round(a+j+1))-mean(window))/std(window) > 5 && (realDat(round(a+j))-mean(window))/std(window) < 5
+            if round(i + j-sizeWindow) > 0 && round(i + j) < mytempdata.pnts
+                window = realDat(i + j-sizeWindow:i + j);
+                if(realDat(i+j+1)-mean(window))/std(window) > 3 && (realDat(i+j)-mean(window))/std(window) < 3
                    jitterPts = [jitterPts;j];
-                   vline(a+j+1,'black');
+                   vline(mytempdata.event(i).latency,'black');
                    absjit = absjit + j;
                    nummarker = nummarker + 1;
                    break
                 end
             end
             
-            if round(a - j-sizeWindow) > 0 && round(a - j) < mytempdata.pnts
-                window = realDat(a - j-sizeWindow:a - j);
-                if(realDat(a-j+1)-mean(window))/std(window) > 5 && (realDat(a-j)-mean(window))/std(window) < 5
+            if round(i - j-sizeWindow) > 0 && round(i - j) < mytempdata.pnts
+                window = realDat(i - j-sizeWindow:i - j);
+                if(realDat(i-j+1)-mean(window))/std(window) > 3 && (realDat(i-j)-mean(window))/std(window) < 3
                    jitterPts = [jitterPts;-j];
-                   vline(a-j+1,'black');
+                   vline(mytempdata.event(i).latency,'black');
                    absjit = absjit + j;
                    nummarker = nummarker + 1;
                    break
@@ -92,7 +90,5 @@ while i < length(mytempdata.event)
 end
 averagejit = (absjit / nummarker)/srate
 figure
-plot(jitterPts*2)
-xlabel('trials')
-ylabel('jitter (ms)')
+plot(jitterPts)
 
