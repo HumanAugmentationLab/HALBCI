@@ -1,9 +1,0 @@
-function [ output_args ] = reconfigSNAP( filepath )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-    returndata = pop_loadxdf(filepath)
-    min = returnf
-    for i = 1:length(returndata.event)
-
-end
-

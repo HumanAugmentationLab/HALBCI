@@ -1,6 +1,6 @@
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\bobtestmarker2.xdf');
+traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\longrecord.xdf');
 %traindata = pop_loadxdf('C:\Users\gsteelman\Desktop\SummerResearch\bob6.xdf', 'streamtype', 'signal')
-mytempdata = tryFindStart(traindata,3);
+mytempdata = tryFindStart(traindata,4);
 %mytempdata = traindata;
 thres = 1000;
 absjit = 0
@@ -27,7 +27,7 @@ for i = 1:length(traindata.event)
 end
 %}
 figure
-realDat = mytempdata.data(3,:).';
+realDat = mytempdata.data(4,:).';
 %realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 %realDat(:,2) = realDat(:,2) - mean(realDat(:,2))
 %realDat(:,3) = realDat(:,3) - mean(realDat(:,3))
@@ -40,8 +40,8 @@ i = 1
 legend(mytempdata.chanlocs([1:4]).labels)
 color = 'N'
 while i < length(mytempdata.event)
-    if(strcmp(mytempdata.event(i).type, '768'))
-        color = 'N';
+    if(strcmp(mytempdata.event(i).type, '700'))
+        color = 'b';
     elseif(strcmp(mytempdata.event(i).type, '769'))
         color = 'g';
     elseif(strcmp(mytempdata.event(i).type, '770'))
@@ -95,4 +95,4 @@ figure
 plot(jitterPts*2)
 xlabel('trials')
 ylabel('jitter (ms)')
-
+nickdat = realDat

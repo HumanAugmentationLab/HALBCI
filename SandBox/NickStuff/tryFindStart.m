@@ -3,10 +3,11 @@ function [ 	inputdata ] = tryFindStart( inputdata,channelnum )
 %   Detailed explanation goes here
 %MAKE SURE THE LATENCIES START AT 0 AND ARE IN SCOPE
     realDat = inputdata.data(channelnum,:).';
-    sizeWindow = 500
+    sizeWindow = 1000
     for i = sizeWindow+1:length(realDat)
         window = realDat(i-sizeWindow:i);
-        if(realDat(i+1)-mean(window))/std(window) > 3
+        if(realDat(i+1)-mean(window))/std(window) > 4 && (realDat(round(i-50))-mean(window))/std(window) < 4
+            
             offset = i
             break
         end
