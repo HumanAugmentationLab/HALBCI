@@ -1,3 +1,4 @@
+%Does the same thing as refactor Func
 traindata = io_loadset('C:\Users\gsteelman\Desktop\bob1.gdf','channels',1:4);
 srate = 220
 minoff = 5

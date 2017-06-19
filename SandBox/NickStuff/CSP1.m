@@ -1,3 +1,4 @@
+%manual CSP and visualization
 traindata = exp_eval(io_loadset('C:\Users\gsteelman\Desktop\bob1.gdf','channels',1:4));
 brains = [traindata.data(2,:);traindata.data(3,:)]
 X1 = []

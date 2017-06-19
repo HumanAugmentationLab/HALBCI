@@ -1,3 +1,5 @@
+%this was just an incomplete sandbox to understand for filtering and the
+%pipline works
 mydata = io_loadset(recorded)
 run_readlsl('DataStreamQuery','type=''EEG''', 'MarkerQuery','')
 bci_stream_name = 'Muse-3FE0'

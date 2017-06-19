@@ -1,6 +1,10 @@
 function [ answer ] = refactorFunc( mydata )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
+%For different training purposes this function will take and event marker
+%and turn it into many event markers at the desired offset and rate.
+%I believe it makes the markers the wrong type so additional processesing
+%is required
     srate = 220
     minoff = 1.5
     maxoff = 3.5

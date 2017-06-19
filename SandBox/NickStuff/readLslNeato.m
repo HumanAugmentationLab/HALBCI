@@ -1,3 +1,7 @@
+%This script will read in a stream called 'Res' over lsl and display the 
+%result
+%The purpose of the first while loop is to make sure that the first loop is
+%found
 bci_stream_name = 'Res'
 lib = lsl_loadlib();
 disp('Resolving a BCI stream...');
