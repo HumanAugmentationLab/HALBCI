@@ -11,7 +11,7 @@ function [ 	inputdata ] = tryFindStart( inputdata,channelnum )
     sizeWindow = 1000
     for i = sizeWindow+1:length(realDat)
         window = realDat(i-sizeWindow:i);
-        if(realDat(i+1)-mean(window))/std(window) > 4 && (realDat(round(i-50))-mean(window))/std(window) < 4
+        if(realDat(i+1)-mean(window))/std(window) > 5 && (realDat(round(i-50))-mean(window))/std(window) < 5
             
             offset = i
             break

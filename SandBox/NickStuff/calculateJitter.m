@@ -2,15 +2,21 @@
 %This script will calculate the jitter of a data set using the data markers
 %and spikes in the data from a photodiode. First the data is loaded and a
 %function is run to try and find the first spike in the data.
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\longrecord.xdf');
+traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\retestSnapOrder.xdf');
 %traindata = pop_loadxdf('C:\Users\gsteelman\Desktop\SummerResearch\bob6.xdf', 'streamtype', 'signal')
-mytempdata = tryFindStart(traindata,4);
+mytempdata = tryFindStart(traindata,3);
 %mytempdata = traindata;
+Stim1 = 'Monkey'
+Stim2 = 'Tool'
+endtrial = 'EndTrial'
 absjit = 0%total jitter
 nummarker = 0%number events
 srate = 500%sampling rate
 sizeWindow = 500%size of the sliding window used to detect anomalies
-jitterPts = []%array of offsets for each data point
+jitterMonkey = []
+jitterTool = []
+jitterend = []
+%array of offsets for each data point
 deviations = 5%number of standard deviations to determine anomaly
 %answer = refactorFunc(traindata);
 %{
@@ -32,7 +38,7 @@ end
 %}
 %first isolate the data and plot it
 figure
-realDat = mytempdata.data(4,:).';
+realDat = mytempdata.data(3,:).';
 %realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 %realDat(:,2) = realDat(:,2) - mean(realDat(:,2))
 %realDat(:,3) = realDat(:,3) - mean(realDat(:,3))
@@ -49,11 +55,11 @@ color = 'N'
 %session), a green line for wrench(eyes open), and a red line for
 %monkey(eyes closed)
 while i < length(mytempdata.event)
-    if(strcmp(mytempdata.event(i).type, '700'))
-        color = 'b';
-    elseif(strcmp(mytempdata.event(i).type, '769'))
+    if(strcmp(mytempdata.event(i).type, 'StartSession') ||strcmp(mytempdata.event(i).type, 'EndSession'))
+        color = 'yellow';
+    elseif(strcmp(mytempdata.event(i).type, Stim1))
         color = 'g';
-    elseif(strcmp(mytempdata.event(i).type, '770'))
+    elseif(strcmp(mytempdata.event(i).type, Stim2))
         color = 'r';    
     else
         color = 'N';  
@@ -77,8 +83,17 @@ while i < length(mytempdata.event)
             a = round(mytempdata.event(i).latency)
             if round(a + j-sizeWindow) > 0 && round(a + j) < mytempdata.pnts
                 window = realDat(a + j-sizeWindow:a + j);
-                if(realDat(round(a+j+1))-mean(window))/std(window) > 5 && (realDat(round(a+j))-mean(window))/std(window) < 5
-                   jitterPts = [jitterPts;j];
+                if(abs(realDat(round(a+j+1))-mean(window))/std(window)) > 5 && abs((realDat(round(a+j))-mean(window))/std(window)) < 5
+                   
+                   if strcmp(mytempdata.event(i).type, Stim1)
+                       jitterMonkey = [jitterMonkey;j];
+                       jitterTool = [jitterTool;NaN];
+                   elseif strcmp(mytempdata.event(i).type, Stim2)
+                       jitterTool = [jitterTool;j];
+                       jitterMonkey = [jitterMonkey;NaN];
+                   elseif strcmp(mytempdata.event(i).type, endtrial)
+                       jitterend = [jitterend;j];
+                   end
                    vline(a+j+1,'black');
                    absjit = absjit + j;
                    nummarker = nummarker + 1;
@@ -88,8 +103,18 @@ while i < length(mytempdata.event)
             
             if round(a - j-sizeWindow) > 0 && round(a - j) < mytempdata.pnts
                 window = realDat(a - j-sizeWindow:a - j);
-                if(realDat(a-j+1)-mean(window))/std(window) > 5 && (realDat(a-j)-mean(window))/std(window) < 5
-                   jitterPts = [jitterPts;-j];
+                if(abs(realDat(a-j+1)-mean(window))/std(window)) > 5 && (abs(realDat(a-j)-mean(window))/std(window)) < 5
+                   
+                   if strcmp(mytempdata.event(i).type, Stim1)
+                       jitterMonkey = [jitterMonkey;-j];
+                       jitterTool = [jitterTool;NaN];
+                   elseif strcmp(mytempdata.event(i).type, Stim2)
+                       jitterTool = [jitterTool;-j];
+                       jitterMonkey = [jitterMonkey;NaN];
+                   elseif strcmp(mytempdata.event(i).type, endtrial)
+                       jitterend = [jitterend;-j];
+                   end
+                    %}
                    vline(a-j+1,'black');
                    absjit = absjit + j;
                    nummarker = nummarker + 1;
@@ -112,9 +137,23 @@ while i < length(mytempdata.event)
 end
 %Finally display the average jitter and plot the jitter over the trials to
 %visualize drift
+figure
+T = 1:length(jitterMonkey);
+monkeybool = ~isnan(jitterMonkey);
+toolbool = ~monkeybool;
+
+plot(T(monkeybool),jitterMonkey(monkeybool)*2,'bx')
+hold on
+plot(T(toolbool),jitterTool(toolbool)*2,'rx')
+plot(jitterend*2)
+
+%{
 averagejit = (absjit / nummarker)/srate
 figure
-plot(jitterPts*2)
+plot(jitterMonkey*2)
+hold on
+plot(jitterTool*2)
+%plot(jitterend*2)
 xlabel('trials')
 ylabel('jitter (ms)')
-nickdat = realDat
+%}
