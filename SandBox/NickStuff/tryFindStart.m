@@ -1,4 +1,4 @@
-function [ 	inputdata ] = tryFindStart( inputdata,channelnum )
+function [ 	inputdata ] = tryFindStart( inputdata,channelnum,offset )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 %MAKE SURE THE LATENCIES START AT 0 AND ARE IN SCOPE
@@ -8,8 +8,8 @@ function [ 	inputdata ] = tryFindStart( inputdata,channelnum )
 %firs time that the next piece of data is outside the standard deviation of
 %the window.
     realDat = inputdata.data(channelnum,:).';
-    sizeWindow = 1000
-    for i = sizeWindow+1:length(realDat)
+    sizeWindow = 2000
+    for i = sizeWindow+1+offset:length(realDat)
         window = realDat(i-sizeWindow:i);
         if(realDat(i+1)-mean(window))/std(window) > 5 && (realDat(round(i-50))-mean(window))/std(window) < 5
             

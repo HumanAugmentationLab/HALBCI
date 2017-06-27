@@ -6,7 +6,7 @@ function [ mydata ] = refactorFunc( mydata, minoff,maxoff )
 %I believe it makes the markers the wrong type so additional processesing
 %is required
     srate = 500
-    rate = srate
+    rate = srate * 1
     answer = cell(3)
     t = 1
     Stim1 = 'Monkey'

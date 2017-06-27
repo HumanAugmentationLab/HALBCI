@@ -9,6 +9,11 @@ function [ returndata ] = reconfigSNAP( filepath )
 % and cells
     returndata = pop_loadxdf(filepath)
     min = returndata.event(1).latency
+    for i = 1 : length(returndata.event)
+        if strcmp(returndata.event(i).type, 'StartSession')
+            min = returndata.event(i).latency 
+        end
+    end
     for i = 1:length(returndata.event)
         returndata.event(i).latency = returndata.event(i).latency - min
     end
