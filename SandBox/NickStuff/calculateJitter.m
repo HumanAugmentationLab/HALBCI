@@ -2,12 +2,13 @@
 %This script will calculate the jitter of a data set using the data markers
 %and spikes in the data from a photodiode. First the data is loaded and a
 %function is run to try and find the first spike in the data.
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\retestSnapOrder.xdf');
+traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\testPsychJitter1.xdf');
+%traindata = pop_loadxdf('C:\Users\gsteelman\Desktop\SummerResearch\testPsych.xdf');
 %traindata = pop_loadxdf('C:\Users\gsteelman\Desktop\SummerResearch\bob6.xdf', 'streamtype', 'signal')
-mytempdata = tryFindStart(traindata,3);
+mytempdata = tryFindStart(traindata,3,0);
 %mytempdata = traindata;
-Stim1 = 'Monkey'
-Stim2 = 'Tool'
+Stim1 = 'Open'
+Stim2 = 'Closed'
 endtrial = 'EndTrial'
 absjit = 0%total jitter
 nummarker = 0%number events
@@ -16,6 +17,7 @@ sizeWindow = 500%size of the sliding window used to detect anomalies
 jitterMonkey = []
 jitterTool = []
 jitterend = []
+jitterTot = []
 %array of offsets for each data point
 deviations = 5%number of standard deviations to determine anomaly
 %answer = refactorFunc(traindata);
@@ -88,9 +90,11 @@ while i < length(mytempdata.event)
                    if strcmp(mytempdata.event(i).type, Stim1)
                        jitterMonkey = [jitterMonkey;j];
                        jitterTool = [jitterTool;NaN];
+                       jitterTot = [jitterTot; j]
                    elseif strcmp(mytempdata.event(i).type, Stim2)
                        jitterTool = [jitterTool;j];
                        jitterMonkey = [jitterMonkey;NaN];
+                       jitterTot = [jitterTot; j]
                    elseif strcmp(mytempdata.event(i).type, endtrial)
                        jitterend = [jitterend;j];
                    end
@@ -108,9 +112,11 @@ while i < length(mytempdata.event)
                    if strcmp(mytempdata.event(i).type, Stim1)
                        jitterMonkey = [jitterMonkey;-j];
                        jitterTool = [jitterTool;NaN];
+                       jitterTot = [jitterTot; -j]
                    elseif strcmp(mytempdata.event(i).type, Stim2)
                        jitterTool = [jitterTool;-j];
                        jitterMonkey = [jitterMonkey;NaN];
+                       jitterTot = [jitterTot; -j]
                    elseif strcmp(mytempdata.event(i).type, endtrial)
                        jitterend = [jitterend;-j];
                    end
@@ -138,6 +144,8 @@ end
 %Finally display the average jitter and plot the jitter over the trials to
 %visualize drift
 figure
+plot(jitterTot(1:end-1)*2)
+%{
 T = 1:length(jitterMonkey);
 monkeybool = ~isnan(jitterMonkey);
 toolbool = ~monkeybool;
@@ -146,6 +154,7 @@ plot(T(monkeybool),jitterMonkey(monkeybool)*2,'bx')
 hold on
 plot(T(toolbool),jitterTool(toolbool)*2,'rx')
 plot(jitterend*2)
+%}
 
 %{
 averagejit = (absjit / nummarker)/srate
