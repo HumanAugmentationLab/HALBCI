@@ -1,6 +1,8 @@
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\pyschoOpenLong.xdf');
-mytempdata = tryFindStart(traindata,3,0);
+%traindata = pop_loadxdf('K:\HumanAugmentationLab\EEGdata\EnobioTests\PhotodiodeScreen\block_nenobio.xdf')
+%mytempdata = exp_eval(traindata)
 %mytempdata = decreaseTrialsFunc(mytempdata,20,{'Open' 'Closed'})
+traindata = io_loadset('C:\Users\gsteelman\Desktop\SummerResearch\6v15Hz_Flashing.edf')
+mytempdata = exp_eval(traindata)
 %mytempdata = refactorFunc(mytempdata);
 %answer = refactorFunc(traindata);
 %{
@@ -26,11 +28,11 @@ for i = 1:length(traindata.event)
 end
 %}
 figure
-realDat = traindata.data(3,:).';
+realDat = mytempdata.data(3,:).';
 %realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 %realDat(:,2) = realDat(:,2) - mean(realDat(:,2))
 %realDat(:,3) = realDat(:,3) - mean(realDat(:,3))
-realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
+%realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 %realDat(:,5) = realDat(:,5) - mean(realDat(:,5))
 %realDat(:,6) = realDat(:,6) - mean(realDat(:,6))
 myX = linspace(0,length(realDat)/1000,length(realDat));
@@ -45,15 +47,20 @@ while i <= length(mytempdata.event)
         break
     end
     %}
-    if(strcmp(mytempdata.event(i).type, 'StartSession') || strcmp(mytempdata.event(i).type, 'EndSession'))
+    %
+    if(strcmp(mytempdata.event(i).type, '1') || strcmp(mytempdata.event(i).type, '5'))
         color = 'magenta';
-    elseif(strcmp(mytempdata.event(i).type, 'Open'))
+    elseif(strcmp(mytempdata.event(i).type, '2'))
         color = 'g';
-    elseif(strcmp(mytempdata.event(i).type, 'Closed'))
+    elseif(strcmp(mytempdata.event(i).type, '4'))
         color = 'r';    
     else
         color = 'N';  
     end
+    %}
+    
+   
+    
     if(~strcmp(color, 'N'))
         vline(mytempdata.event(i).latency,color)
     end

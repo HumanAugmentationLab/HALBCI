@@ -9,8 +9,8 @@ function [ mydata ] = refactorFunc( mydata, minoff,maxoff,epoch)
     rate = srate * epoch
     answer = cell(3)
     t = 1
-    Stim1 = 'Open'
-    Stim2 = 'Closed'
+    Stim1 = '101'
+    Stim2 = '201'
     for i = 1:length(mydata.event)
         if strcmp(mydata.event(i).type,Stim1) 
             for j = minoff * srate:rate:maxoff*srate

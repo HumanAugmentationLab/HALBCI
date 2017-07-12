@@ -18,16 +18,16 @@ mytempdata = tryFindStart(traindata,3,14000);
 mytempdata2 = tryFindStart(traindata2,3,0);
 %}
 %
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\psychOpen.xdf');
-mytempdata = tryFindStart(traindata,3,8000);
+traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\ALClosed6Min.xdf');
+mytempdata = tryFindStart(traindata,3,0);
 traindata2 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\psychOpen2.xdf');
 mytempdata2 = tryFindStart(traindata2,3,0);
 traindata3 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\psychOpen3.xdf');
 mytempdata3 = tryFindStart(traindata3,3,0);
 
-mytempdata = refactorFunc(mytempdata,.75, 3.75,.5)
-mytempdata2 = refactorFunc(mytempdata2,.75, 3.75,.5)
-mytempdata3 = refactorFunc(mytempdata3,.75, 3.75,.5)
+mytempdata = refactorFunc(mytempdata,1, 3.5,.5)
+mytempdata2 = refactorFunc(mytempdata2,1, 3.75,.5)
+mytempdata3 = refactorFunc(mytempdata3,1, 3.75,.5)
 %}
 %mytempdata2 = tryFindStart(traindata2,3,0);
 %here we specifiy the approach to detangle the data
@@ -42,7 +42,7 @@ myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[0.5 3.5]}, ...
 %myapproach = {'CSP' 'SignalProcessing',{'FeatureExtraction',{'PatternPairs',2}, 'EpochExtraction',[1.5 3.5],'FIRFilter',[7 8 28 32]}};
 
 %myapproach = {'ParadigmBandpower' 'SignalProcessing',{'FIRFilter',[8 12 16 32],'EpochExtraction',[1.5 4.5],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}};
-myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[0 .5],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
+myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[0 1],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
 %myapproach = {'FBCSP' 'SignalProcessing',{'EpochExtraction',[1.5 s3.5],'FIRFilter',[8 12 16 32]}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2,'FreqWindows',[8 12;16 32;35 45]},'MachineLearning',{'learner','lda'}}};
 %myapproach = {'Spectralmeans' 'SignalProcessing',{'FIRFilter',[8 12 16 32],'EpochExtraction',[search(1.5:.5:3),search(4:.5:4.5)],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}},'Prediction', {'FeatureExtraction',{'FreqWindows',[2 6;8 12;28 32]}}};
 
@@ -60,7 +60,7 @@ myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[0 .5],'FIRFilter'
 %classification accuracy. You may also use bci_annotate to find probaility
 %values of each
 %annotateData = bci_annotate(lastmodel, mydata)
-[prediction,loss,teststats,targets] = bci_predict(mymodel,mytempdata3);
+[prediction,loss,teststats,targets] = bci_predict(mymodel,mytempdata);
 %this simply displays the information gotten from bci_predict
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
 disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values

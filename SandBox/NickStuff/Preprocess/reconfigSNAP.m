@@ -10,12 +10,12 @@ function [ returndata ] = reconfigSNAP( filepath )
     returndata = pop_loadxdf(filepath)
     min = returndata.event(1).latency
     for i = 1 : length(returndata.event)
-        if strcmp(returndata.event(i).type, 'StartSession')
+        if strcmp(returndata.event(i).type, '99')
             min = returndata.event(i).latency 
         end
     end
     for i = 1:length(returndata.event)
-        returndata.event(i).latency = returndata.event(i).latency - min
+        returndata.event(i).latency = (returndata.event(i).latency - min)/500
     end
 end
 

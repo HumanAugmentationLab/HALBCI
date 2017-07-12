@@ -2,14 +2,14 @@
 %This script will calculate the jitter of a data set using the data markers
 %and spikes in the data from a photodiode. First the data is loaded and a
 %function is run to try and find the first spike in the data.
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\testPsychJitter1.xdf');
+%traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\testPsychJitter1.xdf');
 %traindata = pop_loadxdf('C:\Users\gsteelman\Desktop\SummerResearch\testPsych.xdf');
 %traindata = pop_loadxdf('C:\Users\gsteelman\Desktop\SummerResearch\bob6.xdf', 'streamtype', 'signal')
-mytempdata = tryFindStart(traindata,3,0);
+%mytempdata = tryFindStart(traindata,3,0);
 %mytempdata = traindata;
-Stim1 = 'Open'
-Stim2 = 'Closed'
-endtrial = 'EndTrial'
+Stim1 = '149'
+Stim2 = '151'
+endtrial = '200'
 absjit = 0%total jitter
 nummarker = 0%number events
 srate = 500%sampling rate
@@ -40,7 +40,7 @@ end
 %}
 %first isolate the data and plot it
 figure
-realDat = mytempdata.data(3,:).';
+realDat = mytempdata.data(1,:).';
 %realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 %realDat(:,2) = realDat(:,2) - mean(realDat(:,2))
 %realDat(:,3) = realDat(:,3) - mean(realDat(:,3))
@@ -50,7 +50,7 @@ realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 myX = linspace(0,length(realDat)/1000,length(realDat));
 plot(realDat)
 i = 1
-legend(mytempdata.chanlocs([1:4]).labels)
+%legend(mytempdata.chanlocs([1:4]).labels)
 color = 'N'
 %%
 %Now run through the event markers and draw a blue line for 700 (start
