@@ -37,5 +37,6 @@ right10hz3 = pop_selectevent(neaz3, 'type', '201');
 figure; pop_spectopo(left6hz2, 1, [0  8998], 'EEG' , 'percent', 100, 'freq', [6 10 15], 'freqrange',[5 20],'electrodes','on');
 figure; pop_spectopo(right10hz2, 1, [0  8998], 'EEG' , 'percent', 100, 'freq', [6 10 15], 'freqrange',[2 25],'electrodes','on');
 
+% Plot power/frequency with artifacts for comparison
 figure; pop_spectopo(left6hz3, 1, [0  8998], 'EEG' , 'percent', 100, 'freq', [6 10 15], 'freqrange',[5 20],'electrodes','on');
 figure; pop_spectopo(right10hz3, 1, [0  8998], 'EEG' , 'percent', 100, 'freq', [6 10 15], 'freqrange',[2 25],'electrodes','on');
