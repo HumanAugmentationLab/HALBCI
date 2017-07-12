@@ -1,6 +1,6 @@
+
 sca;
 close all;
-clearvars;
 numTrials = 10;
 Trialslength = 5;
 timeBeforeOnset = 1;%time between trials
@@ -19,7 +19,7 @@ oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 SimpleMovieDemo()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%
+%{
 
 % Get the screen numbers. This gives us a number for each of the screens
 % attached to our computer.

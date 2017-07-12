@@ -1,20 +1,29 @@
 %easy file seems to have wrong channel labels
 % .edf has right channel labels, but wrong events
 % quick cheat: load edf file and copy the hannel locs from that
-a = io_loadset('K:HumanAugmentationLab\EEGdata\EnobioTests\Testing SSVEP\20170710171359_Patient01_SSVEP-P0-8ch.edf','channels',1:8)
-xd = exp_eval(a)
+if ~exist('xd','var')
+    a = io_loadset('C:\Users\gsteelman\Desktop\SummerResearch\10v15Hz_Flashing.edf','channels',1:8)
+    xd = exp_eval(a)
+end
 
-a = io_loadset('K:HumanAugmentationLab\EEGdata\EnobioTests\Testing SSVEP\20170710171359_Patient01_SSVEP-P0-8ch.easy','channels',1:8)
-eaz2 = exp_eval(a)
+
+if ~exist('eaz2','var')
+    a = io_loadset('C:\Users\gsteelman\Desktop\SummerResearch\10v15Hz_Flashing.easy','channels',1:8)
+    eaz2 = exp_eval(a)
+end
 eaz2.chanlocs = xd.chanlocs; % Replace channel locations
-feaz2 = pop_eegfilt(eaz2); %filter between .1 and 56
-neaz2 = pop_epoch(feaz2); %events '101' '201' time from 0 to 9 s
-left6hz2 = pop_selectevent(neaz2); % select event type '101', remove others
-right10hz2 = pop_selectevent(neaz2); % select event type '201', remove others
+%NOTE: I CHANGED A SETTING IN eegfilt! I changed the default from "firls"
+%to "firl". If not changed, it will give bad data
+feaz2 = pop_eegfilt(eaz2,.1,56); %filter between .1 and 56
+neaz2 = pop_epoch(feaz2,{'101' '201'},[-1 9]); %events '101' '201' time from 0 to 9 s
+left10hz2 = pop_selectevent(neaz2,'type','101'); % select event type '101', remove others
+right15hz2 = pop_selectevent(neaz2,'type','201'); % select event type '201', remove others
 
 %% Set which data you're lookin at
-left = left6hz;
-right = right15hz;
+left = left10hz2;
+right = right15hz2;
+pop_timtopo(left)
+pop_timtopo(right)
 
 %% Plot spectr
 figure; pop_spectopo(left, 1, [0  8998], 'EEG' , 'percent', 100, 'freq', [7 11 15], 'freqrange',[2 25],'electrodes','on');
