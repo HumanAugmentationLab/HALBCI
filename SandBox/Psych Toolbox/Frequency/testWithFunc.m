@@ -9,8 +9,8 @@ PsychDefaultSetup(2);
 AssertOpenGL;
 %Undo Warnings
 %
-%oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
-%oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
+oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
+oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
 % Get the screen numbers. This gives us a number for each of the screens
@@ -25,7 +25,7 @@ screens = Screen('Screens');
 % To draw we select the maximum of these numbers. So in a situation where we
 % have two screens attached to our monitor we will draw to the external
 % screen. If I were to select the minimum of these numbers then I would be
-% displaying on the physical screen of my laptop.
+% displaying on the physical screen of my laptop.    
 screenNumber = max(screens);
 
 % Define black and white (white will be 1 and black 0). This is because
@@ -35,14 +35,14 @@ black = BlackIndex(screenNumber);
 
 % Do a simply calculation to calculate the luminance value for grey. This
 % will be half the luminace value for white
-grey = white / 2;
+grey = white / 2; 
 inc = white - grey;
 
 
 % Open an on screen window
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, grey);
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, grey,[0 0 800 500]);
 
-efficientBoardFunc(window,windowRect,20,10);
+inefficientBoardFunc(window,windowRect,30  ,100); 
 
 KbStrokeWait;
 sca;

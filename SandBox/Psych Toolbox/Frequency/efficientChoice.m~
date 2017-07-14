@@ -28,7 +28,7 @@ function [  ] = efficientChoice(  window,windowRect,Hz,time,extraImage,outlet,mr
     
     dstRect1 = CenterRectOnPointd(dstRectOG, xCenter * .5, yCenter);
     dstRect2 = CenterRectOnPointd(dstRectOG, xCenter  * 1.5 , yCenter);
-    dstRect = [dstRect1; dstRect2]
+    dstRect = 
 
 
     % Draw the checkerboard texture to the screen. By default bilinear
@@ -68,8 +68,8 @@ function [  ] = efficientChoice(  window,windowRect,Hz,time,extraImage,outlet,mr
         frameCounter = frameCounter + waitframes;
         frameCounter2 = frameCounter2 + waitframes;
         % Draw our texture to the screen
-        Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect(lr(1),:), 0, filterMode);
-        Screen('DrawTexture', window, checkerTexture(textureCue2(1)),[],dstRect(lr(2),:), 0, filterMode);
+        Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect(lr(1)), 0, filterMode);
+        Screen('DrawTexture', window, checkerTexture(textureCue2(1)),[],dstRect(lr(2)), 0, filterMode);
         Screen('DrawTexture', window, extraImage);
 
         % Flip to the screen

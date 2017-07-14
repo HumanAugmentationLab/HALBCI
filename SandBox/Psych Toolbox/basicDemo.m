@@ -39,7 +39,7 @@ black = BlackIndex(screenNumber);
 grey = white / 2;
 
 % Open an on screen window using PsychImaging and color it grey.
-[w, wRect] = PsychImaging('OpenWindow', screenNumber, grey);
+[w, wRect] = Screen('OpenWindow', 0, 0, [0 0 800 500])
 Screen('TextSize', w ,50);
 
 %define the slack in the system (will be helpful for more accurate event markers)

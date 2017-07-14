@@ -2,13 +2,13 @@
 sca;
 close all;
 clearvars;
-numTrials = 6;
-Trialslength = 5;
+numTrials = 2;
+Trialslength = 10;
 timeBeforeOnset = .8;%time between trials
 extraTime = 4;
 arrowBuffer = .2;
 %repetitions = 1;%This is how many times the audio file should repeat(No reason to be more than 1)
-Hz = [1 15];
+Hz = [10 15];
 orderList = linspace(1,numTrials,numTrials);%randperm(numTrials);
 lrList = randperm(numTrials);
 choices = [1 2];
@@ -45,7 +45,7 @@ black = BlackIndex(screenNumber);
 grey = white / 2;
 
 % Open an on screen window using PsychImaging and color it grey.
-[w, wRect] = PsychImaging('OpenWindow', screenNumber, grey  );
+[w, wRect] = PsychImaging('OpenWindow', screenNumber, grey,[0 0 800 600]);
 Screen('TextSize', w ,50);
 rSize = 250;
 [wW, wH]=WindowSize(w);

@@ -57,13 +57,13 @@ function [  ] = efficientBoardFunc( window,windowRect,Hz,time )
 
 
         % Reverse the texture cue to show the other polarity if the time is up
-        if toc >= checkFlipTimeSecs-.02
+        if toc >= checkFlipTimeSecs-.01
             
             p = p+1;
             
             textureCue = fliplr(textureCue);
             Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect, 0, filterMode);
-            vbl = Screen('Flip', window,vbl + (checkFlipTimeFrames - 1.5) * ifi);
+            vbl = Screen('Flip', window,vbl + (checkFlipTimeFrames - 0.5) * ifi);
             toc
             tic
 

@@ -36,7 +36,7 @@ function [ ] = inefficientBoardFunc( window,windowRect,Hz,time )
         dstRect, 0, filterMode);
 
     % Time to wait in frames for a flip
-    waitframes = 2;
+    waitframes = 1;
 
     % Texture cue that determines which texture we will show
     textureCue = [1 2];
@@ -61,13 +61,14 @@ function [ ] = inefficientBoardFunc( window,windowRect,Hz,time )
             Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect, 0, filterMode);
 
             % Flip to the screen
-            vbl = Screen('Flip', window, vbl + (waitframes - 1.5) * ifi);
+            vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
 
 
             % Reverse the texture cue to show the other polarity if the time is up
             if frameCounter >= checkFlipTimeFrames
                 p = p+1;
-                toc
+                toc - t
+                t = toc;
                 textureCue = fliplr(textureCue);
                 frameCounter = 0;
             end
