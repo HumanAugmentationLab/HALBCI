@@ -46,20 +46,15 @@ Screen('TextSize', w ,50);
 slack = Screen('GetFlipInterval', w)/2
 
 %define the image files and conver them to the appropriate format
-<<<<<<< HEAD
-myimgfile = ['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/openEyes.jpg'];
-=======
+
 myimgfile = ['..\Media\openEyes.jpg'];
->>>>>>> b524a926756f242ff340b7f946bb2f503a678b92
 fprintf('Using image ''%s''\n', myimgfile);
 imdata=imread(myimgfile);
 imagetexOpen=Screen('MakeTexture', w, imdata);
 
-<<<<<<< HEAD
-myimgfile = ['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/closedEyes.jpg'];
-=======
+
 myimgfile = ['..\Media\closedEyes.jpg'];
->>>>>>> b524a926756f242ff340b7f946bb2f503a678b92
+
 fprintf('Using image ''%s''\n', myimgfile);
 imdata=imread(myimgfile);
 imagetexClosed=Screen('MakeTexture', w, imdata);
@@ -99,14 +94,11 @@ else
 end
 %}
 
-%load the audio file and format it correctly
-<<<<<<< HEAD
+%load the audio file and format it correctlyAD
 %InitializePsychSound;
 %[pahandle,wavedata] = loadSound(['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/default_ding.wav']);
-=======
 InitializePsychSound;
 [pahandle,wavedata] = loadSound(['..\Media\default_ding.wav']);
->>>>>>> b524a926756f242ff340b7f946bb2f503a678b92
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %this part loads the lsl outlet so that it may send out markers
@@ -123,7 +115,7 @@ outlet = lsl_outlet(info);
 %ready
 try
     disp('click for stuff')
-    %Screen('FillRect',w, grey);
+    Screen('FillRect',w, grey);
     Screen('DrawText', w, 'Click mouse to prep photodiode stimulation', wW/2-100, wH/2, black);
     clickedTime = Screen('Flip', w);
     while 1
