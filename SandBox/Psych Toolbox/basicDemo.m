@@ -6,7 +6,7 @@ numTrials = 10;
 Trialslength = 5;
 timeBeforeOnset = 1;%time between trials
 repetitions = 1;%This is how many times the audio file should repeat(No reason to be more than 1)
-a_prob = .5;%Probability of each class
+a_prob = .5;%Probability of each class 
 
 % Here we call some defaulhelpt settings for setting up Psychtoolbox
 PsychDefaultSetup(2);
@@ -46,12 +46,12 @@ Screen('TextSize', w ,50);
 slack = Screen('GetFlipInterval', w)/2
 
 %define the image files and conver them to the appropriate format
-myimgfile = ['C:\Users\gsteelman\Desktop\SummerResearch\HALBCI\SandBox\Media\openEyes.jpg'];
+myimgfile = ['..\Media\openEyes.jpg'];
 fprintf('Using image ''%s''\n', myimgfile);
 imdata=imread(myimgfile);
 imagetexOpen=Screen('MakeTexture', w, imdata);
 
-myimgfile = ['C:\Users\gsteelman\Desktop\SummerResearch\HALBCI\SandBox\Media\closedEyes.jpg'];
+myimgfile = ['..\Media\closedEyes.jpg'];
 fprintf('Using image ''%s''\n', myimgfile);
 imdata=imread(myimgfile);
 imagetexClosed=Screen('MakeTexture', w, imdata);
@@ -93,7 +93,7 @@ end
 
 %load the audio file and format it correctly
 InitializePsychSound;
-[pahandle,wavedata] = loadSound(['C:\Users\gsteelman\Desktop\SummerResearch\HALBCI\SandBox\Media\default_ding.wav']);
+[pahandle,wavedata] = loadSound(['..\Media\default_ding.wav']);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %this part loads the lsl outlet so that it may send out markers
