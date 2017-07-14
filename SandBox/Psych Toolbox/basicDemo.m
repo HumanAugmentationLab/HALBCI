@@ -2,7 +2,7 @@
 sca;
 close all;
 clearvars;
-numTrials = 10;
+numTrials = 5;
 Trialslength = 5;
 timeBeforeOnset = 1;%time between trials
 repetitions = 1;%This is how many times the audio file should repeat(No reason to be more than 1)
@@ -13,8 +13,8 @@ PsychDefaultSetup(2);
 AssertOpenGL;
 %Undo Warnings
 %
-%oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
-%oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
+oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
+oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 %}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,19 +39,19 @@ black = BlackIndex(screenNumber);
 grey = white / 2;
 
 % Open an on screen window using PsychImaging and color it grey.
-[w, wRect] = Screen('OpenWindow', 0, 0, [0 0 800 500])
+[w, wRect] = Screen('OpenWindow', 0, 0)
 Screen('TextSize', w ,50);
 
 %define the slack in the system (will be helpful for more accurate event markers)
 slack = Screen('GetFlipInterval', w)/2
 
 %define the image files and conver them to the appropriate format
-myimgfile = ['C:\Users\gsteelman\Desktop\SummerResearch\HALBCI\SandBox\Media\openEyes.jpg'];
+myimgfile = ['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/openEyes.jpg'];
 fprintf('Using image ''%s''\n', myimgfile);
 imdata=imread(myimgfile);
 imagetexOpen=Screen('MakeTexture', w, imdata);
 
-myimgfile = ['C:\Users\gsteelman\Desktop\SummerResearch\HALBCI\SandBox\Media\closedEyes.jpg'];
+myimgfile = ['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/closedEyes.jpg'];
 fprintf('Using image ''%s''\n', myimgfile);
 imdata=imread(myimgfile);
 imagetexClosed=Screen('MakeTexture', w, imdata);
@@ -92,8 +92,8 @@ end
 %}
 
 %load the audio file and format it correctly
-InitializePsychSound;
-[pahandle,wavedata] = loadSound(['C:\Users\gsteelman\Desktop\SummerResearch\HALBCI\SandBox\Media\default_ding.wav']);
+%InitializePsychSound;
+%[pahandle,wavedata] = loadSound(['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/default_ding.wav']);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %this part loads the lsl outlet so that it may send out markers
@@ -110,7 +110,7 @@ outlet = lsl_outlet(info);
 %ready
 try
     disp('click for stuff')
-    Screen('FillRect',w, grey);
+    %Screen('FillRect',w, grey);
     Screen('DrawText', w, 'Click mouse to prep photodiode stimulation', wW/2-100, wH/2, black);
     clickedTime = Screen('Flip', w);
     while 1
