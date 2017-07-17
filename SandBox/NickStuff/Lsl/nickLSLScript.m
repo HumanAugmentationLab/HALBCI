@@ -21,7 +21,7 @@ end
 %run_readdataset('Dataset',mydata);
 %bci_annotate('Model',lastmodel, laststream)
 %'Markers',{'68','69'}
-%
+
 [predictions,latencies] = onl_simulate(traindata, mymodel,'SamplingRate',1);
 [prediction,loss,teststats,targets] = bci_predict(mymodel,traindata);
 %this simply displays the information gotten from bci_predict
