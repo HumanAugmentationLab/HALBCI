@@ -42,7 +42,7 @@ inc = white - grey;
 % Open an on screen window
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber, grey,[0 0 800 500]);
 
-inefficientBoardFunc(window,windowRect,30  ,100); 
+inefficientBoardFuncc(window,windowRect,30  ,100); 
 
 KbStrokeWait;
 sca;
