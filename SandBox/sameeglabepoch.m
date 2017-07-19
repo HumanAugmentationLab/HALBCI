@@ -76,14 +76,34 @@ td4 = io_loadset('C:\Users\smichalka\Documents\NIC\20170718163008_PatientH1.easy
 d4 = exp_eval(td4)
 
 %%
-datatouse = d4;
+%td5 = io_loadset('K:HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W1MuseExtrinsic.xdf')
+%d5 = exp_eval(td5)
+td5 = reconfigSNAP('K:HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W1MuseExtrinsic.xdf');
+d5 = tryFindStart(td5,4,0);
+
+%%
+%td5 = io_loadset('K:HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W1MuseExtrinsic.xdf')
+%d5 = exp_eval(td5)
+td6 = reconfigSNAP('K:HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W2MuseExtrinsic.xdf');
+d6 = tryFindStart(td6,4,0);
+
+%%
+td7 = reconfigSNAP('K:HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W1MuseIntrinsic.xdf');
+d7 = tryFindStart(td7,4,0);
+%%
+datatouse = d7;
+datatotest = d7;
+
+%myapproach = {'SpecCSP' ...
+%    'SignalProcessing',{'EpochExtraction',[0 1],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'P7' 'P4' 'Cz' 'Pz'}}},...
+%    'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
 myapproach = {'SpecCSP' ...
-    'SignalProcessing',{'EpochExtraction',[0 1],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'P7' 'P4' 'Cz' 'Pz'}}},...
+    'SignalProcessing',{'EpochExtraction',[0 1],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}},...
     'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
 
-[trainloss,mymodel,laststats] = bci_train('Data',datatouse,'Approach',myapproach,'TargetMarkers',{'10','11'},'EvaluationMetric', 'mse','EvaluationScheme',0); 
+[trainloss,mymodel,laststats] = bci_train('Data',datatouse,'Approach',myapproach,'TargetMarkers',{'149','151'},'EvaluationMetric', 'mse','EvaluationScheme',0); 
 
-[prediction,loss,teststats,targets] = bci_predict(mymodel,d3);
+[prediction,loss,teststats,targets] = bci_predict(mymodel,datatotest);
 
 %this simply displays the information gotten from bci_predict
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);

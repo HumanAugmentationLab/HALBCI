@@ -1,9 +1,9 @@
 
 function [ returndata ] = reconfigSNAP( filepath )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-%haha sure
-%Not sure how detailed I can go with this simple function
+%reconfigSNAP For xdfs using muse, subtract latency of first event from all
+%events since the time scale coming from the muse are in a different clock
+%system
+
 %Will subtract the entire latencies of a eeg dataset by the first value
 % I used a for loop because matlab does not like indexing with structures
 % and cells
@@ -15,7 +15,7 @@ function [ returndata ] = reconfigSNAP( filepath )
         end
     end
     for i = 1:length(returndata.event)
-        returndata.event(i).latency = (returndata.event(i).latency - min)/500
+        returndata.event(i).latency = (returndata.event(i).latency - min);%/500; %Fixed this; was converting to time instead of tps
     end
 end
 
