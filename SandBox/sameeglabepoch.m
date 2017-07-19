@@ -58,4 +58,34 @@ title(num2str(freqs(selfreq)))
 %% Compare
 figure; [ersp,itc,powbase,times,freqs,erspboot,itcboot tdata] = newtimef({left.data(selchan,:,:) right.data(selchan,:,:)}, 4500,[0  8998],500, [3  0.5] , 'freqs', [[4 18]],'nfreqs',2,'ntimesout', 4);
 
+%%
+td = io_loadset('C:\Users\smichalka\Documents\NIC\20170718150546_Patient017_Start.easy')
+d = exp_eval(td)
+%%
+td1 = io_loadset('C:\Users\smichalka\Documents\NIC\20170718152739_Patient018_Start.easy')
+d1 = exp_eval(td1)
+%%
+td2 = io_loadset('C:\Users\smichalka\Documents\NIC\20170718154026_Patient018_Start.easy')
+d2 = exp_eval(td2)
 
+%%
+td3 = io_loadset('C:\Users\smichalka\Documents\NIC\20170718161317_PatientH1.easy')
+d3 = exp_eval(td3)
+%%
+td4 = io_loadset('C:\Users\smichalka\Documents\NIC\20170718163008_PatientH1.easy')
+d4 = exp_eval(td4)
+
+%%
+datatouse = d4;
+myapproach = {'SpecCSP' ...
+    'SignalProcessing',{'EpochExtraction',[0 1],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'P7' 'P4' 'Cz' 'Pz'}}},...
+    'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
+
+[trainloss,mymodel,laststats] = bci_train('Data',datatouse,'Approach',myapproach,'TargetMarkers',{'10','11'},'EvaluationMetric', 'mse','EvaluationScheme',0); 
+
+[prediction,loss,teststats,targets] = bci_predict(mymodel,d3);
+
+%this simply displays the information gotten from bci_predict
+disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
+disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values
+disp(['  true classes     : ',num2str(round(targets)')]);

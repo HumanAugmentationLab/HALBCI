@@ -14,7 +14,7 @@ close all;
 clearvars;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Settings 
-opts.photodiode = true;
+opts.photodiode = false;
 opts.keyboardsetup = false; % Set up keyboard numbers
 startdelaytime = 10;
 
@@ -31,7 +31,7 @@ mrkOpenEyes = 10;
 mrkClosedEyes = 11; 
 mrkBlink = 12;
 
-namelslstream = 'PsychMarkers';
+namelslstream = 'SamMarkers';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Call some default help settings for setting up Psychtoolbox
 PsychDefaultSetup(2);
@@ -51,20 +51,17 @@ if opts.keyboardsetup
     WaitSecs(0.1);
     [~, keyCode, ~] = KbWait();
     [~, KeyStartNum]=max(keyCode);
-    
-    
+   
     sprintf('Press Open Eyes key: %s \n',KeyOpenEyes)
     WaitSecs(0.3);
     [~, keyCode, ~] = KbWait();
     [~, KeyOpenEyesNum]=max(keyCode);
-    
     
     sprintf('Press Closed Eyes key: %s \n',KeyClosedEyes)
     WaitSecs(0.3);
     [~, keyCode, ~] = KbWait();
     [~, KeyClosedEyesNum]=max(keyCode);
 
-    
     sprintf('Press Blink Eyes key: %s \n',KeyBlink)
     WaitSecs(0.3);
     [~, keyCode, ~] = KbWait();
@@ -104,8 +101,11 @@ if opts.photodiode
     % Do a simply calculation to calculate the luminance value for grey. This
     % will be half the luminace values for white
     grey = white / 2;
-    wW = 1920;%for Nick's laptop
-    wH = 1080;
+    
+    % Put a square just in the bottom corner
+    [wW, wH]=Screen('WindowSize', screenNumber);
+    %wW = 1920;%for Nick's laptop
+    %wH = 1080;
     rSize = 250;
     myrect=[wW-rSize wH - rSize wW wH];
     myoval=[wW/2-rSize/2 wH/2-rSize/2 wW/2+rSize/2 wH/2 + rSize/2]; % center dRect on current mouseposition
@@ -198,7 +198,7 @@ try
         num = num+1; % number of trials/markers
         toc
         mrk = 0; % Change marker back to zero for debugging
-        pause(.1);     
+        pause(.3);     
     end
     
     mrk = mrkend; 
