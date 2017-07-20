@@ -14,7 +14,7 @@ close all;
 clearvars;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Settings 
-opts.photodiode = false;
+opts.photodiode = true;
 opts.keyboardsetup = false; % Set up keyboard numbers
 startdelaytime = 10;
 
@@ -27,8 +27,8 @@ KeyBlink = 'f';
 
 mrkstart = 100;
 mrkend = 200;
-mrkOpenEyes = 10;
-mrkClosedEyes = 11; 
+mrkOpenEyes = 149;
+mrkClosedEyes = 151; 
 mrkBlink = 12;
 
 namelslstream = 'SamMarkers';
@@ -104,14 +104,16 @@ if opts.photodiode
     
     % Put a square just in the bottom corner
     [wW, wH]=Screen('WindowSize', screenNumber);
+    
     %wW = 1920;%for Nick's laptop
     %wH = 1080;
     rSize = 250;
-    myrect=[wW-rSize wH - rSize wW wH];
+    %myrect=[wW-rSize wH - rSize wW wH];
+    myrect = [0 0 wW wH];
     myoval=[wW/2-rSize/2 wH/2-rSize/2 wW/2+rSize/2 wH/2 + rSize/2]; % center dRect on current mouseposition
 
     % Open an on screen window using PsychImaging and color it grey.
-    [w, wRect] = Screen('OpenWindow', screenNumber, black,myrect);
+    [w, wRect] = Screen('OpenWindow', screenNumber, black);%, myrect);
     Screen('TextSize', w ,50);
     %define the slack in the system (will be helpful for more accurate event markers) 
     slack = Screen('GetFlipInterval', w)/2;
@@ -211,24 +213,24 @@ try
         %Wait 5 seconds and turn black
         pause(5)
         Screen('FillRect',w, black);
-        clickedTime = Screen('Flip', w, endtrial+5-slack);
+        clickedTime = Screen('Flip', w, endtrial+4-slack);
         
         % Wait another 10 seconds and turn white and send another marker
         % for the end
         Screen('FillRect',w, white);
-        rectTime = Screen('Flip', w,clickedTime + 10);
+        rectTime = Screen('Flip', w,clickedTime + 3);
         outlet.push_sample(mrk);
         
         Screen('FillRect',w, black);
-        finishedTime = Screen('Flip', w, rectTime + 3);
+        finishedTime = Screen('Flip', w, rectTime + 4);
     end
     toc
     sca;
     ShowCursor;
     Priority(0);
-
+    RestrictKeysForKbCheck([]);
 catch
- 
+    RestrictKeysForKbCheck([]);
     sca;
     ShowCursor;
     Priority(0);
