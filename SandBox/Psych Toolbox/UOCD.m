@@ -2,9 +2,10 @@
 sca;
 close all;
 clearvars;
-numTrials = 5;
-Trialslength = 5;
-timeBeforeOnset = 1;%time between trials
+%This is code specific to my computer because my ubuntu won't add a path on
+%startup
+addpath(genpath('/home/gsteelman/Desktop/Summer Research/labstreaminglayer/LSL/liblsl-Matlab'));
+numTimes = 5;
 
 % Here we call some defaulhelpt settings for setting up Psychtoolbox
 PsychDefaultSetup(2);
@@ -35,9 +36,9 @@ black = [0 0 0]
 % Do a simply calculation to calculate the luminance value for grey. This
 % will be half the luminace values for white
 grey = white / 2;
-wW = 1920%for my laptop
-wH = 1080
-rSize = 250
+wW = 1920%for my laptop;
+wH = 1080;
+rSize = 250;
 myrect=[wW-rSize wH - rSize wW wH];
 myoval=[wW/2-rSize/2 wH/2-rSize/2 wW/2+rSize/2 wH/2 + rSize/2]; % center dRect on current mouseposition
 
@@ -47,23 +48,25 @@ Screen('TextSize', w ,50);
 
 %define the slack in the system (will be helpful for more accurate event
 %markers) 
-slack = Screen('GetFlipInterval', w)/2
+slack = Screen('GetFlipInterval', w)/2;
 %This next part will find the keyboard indexes of the desired kyes
-Key1 = 'a'
-Key2 = 's'
-Key3 = 'd'
+Key1 = 'a';
+Key2 = 's';
+Key3 = 'd';
+disp('Press the Following Button')
 disp(Key1)
 while 1
        
        if KbCheck
            [keyIsDown,secs,keyCode]=PsychHID('KbCheck');
            [Y, I]=max(keyCode);
-           Key1Num = I
+           Key1Num = I;
            break
         end 
 
 end
 pause(.5)
+disp('Press the Following Button')
 disp(Key2)
 while 1
 
@@ -76,6 +79,7 @@ while 1
 
 end
 pause(.5)
+disp('Press the Following Button')
 disp(Key3)
 while 1 
 
@@ -167,7 +171,7 @@ try
                 
             end
             disp('clic')
-            if num > 10
+            if num > numTimes
                 Screen('FillRect',w, black);
                 clickedTime = Screen('Flip', w);
                 break

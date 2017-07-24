@@ -17,7 +17,7 @@ traindata2 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\sa
 mytempdata = tryFindStart(traindata,3,14000);
 mytempdata2 = tryFindStart(traindata2,3,0);
 %}
-%
+%{
 traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\ALClosed6Min.xdf');
 mytempdata = tryFindStart(traindata,3,0);
 traindata2 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\psychOpen2.xdf');
