@@ -1,3 +1,10 @@
+%%This demo will show the user two different pictures (e.g. left vs right
+%%or open vs closed)and equal amount of times in a random order. The time
+%%each image is on the screen and the time between images as well as the
+%%number of trials can be modified at the top. As in many of the other
+%%demos, there is time at the beginning and end when a white square may
+%%flash  in the bottom right as a photodiode stimulation.
+
 % Clear the workspace and the screen and set the variables
 sca;
 close all;

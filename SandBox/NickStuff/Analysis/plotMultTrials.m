@@ -1,3 +1,7 @@
+%%This script was designed to test how a model behaves when the amount of
+%%trials is decreased either randomly or in order. Can be used without
+%%cross validation but works better with multiple trials.
+
 traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\psychOpen.xdf');
 mytempdata = tryFindStart(traindata,3,8000);
 traindata2 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\psychOpen2.xdf');

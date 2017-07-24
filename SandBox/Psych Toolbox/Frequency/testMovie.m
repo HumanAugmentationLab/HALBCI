@@ -1,4 +1,5 @@
-  AssertOpenGL;
+%%This script will play a movie with an overlayed checkboard.
+AssertOpenGL;
 PsychDefaultSetup(2);  
 AssertOpenGL;
 %Undo Warnings

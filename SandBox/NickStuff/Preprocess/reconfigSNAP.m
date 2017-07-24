@@ -15,7 +15,7 @@ function [ returndata ] = reconfigSNAP( filepath )
         end
     end
     for i = 1:length(returndata.event)
-        returndata.event(i).latency = (returndata.event(i).latency - min)/500
+        returndata.event(i).latency = (returndata.event(i).latency - min)
     end
 end
 

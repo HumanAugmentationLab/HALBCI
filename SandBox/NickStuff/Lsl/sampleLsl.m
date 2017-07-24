@@ -1,3 +1,5 @@
+%%This is a simple test script to check the basic reading in functions of
+%%markeres in lsl.
 disp('Loading library...');
 lib = lsl_loadlib();
 

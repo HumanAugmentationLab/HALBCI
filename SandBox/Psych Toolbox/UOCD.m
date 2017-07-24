@@ -1,3 +1,10 @@
+%%This demo will allow the user to specify when certain markers are sent
+%%out. it first get the keyboard mapping by asking the user to press the
+%%desired keys. After some photodiode calibration time that uses a small
+%%square in the bottom right of the screen (will most likely mess up for
+%%different resolutions), the porgram will give the user a certainamount of
+%%kepresses that will send stimulations over lsl.
+
 % Clear the workspace and the screen and set the variables
 sca;
 close all;

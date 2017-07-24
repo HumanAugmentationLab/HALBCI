@@ -1,37 +1,57 @@
-%%This is the first dirty script used for testing out BCILAB especially
-%%with Eyes Open s Eyes closed data on the muse.
+%First we load the data set in
+addpath(genpath('/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/NickStuff'))
+Stim1 = '151'
+Stim2 = '149'
+traindata = reconfigSNAP('/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/W4-Intrinsic.xdf')
+mytempdata = tryFindStart(traindata,4,0);
 
-%First we load the data set into matlab with io_loadset()
-%{
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\onlySnap4.xdf');
-traindata2 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\onlySnap5.xdf');
-traindata3 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\onlySnapLong.xdf');
+figure
+hold on
+realDat = mytempdata.data(2,:).';
+%realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
+%realDat(:,2) = realDat(:,2) - mean(realDat(:,2))
+%realDat(:,3) = realDat(:,3) - mean(realDat(:,3))
+%realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
+%realDat(:,5) = realDat(:,5) - mean(realDat(:,5))
+%realDat(:,6) = realDat(:,6) - mean(realDat(:,6))
+time = 1
+%myX = linspace(0,length(realDat)/1000,length(realDat));
+%plot(realDat)
+i = 1
+%legend(mytempdata.chanlocs([1:4]).labels)
+color = 'N'
+while i <= length(mytempdata.event)
+    %{
+    if mytempdata.event(i).latency > 100000
+        disp('got out')
+        break
+    end
+    %}
 
-mytempdata = tryFindStart(traindata,3,0);
-mytempdata = refactorFunc(mytempdata,1.5,3.5);
-mytempdata2 = tryFindStart(traindata2,3,0);
-mytempdata2 = refactorFunc(mytempdata2,1.5,3.5);
-mytempdata3 = tryFindStart(traindata3,3,0);
-mytempdata3 = refactorFunc(mytempdata3,3,15);
-%}
-%{
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\sabrinaOpen.xdf');
-traindata2 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\sabrinaOpen2.xdf');
-mytempdata = tryFindStart(traindata,3,14000);
-mytempdata2 = tryFindStart(traindata2,3,0);
-%}
-%{
-traindata = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\ALClosed6Min.xdf');
-mytempdata = tryFindStart(traindata,3,0);
-traindata2 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\psychOpen2.xdf');
-mytempdata2 = tryFindStart(traindata2,3,0);
-traindata3 = reconfigSNAP('C:\Users\gsteelman\Desktop\SummerResearch\TestData\Psych Toolbox\psychOpen3.xdf');
-mytempdata3 = tryFindStart(traindata3,3,0);
+    if(strcmp(mytempdata.event(i).type, Stim1))
+        currentTime = mytempdata.event(i).latency;
+        currentWindow = realDat(currentTime-mytempdata.srate/2:currentTime+mytempdata.srate/2);
+        plot(currentWindow - mean(currentWindow),'b')
+    elseif(strcmp(mytempdata.event(i).type, Stim2))
+        currentTime = mytempdata.event(i).latency;
+        currentWindow2 = realDat(currentTime-+mytempdata.srate/2:currentTime+mytempdata.srate/2);
+        plot(currentWindow2 - mean(currentWindow2),'g')  
+    end
+    %}
+    
+   
+    i = i +1;
+end
 
-mytempdata = refactorFunc(mytempdata,1, 3.5,.5)
-mytempdata2 = refactorFunc(mytempdata2,1, 3.75,.5)
-mytempdata3 = refactorFunc(mytempdata3,1, 3.75,.5)
+%{
+plot(latencies, predictions(:,1)*100000,'black',...
+    'LineWidth',2,...
+    'MarkerSize',5,...
+    'MarkerEdgeColor','black',...
+    'MarkerFaceColor',[0.5,0.5,0.5])
 %}
+
+%{
 %mytempdata2 = tryFindStart(traindata2,3,0);
 %here we specifiy the approach to detangle the data
 %this one is Filter Banked CSP with epochs from .5 to 3.5. 8 different
@@ -69,3 +89,4 @@ disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
 disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values
 disp(['  true classes     : ',num2str(round(targets)')]);
 %[7.5 8.5;9.25 10.25;11.39 12.39;14 15;17.17 18.17;21 22;25.75 26.75;31.5 32.5];
+%}

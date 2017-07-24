@@ -1,3 +1,8 @@
+%%Ignore all the comment out stuff in this script the only uncommented
+%%lines are the important lines. They will look for a stream of the given
+%%name, apply the model in the workspace to the model, and export the
+%%results of this model to lsl
+
 %this first statement is telling bcilab to look for an lsl stream of type
 %"EEG"
 %It will then visualize the data with vis_stream

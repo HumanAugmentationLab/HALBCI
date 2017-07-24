@@ -1,8 +1,28 @@
+%%This script is used as a first pass to visualize the data and make sure
+%%everything looks right before diving into analysis. it will plot the data
+%%and the markers according to the specified parameters
+
+
 %traindata = pop_loadxdf('K:\HumanAugmentationLab\EEGdata\EnobioTests\PhotodiodeScreen\block_nenobio.xdf')
 %mytempdata = exp_eval(traindata)
 %mytempdata = decreaseTrialsFunc(mytempdata,20,{'Open' 'Closed'})
-traindata = io_loadset('C:\Users\gsteelman\Desktop\SummerResearch\6v15Hz_Flashing.edf')
-mytempdata = exp_eval(traindata)
+%traindata = io_loadset('/home/gsteelman/Desktop/Summer Research/Data/20170718152739_W1.easy')
+%mytempdata = exp_eval(traindata)
+
+%traindata = io_loadset('/media/HumanAugmentationLab/EEGdata/EnobioTests/EyesOpenClosed/20170718154026_W2.easy')
+%mytempdata = exp_eval(traindata)
+addpath(genpath('/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/NickStuff'))
+
+Stim1 = '149';
+Stim2 = '151';
+PhotodiodeStimulationChannel = 4;
+OffsetforPhotodiodeStimulation = 0;
+pathToData = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/W4-Intrinsic.xdf';
+
+traindata = reconfigSNAP(pathToData)
+mytempdata = tryFindStart(traindata,PhotodiodeStimulationChannel,OffsetforPhotodiodeStimulation);
+
+
 %mytempdata = refactorFunc(mytempdata);
 %answer = refactorFunc(traindata);
 %{
@@ -28,7 +48,7 @@ for i = 1:length(traindata.event)
 end
 %}
 figure
-realDat = mytempdata.data(3,:).';
+realDat = mytempdata.data(5,:).';
 %realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 %realDat(:,2) = realDat(:,2) - mean(realDat(:,2))
 %realDat(:,3) = realDat(:,3) - mean(realDat(:,3))
@@ -48,11 +68,11 @@ while i <= length(mytempdata.event)
     end
     %}
     %
-    if(strcmp(mytempdata.event(i).type, '1') || strcmp(mytempdata.event(i).type, '5'))
+    if(strcmp(mytempdata.event(i).type, '100') || strcmp(mytempdata.event(i).type, '200'))
         color = 'magenta';
-    elseif(strcmp(mytempdata.event(i).type, '2'))
+    elseif(strcmp(mytempdata.event(i).type, Stim1))
         color = 'g';
-    elseif(strcmp(mytempdata.event(i).type, '4'))
+    elseif(strcmp(mytempdata.event(i).type, Stim2))
         color = 'r';    
     else
         color = 'N';  

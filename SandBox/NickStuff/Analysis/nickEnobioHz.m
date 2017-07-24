@@ -1,5 +1,5 @@
-%First we load the data set into matlab with io_loadset()
-
+%This is a dirty general use script for testing out data recorded on the
+%enobio
 
 
 traindata = io_loadset('C:\Users\gsteelman\Desktop\SummerResearch\10v15Hz_Flashing.easy')

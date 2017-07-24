@@ -1,5 +1,7 @@
 function [ pahandle, wavedata ] = loadSound( wavfilename)
-    
+    %%This simple function will simply load a sound into the computer and
+    %%return the required variables for psychotoolbox. This is mainly to
+    %%increase modularoty and readability
 
     [y, freq] = psychwavread(wavfilename);
     wavedata = y';
