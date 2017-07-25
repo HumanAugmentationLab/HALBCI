@@ -48,6 +48,11 @@ bci_stream_name = 'dopeStream';
 run_writelsl('Model',mymodel,'SourceStream',bci_stream_name,'LabStreamName','Res','OutputForm','expectation','ChannelNames',{'open','closed'})
 %onl_newpredictor('mypredictor',mymodel,bci_stream_name)
 
+
+
+%run_writelsl('Model',mymodel2,'SourceStream',bci_stream_name,'LabStreamName','Res2','OutputForm','expectation','ChannelNames',{'open','closed'})
+
+
 %{
 t = 0
 t2 = 0

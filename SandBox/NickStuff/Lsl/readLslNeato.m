@@ -18,9 +18,9 @@ while true
     % and display it
     if timestamp
         fprintf('%.2f\n',data);
-        if data >1.3
+        if data >1.9
             t2 = t2 +1;
-        else
+        elseif data <1.1
             t = t+1;
             
         end

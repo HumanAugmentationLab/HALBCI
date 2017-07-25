@@ -4,9 +4,11 @@
 addpath(genpath('/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/NickStuff'))
 Stim1 = '151';
 Stim2 = '149';
-pathToData = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/W4-Intrinsic.xdf';
-traindata = reconfigSNAP(pathToData)
-mytempdata = tryFindStart(traindata,4,0);
+pathToData = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/N3MuseIntrinsic.xdf';
+pathToData2 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/W3IntrinsicSelf.xdf';
+pathToData3 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/W4-Intrinsic.xdf';
+traindata = reconfigSNAP(pathToData);
+mytempdata = tryFindStart(traindata,3,0);
 
 figure
 hold on
