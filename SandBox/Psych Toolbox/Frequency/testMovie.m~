@@ -108,7 +108,7 @@ try
     filterMode = 0;
 
     % Time to wait in frames for a flip
-    waitframes = 2;
+    waitframes = 1 ;
 
     % Texture cue that determines which texture we will show
     textureCue = [1 2];
@@ -128,40 +128,42 @@ try
     while p<numTimes  && ~KbCheck
 
             % Increment the counter
-           frameCounter = frameCounter + waitframes;
-           if first 
+            frameCounter = frameCounter + waitframes;
+            if mod(frameCounter,2) ==0
+                if first 
 
-              tex = Screen('GetMovieImage', window, movie2,0,0);
- 
-
-           else
-
-              tex = Screen('GetMovieImage', window, movie,0,0);
+                    tex = Screen('GetMovieImage', window, movie2,0,0);
 
 
-           end
+                else
+
+                    tex = Screen('GetMovieImage', window, movie,0,0);
 
 
-           if toc > 10 && first
+                end
+
+
+                if toc > 10 && first
                     first = 0; 
-              Screen('PlayMovie', movie2, 0);
+                    Screen('PlayMovie', movie2, 0);
 
                     % Close movie:
-              Screen('CloseMovie', movie2);
+                    Screen('CloseMovie', movie2);
 
-              Screen('PlayMovie', movie, 1);
+                    Screen('PlayMovie', movie, 1);
 
 
-           end
+                end
 
-           if tex>0
+                if tex>0
 
-               Screen('DrawTexture', window, tex,[],dstRect );
-               ltex = tex;
-           else 
-                Screen('DrawTexture', window, ltex,[],dstRect );
-           end
+                    Screen('DrawTexture', window, tex,[],dstRect );
+                    ltex = tex;
+                else 
+                    Screen('DrawTexture', window, ltex,[],dstRect );
 
+                end
+            end
 
             % Draw our texture to the screen
             Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect, 0, filterMode);

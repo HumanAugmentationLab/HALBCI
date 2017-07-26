@@ -12,14 +12,14 @@ PsychDefaultSetup(2);
 AssertOpenGL;
 %Undo Warnings
 %
-%oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
-%oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
+oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
+oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 %}
-SimpleMovieDemo()
+%SimpleMovieDemo()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%{
+%
 
 % Get the screen numbers. This gives us a number for each of the screens
 % attached to our computer.
@@ -101,10 +101,10 @@ try
         end
         
         % Draw the new texture immediately to screen:
-        Screen('DrawTexture', win, tex);
+        Screen('DrawTexture', w, tex);
         
         % Update display:
-        Screen('Flip', win);
+        Screen('Flip', w);
         
         % Release texture:
         Screen('Close', tex);
