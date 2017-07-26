@@ -14,7 +14,7 @@ oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
 moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass2.mp4' ];
 moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGswim2.mp4' ];
-Hz = [.1  .1];
+Hz = [10  15];
 time = 200;
 transparencyChecker = 100;
 checkernumSize = 2; 
@@ -60,7 +60,7 @@ end
 
    
 checkerboard(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker;  
-   checkerboard2(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker; 
+checkerboard2(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker; 
 
 
 
@@ -94,8 +94,8 @@ try
     dstRect = [dstRect1; dstRect2];
     
     % Open movie file:
-    movie = Screen('OpenMovie', window, moviename);
-    movie2 = Screen('OpenMovie', window, moviename2);
+    movie = Screen('OpenMovie', window, moviename,0,-1);
+    movie2 = Screen('OpenMovie', window, moviename2,0,-1);
     
     % Start playback engine:
     
@@ -123,7 +123,7 @@ try
     filterMode = 0;
 
     % Time to wait in frames for a flip
-    waitframes = 2;
+    waitframes = 1;
 
     % Texture cue that determines which texture we will show
 
@@ -176,8 +176,8 @@ try
             frameCounter = frameCounter + waitframes;
             frameCounter2 = frameCounter2 + waitframes;
             % Draw our texture to the screen
-            %Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect(1,:), 0, filterMode);
-            %Screen('DrawTexture', window, checkerTexture(textureCue2(1)),[],dstRect(2,:), 0, filterMode);
+            Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect(1,:), 0, filterMode);
+            Screen('DrawTexture', window, checkerTexture(textureCue2(1)),[],dstRect(2,:), 0, filterMode);
 
             % Flip to the screen
             vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
