@@ -1,15 +1,28 @@
 cd C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\AvaMuseProcess
 
-traindata = reconfigSNAP('C:\Users\alakmazaheri\Documents\BCI\MuseData\untitled.xdf');
-mytempdata = tryFindStart(traindata,3,0);
+clear trainloss mymodel laststats prediction loss teststats targets myapproach
+
+traindata0 = reconfigSNAP('C:\Users\alakmazaheri\Documents\BCI\MuseData\opencloseava.xdf');
+mytempdata0 = tryFindStart(traindata0,3,0);
+
+traindata1 = reconfigSNAP('C:\Users\alakmazaheri\Documents\BCI\MuseData\W1MuseExtrinsic.xdf');
+mytempdata1 = tryFindStart(traindata1,4,0);
  
-mytempdata = refactorFunc(mytempdata,1, 3.5,.5)
+traindata2 = reconfigSNAP('C:\Users\alakmazaheri\Documents\BCI\MuseData\W2MuseExtrinsic.xdf');
+mytempdata2 = tryFindStart(traindata2,4,0);
 
-myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[0 1],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',2},'MachineLearning',{'learner','lda'}}};
+traindata3 = reconfigSNAP('C:\Users\alakmazaheri\Documents\BCI\MuseData\W1MuseIntrinsic.xdf');
+mytempdata3 = tryFindStart(traindata3,4,0);
 
-[trainloss,mymodel,laststats] = bci_train('Data',mytempdata,'Approach',myapproach,'TargetMarkers',{'Closed','Open'},'EvaluationMetric', 'mse','EvaluationScheme',0); 
+%mytempdataNick = refactorFunc(mytempdata, 0.5, 3.5, 1);
+%mytempdataSam = makeExtraEvents(mytempdata, 0.5, 3.5, 1);
 
-[prediction,loss,teststats,targets] = bci_predict(mymodel,mytempdata);
+%myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[0.5 1.5],'FIRFilter',[6 12 16 32],'ChannelSelection',{{'TP9' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',1},'MachineLearning',{'learner','lda'}}};
+myapproach = {'SpecCSP' 'SignalProcessing',{'EpochExtraction',[-0.5 1],'FIRFilter',[2 4 32 48],'ChannelSelection',{{'TP9' 'FP1' 'FP2' 'TP10'}}}, 'Prediction',{'FeatureExtraction',{'PatternPairs',1},'MachineLearning',{'learner','lda'}}};
+
+[trainloss,mymodel,laststats] = bci_train('Data',mytempdata0,'Approach',myapproach,'TargetMarkers',{'149','151'},'EvaluationMetric', 'mse','EvaluationScheme',0); 
+
+[prediction,loss,teststats,targets] = bci_predict(mymodel,mytempdata0);
 
 %this simply displays the information gotten from bci_predict
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);

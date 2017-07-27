@@ -5,7 +5,7 @@ pub = rospublisher('/raw_vel');
 sub_bump = rossubscriber('/bump');
 msg = rosmessage(pub);
 
-bci_stream_name = 'Res';  
+bci_stream_name = 'Res';
 lib = lsl_loadlib();
 disp('Resolving a BCI stream...');
 result = {};
@@ -32,7 +32,7 @@ while 1
         
         if data > 1.75
             msg.Data = [0.1, 0.1];
-            disp('go you fuck')
+            disp('go')
         else 
             msg.Data = [0.0, 0.0];
         end

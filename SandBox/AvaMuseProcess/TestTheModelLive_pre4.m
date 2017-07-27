@@ -33,7 +33,7 @@ while 1
           
     end
     
-    pause(0.05);
+    %pause(0.05);
     catch 
         break
     end

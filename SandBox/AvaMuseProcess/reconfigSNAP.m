@@ -7,11 +7,11 @@ function [ returndata ] = reconfigSNAP( filepath )
 %Will subtract the entire latencies of a eeg dataset by the first value
 % I used a for loop because matlab does not like indexing with structures
 % and cells
-    returndata = pop_loadxdf(filepath)
-    min = returndata.event(1).latency
+    returndata = pop_loadxdf(filepath);
+    min = returndata.event(1).latency;
     for i = 1 : length(returndata.event)
         if strcmp(returndata.event(i).type, '99')
-            min = returndata.event(i).latency 
+            min = returndata.event(i).latency;
         end
     end
     for i = 1:length(returndata.event)

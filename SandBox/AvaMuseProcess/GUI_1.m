@@ -1,14 +1,14 @@
 %% Dependency Setup
 cd C:\Users\alakmazaheri\Documents\BCI\BCILAB
 bcilab;
-cd C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox %Psych Toolbox
+cd C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\PsychToolbox
 
-%%
+%% mytempdata
 % Clear the workspace and the screen and set the variables
 sca;
 close all;
 clearvars;
-numTrials = 10;
+numTrials = 20;
 Trialslength = 5;
 timeBeforeOnset = 1;%time between trials
 repetitions = 1;%This is how many times the audio file should repeat(No reason to be more than 1)
@@ -27,7 +27,7 @@ disp('Opening an outlet...');
 outlet = lsl_outlet(info);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-pause(30); % rest to open LabRecorder
+pause(15); % rest to open LabRecorder
 
 % Here we call some defaulhelpt settings for setting up Psychtoolbox
 PsychDefaultSetup(2);
@@ -60,7 +60,7 @@ black = 0;
 grey = round(white / 2);
 
 % Open an on screen window using PsychImaging and color it grey.
-[w, wRect] = Screen('OpenWindow', 0, grey)
+[w, wRect] = Screen('OpenWindow', screenNumber, grey)
 Screen('TextSize', w ,50);
 
 %define the slack in the system (will be helpful for more accurate event markers)
@@ -118,7 +118,7 @@ try
     mrk = 100
     Screen('FillRect',w, white,myrect);
     toc
-    rectTime = Screen('Flip', w,clickedTime + 30);
+    rectTime = Screen('Flip', w,clickedTime + 10);
     toc
     outlet.push_sample(mrk);
     toc
