@@ -1,233 +1,230 @@
-
-sca;
-close all;
-clearvars;
-numTrials = 6;
-Trialslength = 5;
-timeBeforeOnset = .8;%time between trials
-extraTime = 4;
-arrowBuffer = .2;
-%repetitions = 1;%This is how many times the audio file should repeat(No reason to be more than 1)
-Hz = [1 15];
-orderList = linspace(1,numTrials,numTrials);%randperm(numTrials);
-lrList = randperm(numTrials);
-choices = [1 2];
-images = ['left.png' 'right.png'];
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Here we call some defaulhelpt settings for setting up Psychtoolbox
-PsychDefaultSetup(2);
+% Select screen for display of movie:
+%%This script will play a movie with an overlayed checkboard.
 AssertOpenGL;
+PsychDefaultSetup(2);  
 %Undo Warnings
+
+addpath(genpath('/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/PsychToolbox'))
+
 %
 oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
 oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
-%}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% Get the screen numbers. This gives us a number for each of the screens
-% attached to our computer.
-screens = Screen('Screens');
-
-% To draw we select the maximum of these numbers. So in a situation where we
-% have two screens attached to our monitor we will draw to the external
-% screen.
-screenNumber = max(screens);
-
-% Define black and white (white will be 1 and black 0). This is because
-% in general luminace values are defined between 0 and 1 with 255 steps in
-% between. All values in Psychtoolbox are defined between 0 and 1
-white = WhiteIndex(screenNumber);
-black = BlackIndex(screenNumber);
-
-% Do a simply calculation to calculate the luminance value for grey. This
-% will be half the luminace values for white
-grey = white / 2;
-
-% Open an on screen window using PsychImaging and color it grey.
-[w, wRect] = PsychImaging('OpenWindow', screenNumber, grey  );
-Screen('TextSize', w ,50);
-rSize = 250;
-[wW, wH]=WindowSize(w);
-myrect=[wW-rSize wH - rSize wW wH];   
-myoval=[wW/2-rSize/2 wH/2-rSize/2 wW/2+rSize/2 wH/2 + rSize/2]; % center dRect on current mouseposition
 
 
-myimgfile = ['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/left.png'];
-fprintf('Using image ''%s''\n', myimgfile);
-imdata=imread(myimgfile);
-imagetexLeft=Screen('MakeTexture', w, imdata);
+moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass2.mp4' ];
+moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGswim2.mp4' ];
+Hz = [10  15];
+time = 200;
+transparencyChecker = 100;
+checkernumSize = 2; 
 
-myimgfile = ['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/right.png'];
-fprintf('Using image ''%s''\n', myimgfile);
-imdata=imread(myimgfile);
-imagetexRight=Screen('MakeTexture', w, imdata);
 
-imagetexs = [imagetexLeft imagetexRight];
+  
+Square1 = [255 0 0];
+Square2 = [0 255 255];
 
-slack = Screen('GetFlipInterval', w)/2
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%this part loads the lsl outlet so that it may send out markers
-%
-disp('Loading library...');
-lib = lsl_loadlib();
+Square1 = [255 0 255];
+Square2 = [0 255 0  ];
 
-disp('Creating a new marker stream info...');
-info = lsl_streaminfo(lib,'PsychMarkers','Markers',1,0,'cf_int32','myuniquesourceid23443');
+Square1 = [0 255 0];
+Square2 = [0 0 255];
 
-disp('Opening an outlet...');
-outlet = lsl_outlet(info);
-%}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Square1 = [0 255 0];
+Square2 = [0 0 0];  
 
-try
-    %{
-    disp('click for stuff')
-    Screen('FillRect',w, grey);
-    Screen('DrawText', w, 'Click mouse to prep photodiode stimulation', wW/2-100, wH/2, black);
-    clickedTime = Screen('Flip', w);
-    while 1
-       [mx, my, buttons]=GetMouse(screenNumber);
-       if find(buttons)
-            while any(buttons)
-                [mx, my, buttons]=GetMouse(screenNumber);
-            end
-            Screen('FillRect',w, black);
-            tic
-            clickedTime = Screen('Flip', w);
-            toc
-            break
-        end 
+checkerboard = repmat(eye(2),checkernumSize , checkernumSize,4);
+%checkerboard = checkerboard .* 255;
 
-    end
-    %This will wait for 30 seconds after the user clicks and then blink a white
-    %square in the bottom right and send an event marker over lsl
-    %The purpose of this is to enable syncing up the data when there is a
-    %photodiode in place so that we can line up the event markers with their
-    %proper timestamp in the data
-    mrk = 100
-    Screen('FillRect',w, white,myrect);
-    toc
-    rectTime = Screen('Flip', w,clickedTime + 30);
-    toc
-    outlet.push_sample(mrk);
-    toc
-    %}
-    %
-    %We will then turn the screen grey and wait for a click before starting the
-    %experiment in order to give time for the user to get the headband properly
-    %situated
-    Screen('FillRect',w, grey);
-    Screen('DrawText', w, 'Click mouse to start session', wW/2-100, wH/2, black);
-    endtrial = Screen('Flip', w);
+checkerboard2 = abs(1-checkerboard);
+for i = 1:3
 
-    while 1
-       [mx, my, buttons]=GetMouse(screenNumber);
-       if find(buttons)
-            while any(buttons)
-                [mx, my, buttons]=GetMouse(screenNumber);
-            end
-            Screen('FillRect',w, grey);
-            mrk = 99;
-            endtrial = Screen('Flip', w);
-            outlet.push_sample(mrk);
-            break
-        end 
-
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    %Now we start the expriment
-    for i = 1:numTrials
-        %Put oval on Screen
-        indexHz = mod(orderList(i),2)+1
-        indexlr = mod(lrList(i),2)+1
-        Screen('DrawTexture', w, imagetexs(indexHz));
-        mrk = indexHz*100 + indexlr*10;%left = 100 , right = 200,
-        tfixation_onset = Screen('Flip', w,endtrial -slack + timeBeforeOnset);
-        outlet.push_sample(mrk);
-        %Select and load the correct image and event marker based on the
-        %predefined probability of the first class. Each selection will
-        %slightly change the probability in order to prevent a run with only 1
-        %type of event
-        %{
-        num = mod(orderList(i),4) + 1;
-        Hz = choices(num);
-        mrk = Hz;
-        %}
-        if indexHz == indexlr
-            lr = [1 2];
-        else
-            lr = [2 1];
-        end
-        tfixation_onset = Screen('Flip', w,tfixation_onset - slack + arrowBuffer);
-        mrk = mrk + 1;%left = 101 right = 201
-        efficientChoice(w,wRect,Hz,Trialslength,imagetexs(indexHz),outlet,mrk,lr);
-        %Put Picture on Screen 3 seconds after oval (adjust for slack)
-        %Imediately send the corresponding event marker afterwards
-        
-        
-        Screen('FillRect',w, grey);
-        endtrial = Screen('Flip', w);
-        %This is supposed to exit the loop if the user clicks, but it does not
-        %work
-        if(mod(i,3) == 0)
-            Screen('FillRect',w, grey);
-            endtrial = Screen('Flip', w, endtrial + 4);
+    for j = 1:checkernumSize*2
+         for k = 1:checkernumSize*2
+             if checkerboard(j,k,i) ==1
+                 checkerboard(j,k,i) = Square1(i);
+                 checkerboard2(j,k,i) = Square2(i);
+                 
+             else
+                 checkerboard2(j,k,i) = Square1(i);
+                 checkerboard(j,k,i) = Square2(i);
+                 
+             end
             
-        end
-
-    end
-    %At the end of the experiment, this will turn the screen grey and wait for
-    %the user click, then 10 seconds later it will flash another white square
-    %for photodiode validation
-    Screen('FillRect',w, grey);
-    Screen('DrawText', w, 'Click mouse when ready for end stimulation', wW/2, wH/2, black);
-    mrk = 299;
-    endtrial = Screen('Flip', w,endtrial + 5);
-    outlet.push_sample(mrk);
-
-    while 1
-       [mx, my, buttons]=GetMouse(screenNumber);
-       if find(buttons)
-            while any(buttons)
-                [mx, my, buttons]=GetMouse(screenNumber);
-            end
-            Screen('FillRect',w, black);
-            clickedTime = Screen('Flip', w);
-            break
-        end 
-
+        
+        
+         end
     end
 
-
-
-
-
-    % Now we have drawn to the screen we wait for a keyboard button press (any
-    % key) to terminate the demo.
-catch
-
-    sca;
-    ShowCursor;
-    Priority(0);
-    
-    % Restore preferences
-    %Screen('Preference', 'VisualDebugLevel', oldVisualDebugLevel);
-    %Screen('Preference', 'SuppressAllWarnings', oldSupressAllWarnings);
-    
-    psychrethrow(psychlasterror);
 end
 
+   
+checkerboard(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker;  
+checkerboard2(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker; 
 
-% Clear the screen.
-%}
+
+
+
+windowrect = [];
+
+
+% Wait until user releases keys on keyboard:
+KbReleaseWait;
+
+
+screenid = max(Screen('Screens'));
+
+try
+    % Open 'windowrect' sized window on screen, with black [0] background color:
+    [window, windowRect] = Screen('OpenWindow', screenid, 0 );
+    
+
+
+    % Make the checkerboard into a texure (4 x 4 pixels)
+    checkerTexture(1) = Screen('MakeTexture', window, checkerboard);
+    checkerTexture(2) = Screen('MakeTexture', window, checkerboard2);
+    
+    [xCenter, yCenter] = RectCenter(windowRect);
+    [wW,wH] = Screen('WindowSize', window)
+    [s1, s2] = size(checkerboard);
+    dstRectOG = [0 0 wW/3 wH/2 ] ;
+     
+    dstRect1 = CenterRectOnPointd(dstRectOG, xCenter * .5, yCenter);
+    dstRect2 = CenterRectOnPointd(dstRectOG, xCenter  * 1.5 , yCenter);
+    dstRect = [dstRect1; dstRect2];
+    
+    % Open movie file:
+    movie = Screen('OpenMovie', window, moviename,0,-1);
+    movie2 = Screen('OpenMovie', window, moviename2,0,-1);
+    
+    % Start playback engine:
+    
+    
+    
+   
+    % Query the frame duration
+    ifi = Screen('GetFlipInterval', window);
+    slack = ifi/2;
+    checkFlipTimeSecs = 1/Hz(1);
+    checkFlipTimeFrames = round(checkFlipTimeSecs / ifi);
+    checkFlipTimeSecs2 = 1/Hz(2);
+    checkFlipTimeFrames2 = round(checkFlipTimeSecs2 / ifi);
+
+    % Get the centre coordinate of the window
+
+    
+
+    % Set up alpha-blending for smooth (anti-aliased) lines
+    Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+
+    % Draw the checkerboard texture to the screen. By default bilinear
+    % filtering is used. For this example we don't want that, we want nearest
+    % neighbour so we change the filter mode to zero
+    filterMode = 0;
+
+    % Time to wait in frames for a flip
+    waitframes = 1;
+
+    % Texture cue that determines which texture we will show
+
+    % Sync us to the vertical retrace
+    topPriorityLevel = MaxPriority(window);
+    Priority(topPriorityLevel);
+    vbl = Screen('Flip', window);
+    my1 = tic;
+    my2 = tic;
+    t = toc;
+    numTimes = Hz(1) * time;
+    p = 0;
+    textureCue = [1 2];
+    textureCue2 = [1 2];
+    frameCounter = 0;
+    frameCounter2 = 0;
+    Screen('PlayMovie', movie, 1);
+    Screen('PlayMovie', movie2, 1);
+    tex2 = Screen('GetMovieImage', window, movie2,1,0); 
+    tex = Screen('GetMovieImage', window, movie,1,0); 
+    ltex = tex;
+    ltex2 = tex2;
+    texFlip = 0;
+    while p<numTimes && ~KbCheck
+                
+           tex2 = Screen('GetMovieImage', window, movie2,0,0);        
+  
+           tex = Screen('GetMovieImage', window, movie,0,0);
+          
+
+            
+           if tex>0
+
+                Screen('DrawTexture', window, tex,[],dstRect(1,:) );
+                ltex = tex;
+           else 
+                Screen('DrawTexture', window, ltex,[],dstRect(1,:) );
+           end
+                
+            
+           if tex2>0
+
+                Screen('DrawTexture', window, tex2,[],dstRect(2,:) );
+                ltex2 = tex2;
+           else 
+                Screen('DrawTexture', window, ltex2,[],dstRect(2,:) );
+           end
+
+
+            frameCounter = frameCounter + waitframes;
+            frameCounter2 = frameCounter2 + waitframes;
+            % Draw our texture to the screen
+            Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect(1,:), 0, filterMode);
+            Screen('DrawTexture', window, checkerTexture(textureCue2(1)),[],dstRect(2,:), 0, filterMode);
+
+            % Flip to the screen
+            vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
+
+
+            % Reverse the texture cue to show the other polarity if the time is up
+            if frameCounter >= checkFlipTimeFrames
+                 p = p+1;
+                 toc(my1)
+                 my1 = tic;
+                 textureCue = fliplr(textureCue);
+                 
+                 frameCounter = 0;
+                 texFlip= ~texFlip;
+            end
+
+            if frameCounter2 >= checkFlipTimeFrames2
+                 toc(my2)
+                 my2 = tic;
+                 textureCue2 = fliplr(textureCue2);
+                 frameCounter2 = 0;
+            end
+    end
+
+
+     
+    
+    % Stop playback:
+    Screen('PlayMovie', movie, 0);
+    
+    % Close movie:
+    Screen('CloseMovie', movie);
+    
+    Screen('PlayMovie', movie2, 0);
+    
+    % Close movie:
+    Screen('CloseMovie', movie2);
+    
+    % Close Screen, we're done:
+  
+    
+catch %#ok<CTCH>
+    sca;
+    psychrethrow(psychlasterror);
+end
 KbStrokeWait;
 sca;
-
-
-
-
 
 
 

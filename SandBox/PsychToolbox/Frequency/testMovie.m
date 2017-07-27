@@ -1,4 +1,5 @@
-  AssertOpenGL;
+%%This script will play a movie with an overlayed checkboard.
+AssertOpenGL;
 PsychDefaultSetup(2);  
 AssertOpenGL;
 %Undo Warnings
@@ -8,13 +9,13 @@ oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
 
-moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/innocuous.mp4' ];
-moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/dot.mp4' ];
-Hz = 1.9*2 ;
+moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass.mp4'];
+moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass.mp4' ]; 
+Hz = 10   
 time = 200;
 transparencyChecker = 100 ;
 
-  
+   
 windowrect = [];
 
 
@@ -31,14 +32,39 @@ try
     
     
     
-    
-    checkerboard = repmat(eye(2), 3, 3,4);
-    checkerboard = checkerboard .* 255;
+  checkernumSize = 6 ; 
 
-    checkerboard2 = abs(255-checkerboard);
-    
-    checkerboard(:,:,4) = zeros(6,6) +transparencyChecker; 
-    checkerboard2(:,:,4) = zeros(6,6) +transparencyChecker; 
+    Square1 = [150 0  0];
+    Square2 = [0 0 0];
+
+
+    checkerboard = repmat(eye(2),checkernumSize , checkernumSize,4);
+    %checkerboard = checkerboard .* 255;
+
+    checkerboard2 = abs(1-checkerboard);
+    for i = 1:3
+
+        for j = 1:checkernumSize*2
+             for k = 1:checkernumSize*2
+                 if checkerboard(j,k,i) ==1
+                     checkerboard(j,k,i) = Square1(i);
+                     checkerboard2(j,k,i) = Square2(i);
+
+                 else
+                     checkerboard2(j,k,i) = Square1(i);
+                     checkerboard(j,k,i) = Square2(i);
+
+                 end
+
+
+
+             end
+        end
+
+    end
+
+    checkerboard(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker;  
+     checkerboard2(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker; 
 
     % Make the checkerboard into a texure (4 x 4 pixels)
     checkerTexture(1) = Screen('MakeTexture', window, checkerboard);
@@ -52,7 +78,7 @@ try
     % Start playback engine:
     
     
-    
+     
    
     % Query the frame duration
     ifi = Screen('GetFlipInterval', window);
@@ -77,19 +103,19 @@ try
     dstRect = CenterRectOnPointd(dstRect, xCenter, yCenter);
 
     % Draw the checkerboard texture to the screen. By default bilinear
-    % filtering is used. For this example we don't want that, we want nearest
+    % filtering is used. For this   example we don't want that, we want nearest
     % neighbour so we change the filter mode to zero
     filterMode = 0;
 
     % Time to wait in frames for a flip
-    waitframes = 1;
+    waitframes = 2;
 
     % Texture cue that determines which texture we will show
     textureCue = [1 2];
     first = 1
     % Sync us to the vertical retrace
     topPriorityLevel = MaxPriority(window);
-    Priority(topPriorityLevel);
+    Priority(topPriorityLevel); 
     vbl = Screen('Flip', window);
     tic
     t = toc;
@@ -98,41 +124,44 @@ try
     frameCounter = 0;
     Screen('PlayMovie', movie2, 1);
     tex = Screen('GetMovieImage', window, movie2,1,0); 
+    ltex = tex
     while p<numTimes  && ~KbCheck
 
             % Increment the counter
-            frameCounter = frameCounter + waitframes;
-            
-            if first
-                
-                tex = Screen('GetMovieImage', window, movie2,0,0);
-                
-                
-            else
-                
-                tex = Screen('GetMovieImage', window, movie,0,0);
-                
-                
-            end
-            
-            
-            if toc > 10 && first
-                first = 0; 
-                Screen('PlayMovie', movie2, 0);
-    
-                % Close movie:
-                Screen('CloseMovie', movie2);
-    
-                Screen('PlayMovie', movie, 1);
-                
-                
-            end
-            
-            if tex>0
-            % We're done, break out of loop 
+           frameCounter = frameCounter + waitframes;
+           if first 
 
-                Screen('DrawTexture', window, tex,[],dstRect );
-            end
+              tex = Screen('GetMovieImage', window, movie2,0,0);
+ 
+
+           else
+
+              tex = Screen('GetMovieImage', window, movie,0,0);
+
+
+           end
+
+
+           if toc > 10 && first
+                    first = 0; 
+              Screen('PlayMovie', movie2, 0);
+
+                    % Close movie:
+              Screen('CloseMovie', movie2);
+
+              Screen('PlayMovie', movie, 1);
+
+
+           end
+
+           if tex>0
+
+               Screen('DrawTexture', window, tex,[],dstRect );
+               ltex = tex;
+           else 
+                Screen('DrawTexture', window, ltex,[],dstRect );
+           end
+
 
             % Draw our texture to the screen
             Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect, 0, filterMode);

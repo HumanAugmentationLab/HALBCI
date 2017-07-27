@@ -1,10 +1,18 @@
+%%This demo will allow the user to specify when certain markers are sent
+%%out. it first get the keyboard mapping by asking the user to press the
+%%desired keys. After some photodiode calibration time that uses a small
+%%square in the bottom right of the screen (will most likely mess up for
+%%different resolutions), the porgram will give the user a certainamount of
+%%kepresses that will send stimulations over lsl.
+
 % Clear the workspace and the screen and set the variables
 sca;
 close all;
 clearvars;
-numTrials = 5;
-Trialslength = 5;
-timeBeforeOnset = 1;%time between trials
+%This is code specific to my computer because my ubuntu won't add a path on
+%startup
+addpath(genpath('/home/gsteelman/Desktop/Summer Research/labstreaminglayer/LSL/liblsl-Matlab'));
+numTimes = 50;
 
 % Here we call some defaulhelpt settings for setting up Psychtoolbox
 PsychDefaultSetup(2);
@@ -14,11 +22,11 @@ AssertOpenGL;
 oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
 oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);      
-%}
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Get the screen numbers. This gives us a number for each of the screens
-% attached to our computer.
+% attached to our computer.  
 screens = Screen('Screens'); 
 
 % To draw we select the maximum of these numbers. So in a situation where we
@@ -35,9 +43,9 @@ black = [0 0 0]
 % Do a simply calculation to calculate the luminance value for grey. This
 % will be half the luminace values for white
 grey = white / 2;
-wW = 1920%for my laptop
-wH = 1080
-rSize = 250
+wW = 1720%for my laptop;
+wH = 1080;
+rSize = 500;
 myrect=[wW-rSize wH - rSize wW wH];
 myoval=[wW/2-rSize/2 wH/2-rSize/2 wW/2+rSize/2 wH/2 + rSize/2]; % center dRect on current mouseposition
 
@@ -47,23 +55,25 @@ Screen('TextSize', w ,50);
 
 %define the slack in the system (will be helpful for more accurate event
 %markers) 
-slack = Screen('GetFlipInterval', w)/2
+slack = Screen('GetFlipInterval', w)/2;
 %This next part will find the keyboard indexes of the desired kyes
-Key1 = 'a'
-Key2 = 's'
-Key3 = 'd'
+Key1 = 'a';
+Key2 = 's';
+Key3 = 'd';
+disp('Press the Following Button')
 disp(Key1)
 while 1
        
        if KbCheck
            [keyIsDown,secs,keyCode]=PsychHID('KbCheck');
            [Y, I]=max(keyCode);
-           Key1Num = I
+           Key1Num = I;
            break
         end 
 
-end
+end 
 pause(.5)
+disp('Press the Following Button')
 disp(Key2)
 while 1
 
@@ -76,6 +86,7 @@ while 1
 
 end
 pause(.5)
+disp('Press the Following Button')
 disp(Key3)
 while 1 
 
@@ -84,8 +95,7 @@ while 1
            [Y, I]=max(keyCode);
            Key3Num = I
            break
-        end 
-
+       end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -141,33 +151,33 @@ try
     Screen('FillRect',w, black);
     endtrial = Screen('Flip', w,rectTime + 3);
     %Next it will call KbCheck and send a marker if any of the
-    %predetermined buttons had been pressed
+    %predetermined buttons had been presseda
     
     num = 0
     while 1
        
        if KbCheck
-            [keyIsDown,secs,keyCode]=PsychHID('KbCheck')
+            [keyIsDown,secs,keyCode]=PsychHID('KbCheck');
             num = num+1;
-            if keyCode(Key1) ==1
-                mrk = 10
+            if keyCode(Key1Num) ==1
+                mrk = 149
                 outlet.push_sample(mrk);
                 
-            elseif keyCode(Key2) ==1
-                mrk = 11
+            elseif keyCode(Key2Num) ==1
+                mrk = 151
                 outlet.push_sample(mrk);
                 
                 
                 
-            elseif keyCode(Key3) ==1
-                mrk = 12
+            elseif keyCode(Key3Num) ==1
+                mrk = 150
                 outlet.push_sample(mrk);
                 
                 
                 
             end
             disp('clic')
-            if num > 10
+            if num > numTimes
                 Screen('FillRect',w, black);
                 clickedTime = Screen('Flip', w);
                 break

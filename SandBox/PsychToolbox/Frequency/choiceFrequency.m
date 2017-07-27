@@ -1,4 +1,7 @@
-
+%%This Script will display two flashing checkerboards of different
+%%frequencies and point an arrow to one or the other. the order of the
+%%checkerboards (i.e. whether the faster/slower one is on the left or right
+%%will change so the data should not be skewed by eye movements.
 sca;
 close all;
 clearvars;
