@@ -24,7 +24,7 @@ pop_selectcomps(ieaz2, [1:8]) % manually check ICs
 seaz2 = pop_subcomp(ieaz2) % subtract select ICs and save as new data set
 
 %% Epoch
-neaz2 = pop_epoch(seaz2, {'101', '201'}, [0 9]); %epoch by events '101' '201' from 0 to 9 s
+neaz2 = pop_epoch(ieaz2, {'101', '201'}, [0 9]); %epoch by events '101' '201' from 0 to 9 s
 left6hz2 = pop_selectevent(neaz2, 'type', '101'); % select '101' epochs
 right10hz2 = pop_selectevent(neaz2, 'type', '201'); % select '201' epochs
 
