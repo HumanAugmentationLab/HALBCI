@@ -1,4 +1,4 @@
-% Select screen for display of movie:
+  % Select screen for display of movie:
 %%This script will play a movie with an overlayed checkboard.
 AssertOpenGL;
 PsychDefaultSetup(2);  
@@ -14,9 +14,9 @@ oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
 moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass2.mp4' ];
 moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGswim2.mp4' ];
-Hz = [10  15];
+Hz = [10  15];  
 time = 200;
-transparencyChecker = 100;
+transparencyChecker = 75;
 checkernumSize = 2; 
 
 
@@ -30,7 +30,7 @@ Square2 = [0 255 0  ];
 Square1 = [0 255 0];
 Square2 = [0 0 255];
 
-Square1 = [0 255 0];
+Square1 = [255 255 255  ];
 Square2 = [0 0 0];  
 
 checkerboard = repmat(eye(2),checkernumSize , checkernumSize,4);
@@ -133,7 +133,7 @@ try
     vbl = Screen('Flip', window);
     my1 = tic;
     my2 = tic;
-    t = toc;
+  
     numTimes = Hz(1) * time;
     p = 0;
     textureCue = [1 2];
@@ -150,50 +150,35 @@ try
     while p<numTimes && ~KbCheck
                 
            tex2 = Screen('GetMovieImage', window, movie2,0,0);        
-  
            tex = Screen('GetMovieImage', window, movie,0,0);
-          
-
-            
            if tex>0
-
                 Screen('DrawTexture', window, tex,[],dstRect(1,:) );
                 ltex = tex;
            else 
                 Screen('DrawTexture', window, ltex,[],dstRect(1,:) );
            end
-                
-            
            if tex2>0
-
                 Screen('DrawTexture', window, tex2,[],dstRect(2,:) );
                 ltex2 = tex2;
            else 
                 Screen('DrawTexture', window, ltex2,[],dstRect(2,:) );
            end
-
-
             frameCounter = frameCounter + waitframes;
             frameCounter2 = frameCounter2 + waitframes;
             % Draw our texture to the screen
             Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect(1,:), 0, filterMode);
             Screen('DrawTexture', window, checkerTexture(textureCue2(1)),[],dstRect(2,:), 0, filterMode);
-
             % Flip to the screen
             vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
-
-
-            % Reverse the texture cue to show the other polarity if the time is up
+           % Reverse the texture cue to show the other polarity if the time is up
             if frameCounter >= checkFlipTimeFrames
                  p = p+1;
                  toc(my1)
                  my1 = tic;
-                 textureCue = fliplr(textureCue);
-                 
+                 textureCue = fliplr(textureCue);  
                  frameCounter = 0;
                  texFlip= ~texFlip;
             end
-
             if frameCounter2 >= checkFlipTimeFrames2
                  toc(my2)
                  my2 = tic;

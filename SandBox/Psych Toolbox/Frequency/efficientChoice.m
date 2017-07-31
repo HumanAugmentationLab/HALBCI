@@ -37,7 +37,7 @@ function [  ] = efficientChoice(  window,windowRect,Hz,time,extraImage,outlet,mr
     filterMode = 0;
 
     % Time to wait in frames for a flip
-    waitframes = 2;
+    waitframes = 1;
 
     % Texture cue that determines which texture we will show
     textureCue = [1 2];
@@ -48,13 +48,13 @@ function [  ] = efficientChoice(  window,windowRect,Hz,time,extraImage,outlet,mr
     Priority(topPriorityLevel);
     Screen('DrawTexture', window, extraImage);
     vbl = Screen('Flip', window);
-    my1 = tic
-    my2 = tic
+    my1 = tic;
+    my2 = tic;
     numTimes = Hz(1) * time;
-    p = 0
-    checkFlipTimeSecs = 1/Hz(1)
+    p = 0;
+    checkFlipTimeSecs = 1/Hz(1);
     checkFlipTimeFrames = round(checkFlipTimeSecs / ifi);
-    checkFlipTimeSecs2 = 1/Hz(2)
+    checkFlipTimeSecs2 = 1/Hz(2);
     checkFlipTimeFrames2 = round(checkFlipTimeSecs2 / ifi);
     outlet.push_sample(mrk);
     while p<numTimes && ~KbCheck
@@ -73,20 +73,20 @@ function [  ] = efficientChoice(  window,windowRect,Hz,time,extraImage,outlet,mr
         Screen('DrawTexture', window, extraImage);
 
         % Flip to the screen
-        vbl = Screen('Flip', window, vbl + (waitframes - 1.5) * ifi);
+        vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
 
 
         % Reverse the texture cue to show the other polarity if the time is up
         if frameCounter >= checkFlipTimeFrames
              p = p+1;
-             toc(my1)
+             %toc(my1)
              my1 = tic;
              textureCue = fliplr(textureCue);
              frameCounter = 0;
         end
         
         if frameCounter2 >= checkFlipTimeFrames2
-             toc(my2)
+             %toc(my2)
              my2 = tic;
              textureCue2 = fliplr(textureCue2);
              frameCounter2 = 0;

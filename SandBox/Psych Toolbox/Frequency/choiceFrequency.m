@@ -3,15 +3,16 @@
 %%checkerboards (i.e. whether the faster/slower one is on the left or right
 %%will change so the data should not be skewed by eye movements.
 sca;
-close all;
+  
 clearvars;
-numTrials = 6;
-Trialslength = 5;
+lslBool = 1;
+numTrials = 35;
+Trialslength = 10;    
 timeBeforeOnset = .8;%time between trials
 extraTime = 4;
 arrowBuffer = .2;
 %repetitions = 1;%This is how many times the audio file should repeat(No reason to be more than 1)
-Hz = [1 15];
+Hz = [8 15];
 orderList = linspace(1,numTrials,numTrials);%randperm(numTrials);
 lrList = randperm(numTrials);
 choices = [1 2];
@@ -72,14 +73,16 @@ slack = Screen('GetFlipInterval', w)/2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %this part loads the lsl outlet so that it may send out markers
 %
-disp('Loading library...');
-lib = lsl_loadlib();
+if lslBool
+    disp('Loading library...');
+    lib = lsl_loadlib();
 
-disp('Creating a new marker stream info...');
-info = lsl_streaminfo(lib,'PsychMarkers','Markers',1,0,'cf_int32','myuniquesourceid23443');
+    disp('Creating a new marker stream info...');
+    info = lsl_streaminfo(lib,'PsychMarkers','Markers',1,0,'cf_int32','myuniquesourceid23443');
 
-disp('Opening an outlet...');
-outlet = lsl_outlet(info);
+    disp('Opening an outlet...');
+    outlet = lsl_outlet(info);
+end
 %}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -120,6 +123,7 @@ try
     %We will then turn the screen grey and wait for a click before starting the
     %experiment in order to give time for the user to get the headband properly
     %situated
+   
     Screen('FillRect',w, grey);
     Screen('DrawText', w, 'Click mouse to start session', wW/2-100, wH/2, black);
     endtrial = Screen('Flip', w);
@@ -133,7 +137,9 @@ try
             Screen('FillRect',w, grey);
             mrk = 99;
             endtrial = Screen('Flip', w);
-            outlet.push_sample(mrk);
+            if lslBool
+                outlet.push_sample(mrk);
+            end
             break
         end 
 
@@ -143,14 +149,17 @@ try
     %Now we start the expriment
     for i = 1:numTrials
         %Put oval on Screen
-        indexHz = mod(orderList(i),2)+1
-        indexlr = mod(lrList(i),2)+1
-        Screen('DrawTexture', w, imagetexs(indexHz));
-        mrk = indexHz*100 + indexlr*10;%left = 100 , right = 200,
+        indexHz = mod(orderList(i),2)+1;
+        indexlr = mod(lrList(i),2)+1;
+        arrowdir = abs(indexHz - indexlr)+1;  
+        Screen('DrawTexture', w, imagetexs(arrowdir));
+        mrk = indexHz*100 + arrowdir*10%left = 100 , right = 200,, arrow left = 10, arrow right = 20s
         tfixation_onset = Screen('Flip', w,endtrial -slack + timeBeforeOnset);
-        outlet.push_sample(mrk);
+        if lslBool
+            outlet.push_sample(mrk);
+        end
         %Select and load the correct image and event marker based on the
-        %predefined probability of the first class. Each selection will
+        %predefined p robability of the first class. Each selection will
         %slightly change the probability in order to prevent a run with only 1
         %type of event
         %{
@@ -158,15 +167,15 @@ try
         Hz = choices(num);
         mrk = Hz;
         %}
-        if indexHz == indexlr
+        if 1 == indexlr
             lr = [1 2];
         else
             lr = [2 1];
         end
         tfixation_onset = Screen('Flip', w,tfixation_onset - slack + arrowBuffer);
         mrk = mrk + 1;%left = 101 right = 201
-        efficientChoice(w,wRect,Hz,Trialslength,imagetexs(indexHz),outlet,mrk,lr);
-        %Put Picture on Screen 3 seconds after oval (adjust for slack)
+        efficientChoice(w,wRect,Hz,Trialslength,imagetexs(arrowdir),outlet,mrk,lr);
+        %Put Picture on Screen 3 seconds after oval (adjust for  slack)
         %Imediately send the corresponding event marker afterwards
         
         
@@ -179,6 +188,9 @@ try
             endtrial = Screen('Flip', w, endtrial + 4);
             
         end
+        if  KbCheck
+            break
+        end
 
     end
     %At the end of the experiment, this will turn the screen grey and wait for
@@ -188,7 +200,9 @@ try
     Screen('DrawText', w, 'Click mouse when ready for end stimulation', wW/2, wH/2, black);
     mrk = 299;
     endtrial = Screen('Flip', w,endtrial + 5);
-    outlet.push_sample(mrk);
+    if lslBool
+        outlet.push_sample(mrk);
+    end
 
     while 1
        [mx, my, buttons]=GetMouse(screenNumber);
@@ -218,7 +232,7 @@ catch
     % Restore preferences
     %Screen('Preference', 'VisualDebugLevel', oldVisualDebugLevel);
     %Screen('Preference', 'SuppressAllWarnings', oldSupressAllWarnings);
-    
+                                           
     psychrethrow(psychlasterror);
 end
 

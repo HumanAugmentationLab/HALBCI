@@ -1,7 +1,6 @@
 %%This script will play a movie with an overlayed checkboard.
 AssertOpenGL;
 PsychDefaultSetup(2);  
-AssertOpenGL;
 %Undo Warnings
 %
 oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
@@ -143,13 +142,19 @@ try
 
 
            if toc > 10 && first
-                    first = 0; 
+              first = 0; 
+              timeindex = Screen('GetMovieTimeIndex', movie2);
+              disp('Time Index:')
+              disp(timeindex)
               Screen('PlayMovie', movie2, 0);
 
                     % Close movie:
               Screen('CloseMovie', movie2);
 
               Screen('PlayMovie', movie, 1);
+              [oldtimeindex] = Screen('SetMovieTimeIndex', movie, timeindex);
+              disp('Time Index:') 
+              disp(oldtimeindex)
 
 
            end

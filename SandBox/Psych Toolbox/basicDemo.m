@@ -9,6 +9,7 @@
 sca;
 close all;
 clearvars;
+soundBool = 0; 
 numTrials = 5;
 Trialslength = 5;
 timeBeforeOnset = 1;%time between trials
@@ -31,7 +32,7 @@ oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 screens = Screen('Screens');
 
 % To draw we select the maximum of these numbers. So in a situation where we
-% have two screens attached to our monitor we will draw to the external
+% have two screens attached to our monitor we will draw to the external 
 % screen.
 screenNumber = max(screens);
 
@@ -40,10 +41,14 @@ screenNumber = max(screens);
 % between. All values in Psychtoolbox are defined between 0 and 1
 white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);
+if isunix
+    white = [255 255 255]
+    black = [0 0 0]
+end
 
 % Do a simply calculation to calculate the luminance value for grey. This
 % will be half the luminace values for white
-grey = white / 2;
+grey = white ./ 2;
 
 % Open an on screen window using PsychImaging and color it grey.
 [w, wRect] = Screen('OpenWindow', 0, 0)
@@ -55,12 +60,20 @@ slack = Screen('GetFlipInterval', w)/2
 %define the image files and conver them to the appropriate format
 
 myimgfile = ['..\Media\openEyes.jpg'];
+if isunix
+    myimgfile = ['../Media/openEyes.jpg'];
+    
+end
 fprintf('Using image ''%s''\n', myimgfile);
 imdata=imread(myimgfile);
 imagetexOpen=Screen('MakeTexture', w, imdata);
 
 
 myimgfile = ['..\Media\closedEyes.jpg'];
+if isunix
+    myimgfile = ['../Media/closedEyes.jpg'];
+    
+end
 
 fprintf('Using image ''%s''\n', myimgfile);
 imdata=imread(myimgfile);
@@ -105,7 +118,13 @@ end
 %InitializePsychSound;
 %[pahandle,wavedata] = loadSound(['/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/Media/default_ding.wav']);
 InitializePsychSound;
-[pahandle,wavedata] = loadSound(['..\Media\default_ding.wav']);
+soundFile = ['..\Media\default_ding.wav']
+if isunix
+    soundFile = ['../Media/default_ding.wav']
+end
+if ~exist('pahandle') && soundBool
+    [pahandle,wavedata] = loadSound(soundFile);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %this part loads the lsl outlet so that it may send out markers
@@ -117,6 +136,7 @@ info = lsl_streaminfo(lib,'PsychMarkers','Markers',1,0,'cf_int32','myuniquesourc
 
 disp('Opening an outlet...');
 outlet = lsl_outlet(info);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %This part is just a buffer screen to wait for the user to click when
 %ready
@@ -209,12 +229,12 @@ try
         toc
         disp('Person')
         %Load the audio into the buffer for fast playing
-        PsychPortAudio('FillBuffer', pahandle, wavedata);
+        if soundBool; PsychPortAudio('FillBuffer', pahandle, wavedata); end
 
         %End Picture and send Audio and event marker
         mrk = 170
         
-        PsychPortAudio('Start', pahandle, repetitions, stim_onset + Trialslength, 1);
+        if soundBool; PsychPortAudio('Start', pahandle, repetitions, stim_onset + Trialslength, 1); end
         Screen('FillRect',w, black);
         toc
         endtrial = Screen('Flip', w,stim_onset + Trialslength);
@@ -271,7 +291,7 @@ end
 
 
 % Clear the screen.
-PsychPortAudio('Close', pahandle);
+if soundBool; PsychPortAudio('Close', pahandle); end
 %}
 KbStrokeWait;
 sca;

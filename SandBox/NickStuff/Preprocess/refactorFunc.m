@@ -9,27 +9,29 @@ function [ mydata ] = refactorFunc( mydata, minoff,maxoff,epoch)
     rate = srate * epoch
     answer = cell(3)
     t = 1
-    Stim1 = '101'
-    Stim2 = '201'
+    Stim1 = {'111' '211' '121' '221'}
+    Stim2 = {'121' '221'}
     for i = 1:length(mydata.event)
-        if strcmp(mydata.event(i).type,Stim1) 
+        if max(strcmp(mydata.event(i).type,Stim1))
             for j = minoff * srate:rate:maxoff*srate
-                answer{1,t} = Stim1;
+                answer{1,t} = char(mydata.event(i).type);
                 answer{2,t} = j+mydata.event(i).latency;
                 answer{3,t} = t;
                 t = t+1;
             end
-
+        end
+        %{
         elseif strcmp(mydata.event(i).type,Stim2)
 
             for j = minoff * srate:rate:maxoff*srate
-                answer{1,t} = Stim2;
+                answer{1,t} = char(mydata.event(i).type);
                 answer{2,t} = j+mydata.event(i).latency;
                 answer{3,t} = t;
                 t = t+1
             end
 
         end
+        %}
     end
     %I copied this code from another so am not 100% sure it works in
     %context. it is supposed to convert the data into the right format

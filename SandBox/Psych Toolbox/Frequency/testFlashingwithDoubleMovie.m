@@ -14,10 +14,23 @@ oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
 moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass2.mp4' ];
 moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGswim2.mp4' ];
-Hz = [.1  .1];
+Hz = [1 15];  
 time = 200;
-transparencyChecker = 100;
+transparencyChecker = 75;
 checkernumSize = 2; 
+lslBool = 1
+
+
+if lslBool
+    disp('Loading library...');
+    lib = lsl_loadlib();
+
+    disp('Creating a new marker stream info...');
+    info = lsl_streaminfo(lib,'PsychMarkers','Markers',1,0,'cf_int32','myuniquesourceid23443');
+
+    disp('Opening an outlet...');
+    outlet = lsl_outlet(info);
+end
 
 
   
@@ -30,7 +43,7 @@ Square2 = [0 255 0  ];
 Square1 = [0 255 0];
 Square2 = [0 0 255];
 
-Square1 = [0 255 0];
+Square1 = [255 255 255  ];
 Square2 = [0 0 0];  
 
 checkerboard = repmat(eye(2),checkernumSize , checkernumSize,4);
@@ -60,7 +73,7 @@ end
 
    
 checkerboard(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker;  
-   checkerboard2(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker; 
+checkerboard2(:,:,4) = zeros(checkernumSize*2,checkernumSize*2) +transparencyChecker; 
 
 
 
@@ -94,8 +107,8 @@ try
     dstRect = [dstRect1; dstRect2];
     
     % Open movie file:
-    movie = Screen('OpenMovie', window, moviename);
-    movie2 = Screen('OpenMovie', window, moviename2);
+    movie = Screen('OpenMovie', window, moviename,0,-1);
+    movie2 = Screen('OpenMovie', window, moviename2,0,-1);
     
     % Start playback engine:
     
@@ -123,7 +136,7 @@ try
     filterMode = 0;
 
     % Time to wait in frames for a flip
-    waitframes = 2;
+    waitframes = 1;
 
     % Texture cue that determines which texture we will show
 
@@ -135,24 +148,33 @@ try
     my2 = tic;
     t = toc;
     numTimes = Hz(1) * time;
-    p = 0;
+    p = 1;
     textureCue = [1 2];
     textureCue2 = [1 2];
     frameCounter = 0;
-    frameCounter2 = 0;
-    Screen('PlayMovie', movie, 1);
-    Screen('PlayMovie', movie2, 1);
+    frameCounter2 = 0;  
+    Screen('PlayMovie', movie, 1,1);
+    Screen('PlayMovie', movie2, 1,1);
     tex2 = Screen('GetMovieImage', window, movie2,1,0); 
     tex = Screen('GetMovieImage', window, movie,1,0); 
     ltex = tex;
     ltex2 = tex2;
     texFlip = 0;
+    numTimes = 1000  
     while p<numTimes && ~KbCheck
                 
            tex2 = Screen('GetMovieImage', window, movie2,0,0);        
   
            tex = Screen('GetMovieImage', window, movie,0,0);
-          
+           if mod(p,20) == 0
+               Hz(1) = Hz(1) + 1;
+               Hz(2) = Hz(2) + 1;
+                   checkFlipTimeSecs = 1/Hz(1);
+                checkFlipTimeFrames = round(checkFlipTimeSecs / ifi);
+                checkFlipTimeSecs2 = 1/Hz(2);
+                checkFlipTimeFrames2 = round(checkFlipTimeSecs2 / ifi);
+                p = p+1 
+           end
 
             
            if tex>0
@@ -176,8 +198,8 @@ try
             frameCounter = frameCounter + waitframes;
             frameCounter2 = frameCounter2 + waitframes;
             % Draw our texture to the screen
-            %Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect(1,:), 0, filterMode);
-            %Screen('DrawTexture', window, checkerTexture(textureCue2(1)),[],dstRect(2,:), 0, filterMode);
+            Screen('DrawTexture', window, checkerTexture(textureCue(1)),[],dstRect(1,:), 0, filterMode);
+            Screen('DrawTexture', window, checkerTexture(textureCue2(1)),[],dstRect(2,:), 0, filterMode);
 
             % Flip to the screen
             vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
@@ -186,7 +208,7 @@ try
             % Reverse the texture cue to show the other polarity if the time is up
             if frameCounter >= checkFlipTimeFrames
                  p = p+1;
-                 toc(my1)
+                 actualhz(mod(p,20)+1,Hz(1)) = toc(my1);
                  my1 = tic;
                  textureCue = fliplr(textureCue);
                  
@@ -225,6 +247,5 @@ catch %#ok<CTCH>
 end
 KbStrokeWait;
 sca;
-
 
 
