@@ -11,13 +11,15 @@ Stim2 = '149';
 if ~exist('mytempdata','var') && ~exist('mytempdata2','var') && ~exist('mytempdata3','var')
     pathToData = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/W1MuseIntrinsic.xdf';
     pathToData2 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/N3MuseIntrinsic.xdf';
+    pathToData2 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/NickTest2.xdf';
     pathToData3 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/N4MuseIntrinsic.xdf';
+    pathToData3 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/NickTest.xdf';
     traindata = reconfigSNAP(pathToData);
     mytempdata = tryFindStart(traindata,4,0);
     traindata = reconfigSNAP(pathToData2);
     mytempdata2 = tryFindStart(traindata,3,0);
     traindata = reconfigSNAP(pathToData3);
-    mytempdata3 = tryFindStart(traindata,3,0);
+    mytempdata3 = tryFindStart(traindata,4,0);
 end
 
 
@@ -26,13 +28,13 @@ end
 clear trainloss mymodel laststats prediction loss teststats targets myapproach
 t = 1;
 wnds = [];
-for i = -0.5:.1:0.5
+for i = -.5:.1:.5
     wnds(t,1:2) = [i i+.1];
     t = t +1;
 end
 %wnds = [-.25 -0.15;-.15 -.1; -.1 -.5;;0.25 0.3;0.3 0.35;0.35 0.4; 0.4 0.45;0.45 0.5;0.5 0.55;0.55 0.6]
 
-myapproach = {'Windowmeans' 'SignalProcessing', {'EpochExtraction',{'TimeWindow',[-0.5 0.6]}, ...
+myapproach = {'Windowmeans' 'SignalProcessing', {'EpochExtraction',{'TimeWindow',[-.5 .6]}, ...
     'SpectralSelection', 'off', 'ChannelSelection', {{'TP9' 'TP10'}}},...
     'Prediction', {'FeatureExtraction',{'TimeWindows',wnds},'MachineLearning',{'Learner',{'lda'}}}...
              };

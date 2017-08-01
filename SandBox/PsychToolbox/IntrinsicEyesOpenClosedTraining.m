@@ -14,8 +14,8 @@ close all;
 clearvars;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Settings 
-opts.photodiode = false;
-opts.keyboardsetup = true; % Set up keyboard numbers
+opts.photodiode = true;
+opts.keyboardsetup = false; % Set up keyboard numbers
 startdelaytime = 10;
 
 %This next part will find the keyboard indexes of the desired kyes
@@ -170,7 +170,12 @@ try
     if opts.photodiode
         Screen('FillRect',w, white);
         toc
+        
         rectTime = Screen('Flip', w,clickedTime + startdelaytime);
+        outlet.push_sample(mrk);
+        Screen('FillRect',w, white);
+        rectTime = Screen('Flip', w);
+        
         toc
     end
     outlet.push_sample(mrk);
