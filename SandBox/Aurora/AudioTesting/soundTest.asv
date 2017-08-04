@@ -1,0 +1,267 @@
+% load data
+[yy, Fss] = audioread('PneumaticFull.m4a');
+[yy2, Fss2] = audioread('RegularHalf.m4a');
+[yy3, Fss3] = audioread('Test_Final.wav');
+
+% create time
+TT = length(yy)/Fss; %seconds
+tt = 0:(1/Fss):(TT-1/Fss); %time step 
+
+TT2 = length(yy2)/Fss; %seconds
+tt2 = 0:(1/Fss):(TT2-1/Fss); %time step
+
+TT3 = length(yy3)/Fss; %seconds
+tt3 = 0:(1/Fss):(TT3-1/Fss);
+
+% trim signal down, get rid of the first and last signals
+sample = .25;
+dp = (Fss*sample)*8;
+audiowrite('PneumaticFull_New.m4a' ,yy(1+dp:end-dp), Fss);
+audiowrite('RegularHalf_New.m4a', yy2(1+dp:end-dp), Fss2);
+audiowrite('Test_Final_New.m4a', yy3(1+dp:end-dp), Fss3);
+
+% load new data
+[y, Fs] = audioread('PneumaticFull_New.m4a');
+[y2, Fs2] = audioread('RegularHalf_New.m4a');
+[y3, Fs3] = audioread('Test_Final_New.m4a');
+
+% create time
+T = length(y)/Fs; %seconds
+t = 0:(1/Fs):(T-1/Fs); %time step 
+
+T2 = length(y2)/Fs; %seconds
+t2 = 0:(1/Fs):(T2-1/Fs); %time step
+
+T3 = length(y3)/Fs; %seconds
+t3 = 0:(1/Fs):(T3-1/Fs);
+
+% plot
+figure
+subplot(3,1,1);
+plot(t, y, 'r-');
+ylabel('Pneumatic')
+axis([0 (T-1/Fs) -1 1])
+grid on
+
+subplot(3,1,2);
+plot(t2, y2, 'b-');
+ylabel('Regular')
+axis([0 (T-1/Fs) -1 1])
+grid on
+
+subplot(3,1,3);
+plot(t3, y3, 'g-');
+ylabel('Test')
+axis([0 (T-1/Fs) -1 1])
+grid on
+
+%measuring delay between the signals and aligning them
+delay = finddelay(y, y3);
+delay2 = finddelay(y2,y3);
+
+ya = y(-delay:end);
+ya2 = y2(-delay2:end);
+ya3 = y3;
+% ya = alignsignals(y, y3);
+% ya2 = alignsignals(y2, y3);
+
+figure
+ax(1) = subplot(3,1,1);
+plot(ya)
+grid on 
+title('y')
+axis tight
+ax(2) = subplot(3,1,2);
+plot(ya2)
+grid on 
+title('y2')
+axis tight
+ax(3) = subplot(3,1,3); 
+plot(y3)
+grid on 
+title('y3')
+axis tight
+linkaxes(ax,'xy')
+
+%cross correlating the pneumatic recording to the regular recording to see
+%if there is a match
+[C1,lag1] = xcorr(ya,ya3);
+[C2,lag2] = xcorr(ya2,ya3);
+
+figure
+ax(1) = subplot(2,1,1); 
+plot(lag1/Fs,C1,'k')
+ylabel('Amplitude')
+grid on
+title('Cross-correlation between Pneumatic and Test')
+ax(2) = subplot(2,1,2); 
+plot(lag2/Fs,C2,'r')
+ylabel('Amplitude') 
+grid on
+title('Cross-correlation between Regular and Test')
+xlabel('Time(secs)') 
+
+%comparing the frequency content of signals
+[p1,f1] = periodogram(ya,[],[],Fs,'power');
+[p2,f2] = periodogram(ya2,[],[],Fs2,'power');
+
+figure
+te = (0:numel(y)-1)/Fs;
+te2 = (0:numel(y2)-1)/Fs;
+subplot(2,2,1)
+plot(te,y,'k')
+ylabel('y')
+grid on
+title('Time Series')
+subplot(2,2,3)
+plot(te2,y2)
+ylabel('y2')
+grid on
+xlabel('Time (secs)')
+subplot(2,2,2)
+plot(f1, p1, 'k')
+ylabel('p1')
+grid on
+title('Power Spectrum')
+subplot(2,2,4)
+plot(f2,p2)
+ylabel('p2')
+grid on
+xlabel('Frequency (Hz)')
+
+% %spectral coherance between the signals
+% ya2t = ya2(1:end-77754);
+% [Cxy, f] = mscohere(ya, ya2t, [], [], [], Fs);
+% Pxy = cpsd(ya, ya2t, [], [], [], Fs);
+% phase = -angle(Pxy)/pi*180;
+% [pks, locs] = findpeaks(Cxy, 'MinPeakHeight', 0.75);
+% 
+% figure
+% subplot(2,1,1)
+% plot(f,Cxy)
+% title('Coherence Estimate')
+% grid on
+% hgca = gca;
+% hgca.XTick = f(locs);
+% hgca.YTick = 0.75;
+% axis([0 200 0 1])
+% subplot(2,1,2)
+% plot(f,phase)
+% title('Cross-spectrum Phase (deg)')
+% grid on
+% hgca = gca;
+% hgca.XTick = f(locs); 
+% hgca.YTick = phase(locs);
+% xlabel('Frequency (Hz)')
+% axis([0 200 -180 180])
+
+
+%% going into each signal - 100 Hz
+
+% getting one test from the signal
+sample = .25;
+dp = (Fss*sample)*8;
+audiowrite('100Hz_pneu.m4a' ,y(1:1+dp), Fs);
+audiowrite('100Hz_reg.m4a', y2(1:1+dp), Fs2);
+audiowrite('100Hz_test.m4a', y3(1:1+dp), Fs3);
+
+[y_100, Fs_100] = audioread('100Hz_pneu.m4a');
+[y2_100, Fs2_100] = audioread('100Hz_reg.m4a');
+[y3_100, Fs3_100] = audioread('100Hz_test.m4a');
+
+delay = finddelay(y_100, y3_100);
+delay2 = finddelay(y2_100,y3_100);
+ya_100 = y_100(-delay:end);
+ya2_100 = y2_100(-delay2:end);
+ya3_100 = y3_100;
+
+% create time
+T_100 = length(ya_100)/Fs_100; %seconds
+t_100 = 0:(1/Fs_100):(T_100-1/Fs_100); %time step 
+
+T2_100 = length(ya2_100)/Fs_100; %seconds
+t2_100 = 0:(1/Fs_100):(T2_100-1/Fs_100); %time step 
+
+T3_100 = length(ya3_100)/Fs_100; %seconds
+t3_100 = 0:(1/Fs_100):(T3_100-1/Fs_100); %time step
+
+% plot
+figure
+subplot(3,1,1);
+plot(t_100, ya_100, 'r-');
+ylabel('Pneumatic')
+axis([0 (T_100-1/Fs_100) -1 1])
+grid on
+
+subplot(3,1,2);
+plot(t2_100, ya2_100, 'b-');
+ylabel('Regular')
+axis([0 (T_100-1/Fs_100) -1 1])
+grid on
+
+subplot(3,1,3);
+plot(t3_100, ya3_100, 'g-');
+ylabel('Test')
+axis([0 (T_100-1/Fs_100) -1 1])
+grid on
+
+%cross correlating the pneumatic recording to the regular recording to see
+%if there is a match
+[C1_100,lag1_100] = xcorr(ya_100,ya3_100);
+[C2_100,lag2_100] = xcorr(ya2_100,ya3_100);
+
+figure
+ax(1) = subplot(2,1,1); 
+plot(lag1_100/Fs_100,C1_100,'k')
+ylabel('Amplitude')
+grid on
+title('Cross-correlation between Pneumatic and Test')
+ax(2) = subplot(2,1,2); 
+plot(lag2_100/Fs_100,C2_100,'r')
+ylabel('Amplitude') 
+grid on
+title('Cross-correlation between Regular and Test')
+xlabel('Time(secs)') 
+
+%% going into each signal - 300 Hz
+
+% getting one test from the signal
+sample = .25;
+dp = (Fss*sample)*8;
+audiowrite('100Hz_pneu.m4a' ,y(1+dp:1+(2*dp)), Fs);
+audiowrite('100Hz_reg.m4a', y2(1+dp:1+(2*dp)), Fs2);
+audiowrite('100Hz_test.m4a', y3(1+dp:1+(2*dp)), Fs3);
+
+[y_300, Fs_300] = audioread('100Hz_pneu.m4a');
+[y2_300, Fs2_300] = audioread('100Hz_reg.m4a');
+[y3_300, Fs3_300] = audioread('100Hz_test.m4a');
+
+% create time
+T_300 = length(y_300)/Fs_300; %seconds
+t_300 = 0:(1/Fs_300):(T_300-1/Fs_300); %time step 
+
+T2_300 = length(y2_300)/Fs_300; %seconds
+t2_300 = 0:(1/Fs_300):(T2_300-1/Fs_300); %time step 
+
+T3_300 = length(y3_300)/Fs_300; %seconds
+t3_300 = 0:(1/Fs_300):(T3_300-1/Fs_300); %time step
+
+% plot
+figure
+subplot(3,1,1);
+plot(t_300, y_300, 'r-');
+ylabel('Pneumatic')
+axis([0 (T_300-1/Fs_300) -1 1])
+grid on
+
+subplot(3,1,2);
+plot(t2_300, y2_300, 'b-');
+ylabel('Regular')
+axis([0 (T_300-1/Fs_300) -1 1])
+grid on
+
+subplot(3,1,3);
+plot(t3_300, y3_300, 'g-');
+ylabel('Test')
+axis([0 (T_300-1/Fs_300) -1 1])
+grid on

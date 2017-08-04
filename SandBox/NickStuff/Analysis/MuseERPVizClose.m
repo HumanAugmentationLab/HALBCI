@@ -7,7 +7,8 @@ Stim2 = '149';
 pathToData = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/N3MuseIntrinsic.xdf';
 pathToData2 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/W3IntrinsicSelf.xdf';
 pathToData3 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/W4-Intrinsic.xdf';
-traindata = reconfigSNAP(pathToData);
+pathToData4 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/NickTest2.xdf';
+traindata = reconfigSNAP(pathToData4);
 mytempdata = tryFindStart(traindata,3,0);
 
 figure
@@ -35,11 +36,11 @@ while i <= length(mytempdata.event)
 
     if(strcmp(mytempdata.event(i).type, Stim1))
         currentTime = mytempdata.event(i).latency;
-        currentWindow = realDat(currentTime-mytempdata.srate/2:currentTime+mytempdata.srate/2);
+        currentWindow = realDat(currentTime-mytempdata.srate:currentTime+mytempdata.srate);
         plot(currentWindow - mean(currentWindow),'b')
     elseif(strcmp(mytempdata.event(i).type, Stim2))
         currentTime = mytempdata.event(i).latency;
-        currentWindow2 = realDat(currentTime-+mytempdata.srate/2:currentTime+mytempdata.srate/2);
+        currentWindow2 = realDat(currentTime-mytempdata.srate:currentTime+mytempdata.srate);
         plot(currentWindow2 - mean(currentWindow2),'g')  
     end
     %}

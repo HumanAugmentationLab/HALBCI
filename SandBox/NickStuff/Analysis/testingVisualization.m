@@ -13,17 +13,22 @@
 %mytempdata = exp_eval(traindata)
 addpath(genpath('/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/NickStuff'))
 
-Stim1 = '149';
-Stim2 = '151';
-StimArr = {'149','151','0','200'}
-StimArr2 = {'151','149','0','200'}
-PhotodiodeStimulationChannel = 3;
+Stim1 = {'149' '151'};
+Stim2 = {'151' '149'};
+StimArr = {'149','151','12','0','200'}
+StimArr2 = {'151','149','12','0','200'}
+PhotodiodeStimulationChannel = 4;
 OffsetforPhotodiodeStimulation = 0;
-pathToData = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/N3MuseIntrinsic.xdf';
-
-traindata = reconfigSNAP(pathToData)
+%pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727114720_PatientW1-8v15_Record.easy';
+pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727113703_PatientW1-12v15_Record.easy';
+%pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727112030_PatientW1-15v20_Record.easy';
+pathToData4 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/NickTest.xdf';
+%traindata = io_loadset(pathToData)
+%mytempdata= exp_eval(traindata)
+%mytempdata = refactorFunc(mytempdata,2, 9,3)
+traindata = reconfigSNAP(pathToData4);
 mytempdata = tryFindStart(traindata,PhotodiodeStimulationChannel,OffsetforPhotodiodeStimulation);
-mytempdata = refactorMarkersVariable(mytempdata,0,1,StimArr,StimArr2);
+%mytempdata = refactorMarkersVariable(mytempdata,0,1,StimArr,StimArr2);
 
 
 %mytempdata = refactorFunc(mytempdata);
@@ -51,7 +56,7 @@ for i = 1:length(traindata.event)
 end
 %}
 figure
-realDat = mytempdata.data(3,:).';
+realDat = mytempdata.data(PhotodiodeStimulationChannel,:).';
 %realDat(:,1) = realDat(:,1) - mean(realDat(:,1))
 %realDat(:,2) = realDat(:,2) - mean(realDat(:,2))
 %realDat(:,3) = realDat(:,3) - mean(realDat(:,3))
@@ -73,9 +78,9 @@ while i <= length(mytempdata.event)
     %
     if(strcmp(mytempdata.event(i).type, '100') || strcmp(mytempdata.event(i).type, '200'))
         color = 'magenta';
-    elseif(strcmp(mytempdata.event(i).type, Stim1))
+    elseif(max(strcmp(mytempdata.event(i).type, Stim1(1))))
         color = 'g';
-    elseif(strcmp(mytempdata.event(i).type, Stim2))
+    elseif(max(strcmp(mytempdata.event(i).type, Stim2(1))))
         color = 'r';    
     else
         color = 'N';  

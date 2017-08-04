@@ -1,7 +1,7 @@
 %%This script will run through BCI_train over multiple parameters and plot
 %%the relationship between a parameter and the accuracy of the model (
 %%either cross validated or self validated
-traindata = io_loadset('C:\Users\gsteelman\Desktop\SummerResearch\10v15Hz_Flashing.easy')
+traindata = io_loadset('/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727114720_PatientW1-8v15_Record.easy')
 mytempdata = exp_eval(traindata)
 resultdataSpec = []
 resultdataSpoc = []
