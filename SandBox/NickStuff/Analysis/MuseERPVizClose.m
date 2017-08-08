@@ -51,9 +51,9 @@ while i <= length(mytempdata.event)
     i = i +1;
 end
 
-plot(mean(currentWindow),'b')
-plot(mean(currentWindow2),'g')
+plot(mean(currentWindow),'b','linewidth',3)
+plot(mean(currentWindow2),'g','linewidth',3)
 legend('Open Eyes', 'Closed Eyes')
 xlabel('Time After Stimulation (ms)')
 ylabel('Voltage (uV)')
-
+ylim([600 1050])

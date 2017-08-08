@@ -80,9 +80,9 @@ for i = 1:length(nameList)
         allData.unattIndex((i-1)*numberTrials+j) = double(unmarker);
         allData.sizeIndex((i-1)*numberTrials+j) = checker;
         disp((i-1)*numberTrials+j)
-
+        
     end
-    
+    allData.freq = freq;
     
 
     
