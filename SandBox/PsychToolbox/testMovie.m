@@ -92,7 +92,7 @@ try
     % Playback loop: Runs until end of movie or keypress:
     while ~KbCheck
         % Wait for next movie frame, retrieve texture handle to it
-        tex = Screen('GetMovieImage', win, movie);
+        tex = Screen('GetMovieImage', w, movie);
         
         % Valid texture returned? A negative value means end of movie reached:
         if tex<=0

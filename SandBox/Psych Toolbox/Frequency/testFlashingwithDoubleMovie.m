@@ -12,8 +12,8 @@ oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
 
-moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass2.mp4' ];
-moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGswim2.mp4' ];
+moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass.mp4' ];
+moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGswim.mp4' ];
 Hz = [1 15];  
 time = 200;
 transparencyChecker = 75;
@@ -146,7 +146,6 @@ try
     vbl = Screen('Flip', window);
     my1 = tic;
     my2 = tic;
-    t = toc;
     numTimes = Hz(1) * time;
     p = 1;
     textureCue = [1 2];

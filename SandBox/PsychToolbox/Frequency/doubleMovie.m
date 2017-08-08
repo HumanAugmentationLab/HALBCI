@@ -12,8 +12,8 @@ oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
 
-moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass2.mp4' ];
-moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGswim2.mp4' ];
+moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass.mp4' ];
+moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGswim.mp4' ];
 Hz = [10  15];  
 time = 200;
 transparencyChecker = 75;

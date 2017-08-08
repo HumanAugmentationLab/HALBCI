@@ -14,9 +14,9 @@ while true
     [data,timestamp] = inlet.pull_sample(0);
     % and display it
     if timestamp
-        if closed && data <1.2
+        if closed && data <1.25
             closed = false
-        elseif ~closed && data > 1.8
+        elseif ~closed && data > 1.75
             closed = true
         end
         
@@ -28,8 +28,8 @@ while true
             
             
         fprintf('%.2f\n',data);
-        disp(['Closed ' t])
-        disp(['Open ' t2])
+        disp(['Open ' num2str(t)])
+        disp(['Closed ' num2str(t2)])
         if t + t2 > 200
             t = 0;
             t2 = 0;

@@ -15,10 +15,7 @@ function [  ] = efficientChoice(  window,windowRect,Hz,time,extraImage,outlet,mr
     Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 
     % Define a simple 4 by 4 checker board
-    if checkerSize == 0
-        checkerboard = [1];
-    else
-        checkerboard = repmat(eye(2), checkerSize, checkerSize);
+    checkerboard = repmat(eye(2), checkerSize, checkerSize);
 
     % Make the checkerboard into a texure (4 x 4 pixels)
     checkerTexture(1) = Screen('MakeTexture', window, checkerboard);
@@ -26,11 +23,10 @@ function [  ] = efficientChoice(  window,windowRect,Hz,time,extraImage,outlet,mr
 
     % We will scale our texure up to 90 times its current size be defining a
     % larger screen destination rectangle
-    [s1, s2] = Screen('WindowSize', window);
-    dstRectOG = [0 0 s1*.357 s2*.75];
+
     
-    dstRect1 = CenterRectOnPointd(dstRectOG, xCenter * .4, yCenter);
-    dstRect2 = CenterRectOnPointd(dstRectOG, xCenter  * 1.60 , yCenter);
+    dstRect1 = CenterRectOnPointd(dstRectOG, xCenter * .5, yCenter);
+    dstRect2 = CenterRectOnPointd(dstRectOG, xCenter  * 1.5 , yCenter);
     dstRect = [dstRect1; dstRect2]
 
 
@@ -82,14 +78,14 @@ function [  ] = efficientChoice(  window,windowRect,Hz,time,extraImage,outlet,mr
         % Reverse the texture cue to show the other polarity if the time is up
         if frameCounter >= checkFlipTimeFrames
              p = p+1;
-             %toc(my1)
+             toc(my1)
              my1 = tic;
              textureCue = fliplr(textureCue);
              frameCounter = 0;
         end
         
         if frameCounter2 >= checkFlipTimeFrames2
-             %toc(my2)
+             toc(my2)
              my2 = tic;
              textureCue2 = fliplr(textureCue2);
              frameCounter2 = 0;

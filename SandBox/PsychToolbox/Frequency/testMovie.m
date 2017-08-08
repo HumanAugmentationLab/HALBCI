@@ -8,7 +8,7 @@ oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
 
-moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass.mp4'];
+moviename = [ '/home/gsteelman/Desktop/Summer Research/Media/dot.mp4'];
 moviename2 = [ '/home/gsteelman/Desktop/Summer Research/Media/OGgrass.mp4' ]; 
 Hz = 10   
 time = 200;
@@ -107,7 +107,7 @@ try
     filterMode = 0;
 
     % Time to wait in frames for a flip
-    waitframes = 2;
+    waitframes = 1;
 
     % Texture cue that determines which texture we will show
     textureCue = [1 2];

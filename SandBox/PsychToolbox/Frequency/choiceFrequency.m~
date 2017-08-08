@@ -1,16 +1,16 @@
-  %%This Script will display two flashing checkerboards of different
+%%This Script will display two flashing checkerboards of different
 %%frequencies and point an arrow to one or the other. the order of the
 %%checkerboards (i.e. whether the faster/slower one is on the left or right
 %%will change so the data should not be skewed by eye movements.
 sca;
   
 clearvars;
-checkerSize = 3;
-Hz = [12 15];
+checkerSize = 10;
+Hz = [15 20];
 lslBool = 1;
 numTrials = 36;
 Trialslength = 10;    
-timeBeforeOnset = .8;%time between trials
+timeBeforeOnset = .8;%tim  e between trials
 extraTime = 4;
 arrowBuffer = .2;
 %repetitions = 1;%This is how many times the audio file should repeat(No reason to be more than 1)

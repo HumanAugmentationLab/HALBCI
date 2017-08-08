@@ -6,6 +6,16 @@ addpath(genpath('/home/gsteelman/Desktop/Summer Research/HALBCI/SandBox/NickStuf
 %pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727114720_PatientW1-8v15_Record.easy';
 pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727113703_PatientW1-12v15_Record.easy';
 %pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727112030_PatientW1-15v20_Record.easy';
+% 20170806165229_PatientW1-12v15-medium.easy
+% 20170806164107_PatientW1-7.5v12-small.easy
+% 20170806162852_PatientW1-12v30-small.easy
+% 20170806161942_PatientW1-15v20-big.easy
+% 20170806160959_PatientW1-7.5v12-big.easy
+% 20170806154747_PatientW1-7.5v12-small.easy
+% 20170806153807_PatientW1-15v20-small.easy
+% 20170806152814_PatientW1-7.5v12-small.easy
+% 20170806151821_PatientW1-7.5v20-small.easy
+% 20170806150345_PatientW1-15v20-small.easy
 
 traindata = io_loadset(pathToData)
 %mytempdata = exp_eval(traindata)
