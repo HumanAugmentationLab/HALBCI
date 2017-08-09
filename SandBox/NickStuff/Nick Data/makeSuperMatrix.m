@@ -1,3 +1,6 @@
+%This script will take the data we just recorded and turn it into a super
+%matrix that contains the frequency analysis of all the channels for all
+%the trials.
 allData = struct
 nameList = {'20170806165229_PatientW1-12v15-medium'
 '20170806164107_PatientW1-7.5v12-small'
@@ -23,7 +26,8 @@ end
 
 freqList = [12, 15; 7.5, 12; 12, 30; 15, 20; 7.5, 12; 7.5, 12; 15, 20; 7.5, 12; 7.5, 20; 15, 20];
 sizeList = [6, 2, 2, 20, 20, 2, 2, 2, 2, 2];
-channels = {'P3', 'P4','O1','O2','CP1','CP2','CP6','PO3','PO4'};
+%channels = {'P3', 'P4','O1','O2','CP1','CP2','CP6','PO3','PO4'};
+channels = {ez.chanlocs.labels}
 numberTrials = 36;
 numberChannels = length(channels);
 numberFrequencies = 513;
@@ -88,3 +92,5 @@ for i = 1:length(nameList)
     
     
 end
+
+save('superMatrix.mat','allData')

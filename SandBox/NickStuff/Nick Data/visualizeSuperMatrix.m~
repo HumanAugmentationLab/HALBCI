@@ -7,13 +7,13 @@ if ~exist('allData','var')
    makesuperMatrix; 
 end
 plotSize = 60;
-channels = {'P3','P4'};
+channels = {'CP6'};
 selectedChannels = []
 for i = 1: length(channels)
     index = find(strcmp(allData.channels,char(channels(i))))
     selectedChannels = [selectedChannels index]
 end
-natural = 1;
+natural = 0;
 freq = 7.5;
 freq2 = 12;
 freq3 = 15;
@@ -61,7 +61,7 @@ for i = 1:length(allData.attIndex)
     
 end
 figure
-meanAll = mean([mean(list1(:,:));mean(list2(:,:));mean(list3(:,:));mean(list4(:,:))]);
+meanAll = median([mean(list1(:,:));mean(list2(:,:));mean(list3(:,:));mean(list4(:,:))]);
 if natural 
     plotOne = mean(list1(:,:));
 else
@@ -87,12 +87,11 @@ else
     plotFour(plotFour<0) = 0
 end
 
-plot(allData.freq(6:plotSize),plotOne,'b','LineWidth',2)
+plot(allData.freq(6:plotSize),plotOne,'b')
 hold on
-plot(allData.freq(6:plotSize),plotTwo,'g','LineWidth',2)
-plot(allData.freq(6:plotSize),plotThree,'r','LineWidth',2)
-plot(allData.freq(6:plotSize),plotFour,'k','LineWidth',2)
-legend('7.5 Hz','12 Hz','15 Hz','20 Hz')
-title('P7 and P8')
+% plot(allData.freq(6:plotSize),plotTwo,'g')
+% plot(allData.freq(6:plotSize),plotThree,'r')
+% plot(allData.freq(6:plotSize),plotFour,'k')
+% legend('7.5 Hz','12 Hz','15 Hz','20 Hz')
 xlabel('Frequency (Hz)')
 ylabel('Power')
