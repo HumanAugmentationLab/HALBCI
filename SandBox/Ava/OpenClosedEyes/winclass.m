@@ -1,11 +1,13 @@
+% Use windowed means to classify eyes open/eyes closed data
 %% Dependency Setup
 cd C:\Users\alakmazaheri\Documents\BCI\BCILAB
 bcilab;
 
 %% Load Data
-cd C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\AvaMuseProcess
+%cd C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Ava
 
-traindata1 = reconfigSNAP('K:\HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W4-Intrinsic.xdf');
+%traindata1 = reconfigSNAP('K:\HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W4-Intrinsic.xdf');
+traindata1 = reconfigSNAP('K:\HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W1MuseExtrinsic.xdf');
 dat1 = tryFindStart(traindata1,4,0);
 
 traindata2 = reconfigSNAP('K:\HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\W3IntrinsicSelf.xdf');
@@ -31,7 +33,7 @@ dat3.event(50) = [];
 close all;
 hzlim = [5e4 5.25e4];
 upvlim = [400 1400]; lowvlim = [-500 500];
-vis_data(dat1,[2 5],upvlim,hzlim, 'Original Data')
+vis_data2(dat1,[2 5])%,[5e4 5.25e4])%,upvlim,hzlim, 'Original Data')
 
 
 movavdat1 = exp_eval(flt_movavg(dat1,4)); 
@@ -39,7 +41,7 @@ vis_data(movavdat1,[2 5],upvlim,hzlim, 'Moving Average');
 baseremdat1 = exp_eval(flt_rmbase(dat1)); 
 vis_data(baseremdat1,[2 5],lowvlim,hzlim, 'Baseline Removal');
 hpfiltdat1 = exp_eval(flt_fir(dat1,[0.1 0.5],'highpass'));
-vis_data(hpfiltdat1,[2 5],lowvlim,hzlim, 'Highpass Filter');
+vis_data(hpfiltdat1,[2 5]);
 
 
 fltmovav = exp_eval(flt_movavg(hpfiltdat1));
