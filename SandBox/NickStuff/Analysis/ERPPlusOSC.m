@@ -35,14 +35,14 @@ end
 %wnds = [-.25 -0.15;-.15 -.1; -.1 -.5;;0.25 0.3;0.3 0.35;0.35 0.4; 0.4 0.45;0.45 0.5;0.5 0.55;0.55 0.6]
 
 myapproach = {'Windowmeans' 'SignalProcessing', {'EpochExtraction',{'TimeWindow',[-.5 .6]}, ...
-    'SpectralSelection', 'off', 'ChannelSelection', {{'TP9' 'TP10'}}},...
-    'Prediction', {'FeatureExtraction',{'TimeWindows',wnds},'MachineLearning',{'Learner',{'lda'}}}...
+    'SpectralSelection', 'off', 'ChannelSelection', {{'TP9' 'TP10'}},'rmbase',{'BaselineWindow',[0 0.5]}},...
+    'Prediction', {'FeatureExtraction',{'TimeWindows',wnds},'MachineLearning',{'Learner',{'logreg'}}}...
              };
 
 %myapproach = {'Windowmeans' 'SignalProcessing',{'EpochExtraction',[0.5 1.5],'FIRFilter',[2 4 32 48],'ChannelSelection',{'TP9' 'TP10'}, 'Prediction',{'FeatureExtraction',{'PatternPairs',1},'MachineLearning',{'learner','lda'}}};
-[trainloss,mymodel,laststats] = bci_train('Data',{mytempdata3},'Approach',myapproach,'TargetMarkers',{'149','151'},'EvaluationMetric', 'mse','EvaluationScheme',0); 
+[trainloss,mymodel,laststats] = bci_train('Data',{mytempdata2},'Approach',myapproach,'TargetMarkers',{'149','151'},'EvaluationMetric', 'mse','EvaluationScheme',0); 
 
-[prediction,loss,teststats,targets] = bci_predict(mymodel,mytempdata2);
+[prediction,loss,teststats,targets] = bci_predict(mymodel,mytempdata3);
 
 %this simply displays the information gotten from bci_predict
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);

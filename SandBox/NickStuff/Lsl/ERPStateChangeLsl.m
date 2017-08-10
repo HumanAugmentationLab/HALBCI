@@ -8,7 +8,7 @@ inlet = lsl_inlet(result{1});
 disp('Now receiving data...');
 t = 0
 t2 = 0
-closed = false
+closed = 0
 while true
     % get data from the inlet (timeout: 1 second)
     [data,timestamp] = inlet.pull_sample(0);
@@ -40,4 +40,3 @@ while true
         pause(0.01);
     end
 end
-
