@@ -1,4 +1,4 @@
-##Ava Scripts
+## Ava Scripts
 
 OpenClosedEyes - offline processing and classification on open/closed eye Muse data
 
