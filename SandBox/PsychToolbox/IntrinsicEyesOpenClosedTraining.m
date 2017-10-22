@@ -1,3 +1,4 @@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Use an observer to record if a persons eyes are open, closed or if they
 % blinked. This script sends triggers over LSL that indicate the condition.

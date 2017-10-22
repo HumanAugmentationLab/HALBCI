@@ -17,18 +17,19 @@ Stim1 = {'149' '151'};
 Stim2 = {'151' '149'};
 StimArr = {'149','151','12','0','200'}
 StimArr2 = {'151','149','12','0','200'}
-PhotodiodeStimulationChannel = 4;
+PhotodiodeStimulationChannel = 2;
 OffsetforPhotodiodeStimulation = 0;
 %pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727114720_PatientW1-8v15_Record.easy';
-pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727113703_PatientW1-12v15_Record.easy';
+pathToData = 'C:\Users\gsteelman\Desktop\Neurotech\OCtrainingtest.xdf';
 %pathToData = '/media/HumanAugmentationLab/EEGdata/EnobioTests/Testing SSVEP/20170727112030_PatientW1-15v20_Record.easy';
-pathToData4 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/NickTest.xdf';
+%pathToData4 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/NickTest.xdf';
 %traindata = io_loadset(pathToData)
 %mytempdata= exp_eval(traindata)
 %mytempdata = refactorFunc(mytempdata,2, 9,3)
-traindata = reconfigSNAP(pathToData4);
+traindata = reconfigSNAP(pathToData);
 mytempdata = tryFindStart(traindata,PhotodiodeStimulationChannel,OffsetforPhotodiodeStimulation);
-%mytempdata = refactorMarkersVariable(mytempdata,0,1,StimArr,StimArr2);
+mytempdata = refactorMarkersVariable(mytempdata,0,1,StimArr,StimArr2);
+
 
 
 %mytempdata = refactorFunc(mytempdata);
