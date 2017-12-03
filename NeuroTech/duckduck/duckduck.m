@@ -20,7 +20,7 @@ try
     ducks2 = [3 12 8 5 15 8];
     ducks3 = [9 4 7 15 5 6 5]; 
     ducks4 = [3 12 15 5 8 9];
-    ducks = {ducks1};
+    ducks = {ducks1 ducks2 ducks3 ducks4};
     for i = 1:length(ducks)
         cDuck = [];
         duck = cell2mat(ducks(i));
@@ -147,11 +147,11 @@ try
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %This part is just a buffer screen to wait for the user to click when
-    %ready
+    %ready    
     disp('click for stuff')
     Screen('FillRect',w, grey);
     Screen('DrawText', w, 'Click mouse to prep photodiode stimulation', wW/2-100, wH/2, black);
-    clickedTime = Screen('Flip', w);
+    rectTime = Screen('Flip', w);
     while 1
        [mx, my, buttons]=GetMouse(screenNumber);
        if find(buttons)
@@ -159,9 +159,7 @@ try
                 [mx, my, buttons]=GetMouse(screenNumber);
             end
             Screen('FillRect',w, black);
-            tic
             clickedTime = Screen('Flip', w);
-            toc
             break
         end 
 
@@ -173,12 +171,9 @@ try
     %proper timestamp in the data
     mrk = 100
     Screen('FillRect',w, white,myrect);
-    toc
-    rectTime = Screen('Flip', w,clickedTime + 30);
-    toc
+    disp(clickedTime)
+    rectTime = Screen('Flip', w,clickedTime + 10);
     outlet.push_sample(mrk);
-    toc
-
     Screen('FillRect',w, black);
     endtrial = Screen('Flip', w,rectTime + 3);
     %We will then turn the screen grey and wait for a click before starting the
