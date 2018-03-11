@@ -23,7 +23,7 @@ ez1215.chanlocs = edf1215.chanlocs; % Replace channel locations
 % 15 vs 20 Hz
 disp('loading 15 vs. 20 Hz data...')
 a = io_loadset('C:\Users\alakmazaheri\Desktop\EEGfiles\20170727112030_PatientW1-15v20_Record.edf');
-edf1520 = exp_eval(a); % Load EDF for channel locations
+edf1520 = exp_eval(a); % Load EDF for cahannel locations
 a = io_loadset('C:\Users\alakmazaheri\Desktop\EEGfiles\20170727112030_PatientW1-15v20_Record.easy');
 ez1520 = exp_eval(a); % Load EASY file
 ez1520.chanlocs = edf1520.chanlocs; % Replace channel locations

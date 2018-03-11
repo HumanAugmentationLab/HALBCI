@@ -109,7 +109,7 @@ lefthighiez = importdata('K:HumanAugmentationLab\EEGdata\EnobioTests\Testing SSV
 pop_selectcomps(fulliez, [1:26])
 pop_selectcomps(efulliez, [1:26]) %%this makes a difference!
 
-pop_selectcomps(lowiez, [1:26])
+pop_selectcomps(lowiez, [1:26l])
 pop_selectcomps(highiez, [1:26])
 %% 6. Select/Remove Components
 keep = [9 11 13 15]; % Full Full

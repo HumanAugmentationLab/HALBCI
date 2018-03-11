@@ -79,7 +79,7 @@ try
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %Now we start the expriment
-    moviename = [ PsychtoolboxRoot 'PsychDemos/MovieDemos/DualDiscs.mov' ];
+    moviename = [ PsychtoolboxRoot 'PsychDemos\MovieDemos\DualDiscs.mov' ];
     
     
         % Start playback engine:

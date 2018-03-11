@@ -158,21 +158,18 @@ try
            tex = Screen('GetMovieImage', window, movie,0,0);     
            tex2 = Screen('GetMovieImage', window, movie2,0,0);        
   
-           % Every 20 counts...
            if mod(p,20) == 0
                % increasing frequencies? [2 16] ...
-               % Hz(1) = Hz(1) + 1;
-               % Hz(2) = Hz(2) + 1;
+               Hz(1) = Hz(1) + 1;
+               Hz(2) = Hz(2) + 1;
                
-               % number of seconds per flip (1/1/s)
+               % flip every 1/Hz(1) e.g. 0.5 s
                checkFlipTimeSecs = 1/Hz(1);
-               % number of frames per flip (s/s/frame) 
-               checkFlipTimeFrames = round(checkFlipTimeSecs / ifi);
-               
-               checkFlipTimeSecs2 = 1/Hz(2);
-               checkFlipTimeFrames2 = round(checkFlipTimeSecs2 / ifi);
-               
-               p = p+1;
+               %
+                checkFlipTimeFrames = round(checkFlipTimeSecs / ifi);
+                checkFlipTimeSecs2 = 1/Hz(2);
+                checkFlipTimeFrames2 = round(checkFlipTimeSecs2 / ifi);
+                p = p+1 
            end
 
            % MOVIE 1
