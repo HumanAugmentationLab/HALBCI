@@ -11,12 +11,12 @@ movieBool = 0;                  % Ignore movie files for testing
 trialLength = 30;               % Trial length (s)
 
 % Checkerboard display
-Hz = [16 30];                   % [L R] frequencies (actual = 1/2 input?)
-transparencyChecker = 75;       % Set transparency (0: none, 250: opaque)
+Hz = [1 2];                   % [L R] frequencies (actual = 1/2 input?)
+transparencyChecker = 200;       % Set transparency (0: none, 250: opaque)
 board_size = 2;                 % Half of board width/height (2: 4x4)
 color1 = 255;                   % Checker color 1 (black)
 color2 = 0;                     % Checker color 2 (white)
-WindowCoords = [];              % For full screen, []
+WindowCoords = [100 100 600 600];              % For full screen, []
 filterMode = 0;                 % Nearest neighbour
 
 
@@ -88,8 +88,8 @@ try
     % --------------------- TIMING ------------------------- %
     % Query the frame duration
     ifi = Screen('GetFlipInterval', window);            % s/frame
-    framesPerFlipL = round(1 / (ifi * Hz(1)));
-    framesPerFlipR = round(1 / (ifi * Hz(2)));
+    framesPerFlipL = (1 / (ifi * Hz(1)))
+    framesPerFlipR = (1 / (ifi * Hz(2)))
 
     textureCueL = [1 2];
     textureCueR = [1 2];
@@ -106,11 +106,10 @@ try
     waitframes = 1;
     
     % Start timing to manually check frequency
-    startL = tic;
-    startR = tic;
+    start = tic;
     
     % Stop script if trial ends or keyboard pressed
-    while toc(startL) < trialLength && ~KbCheck
+    while toc(start) < trialLength && ~KbCheck
         % Display movies if included
         if movieBool == 1
             texL = Screen('GetMovieImage', window, movieL, 0, 0);     
@@ -131,9 +130,6 @@ try
                 Screen('DrawTexture', window, ltexR, [], dstRect(2,:) );
             end
         end
-           
-        frameCounterL = frameCounterL + 1;
-        frameCounterR = frameCounterR + 1;
 
         % Draw texture on screen
         Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), 0, filterMode);
@@ -141,18 +137,14 @@ try
         Screen('Flip', window)
 
         % For each checkerboard, reverse texture cue to flash opposite at t
-        if frameCounterL >= framesPerFlipL
-             frameCounterL = 0;
+        if mod(toc(start), 1/Hz(1)) < 0.05
              textureCueL = fliplr(textureCueL);
-             actualhzL = frameCounterL/toc(startL);
-             startL = tic;
+             actualhzL = frameCounterL/toc(start);
         end
         
-        if frameCounterR >= framesPerFlipR
-             frameCounterR = 0;
+        if mod(toc(start), 1/Hz(2)) < 0.05
              textureCueR = fliplr(textureCueR);
              actualhzR = frameCounterR/toc(startR);
-             startR = tic;
         end
     end
     
@@ -163,7 +155,7 @@ end
 disp('frameCounterL')
 disp(frameCounterL)
 disp('toc')
-disp(toc(startL))
+disp(toc(start))
 
 KbStrokeWait;
 sca;
