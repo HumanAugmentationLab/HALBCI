@@ -5,13 +5,12 @@ oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
 oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
-
 % Experiment Parameters
 movieBool = 0;                  % Ignore movie files for testing
 trialLength = 30;               % Trial length (s)
 
 % Checkerboard display
-Hz = [1 2];                   % [L R] frequencies (actual = 1/2 input?)
+Hz = [12 2];                   % [L R] frequencies (actual = 1/2 input?)
 transparencyChecker = 200;       % Set transparency (0: none, 250: opaque)
 board_size = 2;                 % Half of board width/height (2: 4x4)
 color1 = 255;                   % Checker color 1 (black)
@@ -107,9 +106,10 @@ try
     
     % Start timing to manually check frequency
     start = tic;
+    time_elapsed = toc(start);
     
     % Stop script if trial ends or keyboard pressed
-    while GetSecs < trialLength && ~KbCheck
+    while toc(start) < trialLength && ~KbCheck
         % Display movies if included
         if movieBool == 1
             texL = Screen('GetMovieImage', window, movieL, 0, 0);     
@@ -131,20 +131,29 @@ try
             end
         end
 
+        frameCounterL = frameCounterL + waitframes;
+        frameCounterR = frameCounterR + waitframes;
+        
         % Draw texture on screen
         Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), 0, filterMode);
         Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), 0, filterMode);
-        Screen('Flip', window)
         
-        VBLTimestamp = Screen('Flip', win, 0, 2);
+        vbl = Screen('Flip', window, vbl + (waitframes-0.5) * ifi);
 
-    % loop swapping buffers, checking keyboard, and checking time
-    % param 2 denotes "dont clear buffer on flip", i.e., we alternate
-    % our buffers cum textures
-    while (~KbCheck) && (GetSecs < deadline)
-        [VBLTimestamp StimulusOnseTime] = Screen('Flip', win, VBLTimestamp + swapinterval,2);
-    end
-
+        % For each checkerboard, reverse texture cue to flash opposite at t
+        if frameCounterL >= 0.5/(ifi*Hz(1))
+             hi = toc(start)-time_elapsed
+             textureCueL = fliplr(textureCueL);
+             frameCounterL = 0;
+             time_elapsed = toc(start);
+        end
+        
+        if frameCounterR >= 0.5/(ifi*Hz(2))
+             
+             textureCueR = fliplr(textureCueR);
+             frameCounterR = 0;
+             
+        end
     end
     
 catch

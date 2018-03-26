@@ -5,13 +5,12 @@ oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
 oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 
-
 % Experiment Parameters
 movieBool = 0;                  % Ignore movie files for testing
 trialLength = 30;               % Trial length (s)
 
 % Checkerboard display
-Hz = [5 15];                   % [L R] frequencies (actual = 1/2 input?)
+Hz = [1 2];                   % [L R] frequencies (actual = 1/2 input?)
 transparencyChecker = 200;       % Set transparency (0: none, 250: opaque)
 board_size = 2;                 % Half of board width/height (2: 4x4)
 color1 = 255;                   % Checker color 1 (black)
@@ -107,6 +106,7 @@ try
     
     % Start timing to manually check frequency
     start = tic;
+    time_elapsed = toc(start);
     
     % Stop script if trial ends or keyboard pressed
     while toc(start) < trialLength && ~KbCheck
@@ -131,19 +131,25 @@ try
             end
         end
 
+        frameCounterL = frameCounterL + waitframes;
+        frameCounterR = frameCounterR + waitframes;
+        
         % Draw texture on screen
         Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), 0, filterMode);
         Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), 0, filterMode);
+        
+        vbl = Screen('Flip', window, vbl + (waitframes-0.25) * ifi);
 
         % For each checkerboard, reverse texture cue to flash opposite at t
-        if mod(toc(start), 1/Hz(1)) < 0.05
+        if frameCounterL >= 1/(ifi*Hz(1))
              textureCueL = fliplr(textureCueL);
-             actualhzL = frameCounterL/toc(start);
+             frameCounterL = 0;
         end
         
-        if mod(toc(start), 1/Hz(2)) < 0.05
+        if frameCounterR >= 1/(ifi*Hz(2))
+             time_elapsed = toc(start)-time
              textureCueR = fliplr(textureCueR);
-             actualhzR = frameCounterR/toc(start);
+             frameCounterR = 0;
         end
     end
     
