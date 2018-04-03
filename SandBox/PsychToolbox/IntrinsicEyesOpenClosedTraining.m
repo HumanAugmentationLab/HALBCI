@@ -14,9 +14,9 @@ close all;
 clearvars;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Settings 
-opts.photodiode = true;
-opts.keyboardsetup = false; % Set up keyboard numbers
-startdelaytime = 10;
+opts.photodiode = false;
+opts.keyboardsetup = true; % Set up keyboard numbers
+startdelaytime = 5;
 
 %This next part will find the keyboard indexes of the desired kyes
 KeyStart = 's';

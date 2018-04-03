@@ -23,10 +23,12 @@ msg = rosmessage(pub);
 % 2) Use muse-io to connect over lsl
 %       a) cd C:\Program Files (x86)\Muse
 %       b) muse-io.exe --lsl-acc museacc
+%  OR 
+% 2) !C:\"Program Files (x86)"\Muse\muse-io.exe --lsl-eeg MuseEEG --lsl-acc museacc --no-dsp --preset ab &
 % 3) Run code below to read in acc data from Muse
 
 
-bci_stream_name = 'museacc';  
+bci_stream_name = 'museEEG';  
 lib = lsl_loadlib();
 disp('Resolving a BCI stream...');
 result = {};
@@ -36,7 +38,7 @@ inlet = lsl_inlet(result{1});
 disp('Now receiving data...');
 
 % Confirm that you are getting data
-vis_stream('museacc');
+vis_stream(bci_stream_name);
 % Close the vis_stream window
 input();
 pause(1);
