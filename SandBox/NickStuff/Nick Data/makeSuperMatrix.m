@@ -25,7 +25,7 @@ if ~exist('nameListLoaded','var')
 end
 
 freqList = [12, 15; 7.5, 12; 12, 30; 15, 20; 7.5, 12; 7.5, 12; 15, 20; 7.5, 12; 7.5, 20; 15, 20];
-sizeList = [6, 2, 2, 20, 20, 2, 2, 2, 2, 2];
+sizeList = [6, 20, 20, 2, 2, 20, 20, 20, 20, 20];
 %channels = {'P3', 'P4','O1','O2','CP1','CP2','CP6','PO3','PO4'};
 channels = {ez.chanlocs.labels}
 numberTrials = 36;

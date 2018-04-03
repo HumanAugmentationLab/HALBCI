@@ -13,18 +13,22 @@ for i = 1: length(channels)
     index = find(strcmp(allData.channels,char(channels(i))))
     selectedChannels = [selectedChannels index]
 end
-natural = 0;
-freq = 7.5;
-freq2 = 12;
+natural = 1;
+freq = 15;
+unfreq = 20;
+freq2 = 20;
+unfreq2 = 15;
 freq3 = 15;
+unfreq3 = 20;
 freq4 = 20;
+unfreq4 = 15;
 one = 0;
 list1 = [];
 list2 = [];
 list3 = [];
 list4 = [];
-for i = 1:length(allData.attIndex)
-   if allData.attIndex(i) == freq
+for i = 1:length(allData.attIndex) 
+   if allData.attIndex(i) == freq && allData.unattIndex(i) == unfreq && allData.sizeIndex(i)== 20
       if length(channels) > 1 temp = squeeze(mean(allData.DataTCF(i,selectedChannels,6:plotSize)));
       else  temp =  squeeze(allData.DataTCF(i,selectedChannels,6:plotSize));end
       list1 = [list1;temp.'];
@@ -35,7 +39,7 @@ end
 one
 
 for i = 1:length(allData.attIndex)
-   if allData.attIndex(i) == freq2
+   if allData.attIndex(i) == freq2 && allData.unattIndex(i) == unfreq2 && allData.sizeIndex(i)== 20
       if length(channels) > 1 temp = squeeze(mean(allData.DataTCF(i,selectedChannels,6:plotSize)));
       else  temp =  squeeze(allData.DataTCF(i,selectedChannels,6:plotSize));end
       list2 = [list2;temp.'];   
@@ -44,7 +48,7 @@ for i = 1:length(allData.attIndex)
 end
 
 for i = 1:length(allData.attIndex)
-   if allData.attIndex(i) == freq3
+   if allData.attIndex(i) == freq3 && allData.unattIndex(i) == unfreq3 && allData.sizeIndex(i)== 2
       if length(channels) > 1 temp = squeeze(mean(allData.DataTCF(i,selectedChannels,6:plotSize)));
       else  temp =  squeeze(allData.DataTCF(i,selectedChannels,6:plotSize)); end
       list3 = [list3;temp.'];  
@@ -53,7 +57,7 @@ for i = 1:length(allData.attIndex)
 end
 
 for i = 1:length(allData.attIndex)
-   if allData.attIndex(i) == freq4
+   if allData.attIndex(i) == freq4 && allData.unattIndex(i) == unfreq4 && allData.sizeIndex(i)== 2
       if length(channels) > 1 temp = squeeze(mean(allData.DataTCF(i,selectedChannels,6:plotSize)));
       else  temp =  squeeze(allData.DataTCF(i,selectedChannels,6:plotSize)); end
       list4 = [list4;temp.'];  
@@ -61,7 +65,7 @@ for i = 1:length(allData.attIndex)
     
 end
 figure
-meanAll = median([mean(list1(:,:));mean(list2(:,:));mean(list3(:,:));mean(list4(:,:))]);
+meanAll = mean([mean(list1(:,:));mean(list2(:,:));mean(list3(:,:));mean(list4(:,:))]);
 if natural 
     plotOne = mean(list1(:,:));
 else
@@ -87,11 +91,12 @@ else
     plotFour(plotFour<0) = 0
 end
 
-plot(allData.freq(6:plotSize),plotOne,'b')
+plot(allData.freq(6:plotSize),plotOne,'b','LineWidth',1)
 hold on
-% plot(allData.freq(6:plotSize),plotTwo,'g')
-% plot(allData.freq(6:plotSize),plotThree,'r')
-% plot(allData.freq(6:plotSize),plotFour,'k')
-% legend('7.5 Hz','12 Hz','15 Hz','20 Hz')
+plot(allData.freq(6:plotSize),plotTwo,'g','LineWidth',1)
+plot(allData.freq(6:plotSize),plotThree,'b','LineWidth',2)
+plot(allData.freq(6:plotSize),plotFour,'g','LineWidth',2)
+legend('15 Hz','20 Hz','15 Hz B','20 Hz B')
+title('P7 and P8')
 xlabel('Frequency (Hz)')
 ylabel('Power')

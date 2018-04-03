@@ -1,0 +1,193 @@
+%% Dual Flashing Checkerboard & Movie
+% PsychToolbox code for SSVEP attention experiment
+% Display two square checkerboards flashing independently (with movies overlayed)
+% CONTROL: 1 keyboard press to pause experiment | 2 to stop experiment and close window
+
+%% PsychToolbox Setup
+AssertOpenGL;
+PsychDefaultSetup(2);  
+oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
+oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
+oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
+
+%% Experiment Parameters
+% Trial Options
+trialLength = 30;                   % Trial length (s)
+movieBool = 0;                      % 0: Checkerboards only | 1: Overlay movies
+
+% Background Display
+WindowCoords = [];                  % Size of display: [x1, y1, x2, y2] or [] for full screen
+backgroundColor = 0;                % 0: black
+scalingCoeff = 0.325;               % Fix bug of speed dependening on display size
+
+% Checkerboard Display
+Hz = [12 20];                       % Frequencies to display [L R]
+transparencyChecker = 200;          % Transparency (0: none, 250: opaque)
+board_size = 8;                     % Number of checkers per side (EVEN ONLY)
+color1 = 255;                       % Checker color 1 (255: black)
+color2 = 0;                         % Checker color 2 (0: white)
+filterMode = 0;                     % Color blending (0: nearest neighbour)
+waitframes = 1;                     % Flip rate in reference to monitor refresh
+buffer = 0.1;                       % Time buffer to prevent lag
+
+% Movie Options
+movienameL = '/.mp4';
+movienameR = '/.mp4';
+
+%% Generate Initial Checkerboards
+% Populate matrices to represent checkerboard display
+checkerboardL = repmat(eye(2), board_size/2, board_size/2, 2);
+checkerboardR = checkerboardL;
+
+% LAYER 1: Set checkerboard colors with opposite polarity
+for j = 1:board_size
+     for k = 1:board_size
+         if checkerboardL(j,k,:) == 1
+             checkerboardL(j,k,:) = color1;
+             checkerboardR(j,k,:) = color2;
+         else
+             checkerboardL(j,k,:) = color2; 
+             checkerboardR(j,k,:) = color1;
+         end
+     end
+end
+
+% LAYER 2: Set transparency
+checkerboardL(:,:,2) = zeros(board_size, board_size) + transparencyChecker;  
+checkerboardR(:,:,2) = zeros(board_size, board_size) + transparencyChecker; 
+
+%% Display
+try
+    % Find screen
+    screenid = max(Screen('Screens'));
+
+    % Open window on specified screen | return [window ID, window size]
+    [window, windowRect] = Screen('OpenWindow', screenid, backgroundColor, WindowCoords);
+    
+    % Find center of display window
+    [xCenter, yCenter] = RectCenter(windowRect);
+    
+    % Return width and height of display window
+    [wW,wH] = Screen('WindowSize', window);
+    
+    % Set portion of window for displaying checkerboards (with margins)
+    % Space checkerboards evenly for display
+    dispRect = [0 0 wW/3 wH/2];
+    dispRectL = CenterRectOnPointd(dispRect, xCenter*.5, yCenter);
+    dispRectR = CenterRectOnPointd(dispRect, xCenter*1.5, yCenter);
+    dstRect = [dispRectL; dispRectR];
+
+    % Make the checkerboard into a texure
+    checkerTexture(1) = Screen('MakeTexture', window, checkerboardL);
+    checkerTexture(2) = Screen('MakeTexture', window, checkerboardR);
+    
+    % Set up alpha-blending for smooth (anti-aliased) lines
+    Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+
+    % Setup movies if included
+    if movieBool == 1
+        % Open movies and load initial frames
+        movieL = Screen('OpenMovie', window, movienameL, 0, -1);
+        movieR = Screen('OpenMovie', window, movienameR, 0, -1);
+    
+        Screen('PlayMovie', movieL, 1, 1);
+        Screen('PlayMovie', movieR, 1, 1);
+        
+        texL = Screen('GetMovieImage', window, movieL,1,0); 
+        ltexL = texL;
+        
+        texR = Screen('GetMovieImage', window, movieR,1,0); 
+        ltexR = texR;
+    end
+    
+    %% Flip Timing
+    % Query refresh rate of monitor (s)
+    ifi = Screen('GetFlipInterval', window);
+
+    % Set initial checkerboard polarities
+    textureCueL = [1 2];
+    textureCueR = [1 2];
+
+    % Initialize frame counters
+    frameCounterL = 0;
+    frameCounterR = 0;  
+    
+    % Sync to vertical retrace
+    topPriorityLevel = MaxPriority(window);
+    Priority(topPriorityLevel);
+    
+    % Return time of initial flip
+    vbl = Screen('Flip', window);
+    
+    % Start timing for trial length and to manually check frequencies
+    start = tic;
+    time_elapsedL = toc(start);
+    time_elapsedR = toc(start);
+    
+    % Stop script if trial ends or keyboard pressed
+    while toc(start) < trialLength && ~KbCheck
+        % Display movies if included
+        if movieBool == 1
+            texL = Screen('GetMovieImage', window, movieL, 0, 0);     
+            texR = Screen('GetMovieImage', window, movieR, 0, 0);    
+            
+            % If found, display next frame, else display last found
+            if texL > 0
+                 Screen('DrawTexture', window, texL, [], dstRect(1,:) );
+                 ltexL = texL;
+            else 
+                 Screen('DrawTexture', window, ltexL, [], dstRect(1,:) );
+            end
+            
+            if texR > 0
+                Screen('DrawTexture', window, texR, [], dstRect(2,:) );
+                ltexR = texR;
+            else 
+                Screen('DrawTexture', window, ltexR, [], dstRect(2,:) );
+            end
+        end
+
+        % Increment frame counter per flip
+        frameCounterL = frameCounterL + waitframes;
+        frameCounterR = frameCounterR + waitframes;
+        
+        % Draw texture on screen
+        Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), 0, filterMode);
+        Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), 0, filterMode);
+        
+        % Flip to update display at set time (at waitframes multiple of screen refresh rate)
+        vbl = Screen('Flip', window, vbl + (waitframes-buffer) * ifi);
+
+        % For each checkerboard, reverse texture cue/polarity at interval of frequency
+        if frameCounterL >= scalingCoeff/(ifi*Hz(1))
+             % Manually check duration of each flash
+             LeftTime = toc(start) - time_elapsedL;
+             disp({'LeftTime', LeftTime})
+             
+             % Flip texture
+             textureCueL = fliplr(textureCueL);
+             
+             % Reset counter and time
+             frameCounterL = 0;
+             time_elapsedL = toc(start);
+        end
+        
+        if frameCounterR >= scalingCoeff/(ifi*Hz(2))
+            RightTime = toc(start) - time_elapsedR;
+            disp({'RightTime', RightTime})
+            
+            textureCueR = fliplr(textureCueR);
+            
+            frameCounterR = 0;
+            time_elapsedR = toc(start);
+        end
+    end
+    
+catch
+    sca;
+    psychrethrow(psychlasterror);
+end
+
+% Closes screen with keyboard press
+KbStrokeWait;
+sca;

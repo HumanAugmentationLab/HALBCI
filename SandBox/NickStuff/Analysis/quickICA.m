@@ -26,7 +26,6 @@ figure; plot(afez.data'); legend(sez.chanlocs.labels)
 %highiez = pop_runica(highfreq_b) % run ICA on data
 nez = pop_epoch(afez, {'111', '121', '211', '221'}, [-.5 9]);
 
-
 iez = pop_runica(nez);
 
 variableComps = {'icaact' 'icawinv' 'icasphere' 'icaweights' 'icachansind' 'reject' 'splinefile' 'icasplinefile'};
@@ -39,14 +38,14 @@ end
 %pop_selectcomps(lowiez, [1:26])
 pop_selectcomps(afez, [1:26])
 %sezKeep1520 = [3 11 14 15 16 17 26];
-sezKeep1215 = [3 4 6 11 16 19]
-keep = sezKeep1520;
+sezKeep1215 = [5 9 10 11 13 14];%[3 4 6 11 16 19]
+keep = sezKeep1215;
 reject = [1:keep(1)-1];
 
 for i = 2:length(keep)
     reject = [reject keep(i-1)+1:keep(i)-1];
 end
-reject = [1 7 9 15 18]
-
+%reject = [1 7 9 15 18]
+reject = [reject 15:26];
 
 sez = pop_subcomp(afez,reject)

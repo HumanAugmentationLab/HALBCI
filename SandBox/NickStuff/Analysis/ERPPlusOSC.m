@@ -16,6 +16,7 @@ if ~exist('mytempdata','var') && ~exist('mytempdata2','var') && ~exist('mytempda
     %pathToData2 = 'K:\HumanAugmentationLab\EEGdata\Muse_EyesOpenClosed\NickTest2.xdf';
     %pathToData3 = 'K:\HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/N4MuseIntrinsic.xdf';
     pathToData3 = 'K:\HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/NickTest.xdf';
+     %pathToData3 = '/media/HumanAugmentationLab/EEGdata/Muse_EyesOpenClosed/N4MuseIntrinsic.xdf'; %if on linux (Nick's)
     traindata = reconfigSNAP(pathToData);
     mytempdata2 = tryFindStart(traindata,4,0); %W1
     %traindata2 = reconfigSNAP(pathToData2);
@@ -36,13 +37,22 @@ for i = -.5:.1:.5
 end
 %wnds = [-.25 -0.15;-.15 -.1; -.1 -.5;;0.25 0.3;0.3 0.35;0.35 0.4; 0.4 0.45;0.45 0.5;0.5 0.55;0.55 0.6]
 
+
 myapproach = {'Windowmeans' 'SignalProcessing', {'FIRFilter',[1 2 16 24],'EpochExtraction',{'TimeWindow',[-.5 .6]}, ...
     'SpectralSelection', 'off', 'ChannelSelection', {{'TP9' 'TP10'}}},...
-    'Prediction', {'FeatureExtraction',{'TimeWindows',wnds},'MachineLearning',{'Learner',{'logreg'}}}...
+=======
+%myapproach = {'Windowmeans' 'SignalProcessing', {'EpochExtraction',{'TimeWindow',[-.5 .6]}, ...
+%    'SpectralSelection', 'off', 'ChannelSelection', {{'TP9' 'TP10'}},'rmbase',{'BaselineWindow',[0 0.5]}},...
+%
+%    'Prediction', {'FeatureExtraction',{'TimeWindows',wnds},'MachineLearning',{'Learner',{'logreg'}}}...
              };
 
 %myapproach = {'Windowmeans' 'SignalProcessing',{'EpochExtraction',[0.5 1.5],'FIRFilter',[2 4 32 48],'ChannelSelection',{'TP9' 'TP10'}, 'Prediction',{'FeatureExtraction',{'PatternPairs',1},'MachineLearning',{'learner','lda'}}};
-[trainloss,mymodel,laststats] = bci_train('Data',{mytempdata2},'Approach',myapproach,'TargetMarkers',{Stim1,Stim2},'EvaluationMetric', 'mse','EvaluationScheme',0); 
+
+trainloss,mymodel,laststats] = bci_train('Data',{mytempdata2},'Approach',myapproach,'TargetMarkers',{Stim1,Stim2},'EvaluationMetric', 'mse','EvaluationScheme',0); 
+=======
+%[trainloss,mymodel,laststats] = bci_train('Data',{mytempdata2},'Approach',myapproach,'TargetMarkers',{'149','151'},'EvaluationMetric', 'mse','EvaluationScheme',0); 
+
 
 [prediction,loss,teststats,targets] = bci_predict(mymodel,mytempdata3);
 
@@ -81,6 +91,7 @@ StimArr = {'149','151','0','200'};
 StimArr2 = {'151','149','0','200'};
 %myrefacdata = refactorMarkersVariable(mytempdata,offSet,epoch,StimArr,StimArr2);
 %myrefacdata2 = refactorMarkersVariable(mytempdata2,offSet,epoch,StimArr,StimArr2);
+
 myrefacdata3 = refactorMarkersVariable(mytempdata3,offSet,epoch,StimArr,StimArr2);
 myrefacdata2 = refactorMarkersVariable(mytempdata2,offSet,epoch,StimArr,StimArr2);
 

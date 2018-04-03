@@ -34,22 +34,25 @@ disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
 disp(['  predicted classes: ',num2str(round(prediction{2}*prediction{3})')]);  % class probabilities * class values
 disp(['  true classes     : ',num2str(round(targets)')]);
 %}
-disp('Done')
+%disp('Done')
 %plot(latencies, predictions); 
 % process data in real time using lastmodel, and visualize outputs
 %run_writevisualization('Model',lastmodel, 'VisFunction','bar(y);ylim([0 1])');
 
 %}
 %
-run_readlsl('MatlabStream','dopeStream','DataStreamQuery','type=''EEG''', 'MarkerStreamQuery','');
-bci_stream_name = 'dopeStream';
+%run_readlsl('MatlabStream','dopeStream','DataStreamQuery','type=''EEG''', 'MarkerStreamQuery','');
+%bci_stream_name = 'dopeStream';
 %
 
-run_writelsl('Model',mymodel,'SourceStream',bci_stream_name,'LabStreamName','Res','OutputForm','expectation','ChannelNames',{'open','closed'})
+%run_writelsl('Model',mymodel,'SourceStream',bci_stream_name,'LabStreamName','Res','OutputForm','expectation','ChannelNames',{'open','closed'})
 %onl_newpredictor('mypredictor',mymodel,bci_stream_name)
+[Predictions,Latencies] = onl_simulate(Signal, Model, Markers,Latencies,SamplingRate,Shift,Format,Interval,Waitbar,Feedback)
 
 
-
+testdata = io_loadset('data sets/mary/stresslevels_realworld.signal');
+[predictions,latencies] = onl_simulate(testdata, model, 'SamplingRate',5);
+plot(latencies, predictions{2}*predictions{3}); title('expected stress level');
 %run_writelsl('Model',mymodel2,'SourceStream',bci_stream_name,'LabStreamName','Res2','OutputForm','expectation','ChannelNames',{'open','closed'})
 
 

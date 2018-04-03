@@ -1,8 +1,8 @@
-function [ pahandle, wavedata ] = loadSound( wavfilename)
+function [ pahandle, wavedata ] = loadSound( wavfilename, loadpahandle)
     %%This simple function will simply load a sound into the computer and
     %%return the required variables for psychotoolbox. This is mainly to
     %%increase modularoty and readability
-
+    pahandle = 0
     [y, freq] = psychwavread(wavfilename);
     wavedata = y';
     nrchannels = size(wavedata,1); % Number of rows == number of channels.
@@ -12,7 +12,9 @@ function [ pahandle, wavedata ] = loadSound( wavfilename)
         nrchannels = 2;
     end
 
-
+    if ~loadpahandle
+        return
+    end
     try
         % Try with the 'freq'uency we wanted:
         pahandle = PsychPortAudio('Open', [], [], 0, freq, nrchannels);

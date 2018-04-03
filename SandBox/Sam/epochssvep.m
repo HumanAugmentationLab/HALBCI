@@ -5,7 +5,7 @@ ioeeg = io_loadset(fullfile(direeg,fnameeeg));
 deeg = exp_eval(ioeeg)
 %01 is ch7; T8 is ch9; F7 is ch19; Oz is ch20
 
-
+EEG = deeg;
 %%
 for i=1:26
     allchnames{i} = EEG.chanlocs(i).labels;
