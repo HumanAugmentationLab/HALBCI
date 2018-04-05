@@ -13,7 +13,8 @@
 % Directory for EEG data (K drive is \fsvs01\Research\)
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\Testing SSVEP\';
 % File name without extension
-fnameeeg = '20170727114720_PatientW1-8v15_Record'; 
+%fnameeeg = '20170727114720_PatientW1-8v15_Record'; 
+fnameeeg = '20170806164107_PatientW1-7.5v12-small';
 %fnameeeg = '20170710171359_Patient01_SSVEP-P0-8ch';
 
 adetails.headset = 'enobio'; % 'enobio' or 'muse'
@@ -53,7 +54,8 @@ end
 % Make sure that the event markers make sense.
 pop_eegplot(EEG,1,1,0);
 % This removes the dc offset 
-psettings=get(gcf,'UserData'); psettings.submean='on'; set(gcf,'Position',Pos,'UserData',psettings); eegplot('draws',0);
+psettings=get(gcf,'UserData'); psettings.submean='on'; 
+set(gcf,'UserData',psettings); eegplot('draws',0);
 % When you are done scrolling through the data, hit CLOSE.
 
 %% Inspect raw data in frequency domain
@@ -78,8 +80,8 @@ adetails.filter.mode = 'bandpass'; % band pass
 
 %for a band-pass/stop filter, this is: [low-transition-start,
 % low-transition-end, hi-transition-start, hi-transition-end], in Hz
-adetails.filter.freqs = [.25 .75 50 54]; 
-%adetails.filter.freqs = [.5 52]; 
+%adetails.filter.freqs = [.25 .75 50 54]; 
+adetails.filter.freqs = [.5 52]; 
 
 %  Type         :   * 'minimum-phase' minimum-hase filter -- pro: introduces minimal signal delay;
 %                         con: distorts the signal (default)
@@ -115,7 +117,7 @@ adetails.filter.state = [];
     adetails.filter.mode, adetails.filter.type));
 
 %% Plot the data from filtering
-datatoplot = B_eegbandpass; 
+datatoplot = E_eegbandpass; 
 
 % Plot the raw data
 %figure; plot(datatoplot.data'); legend(EEG.chanlocs.labels); title('All filtered channels')
@@ -136,7 +138,7 @@ figure; pop_spectopo(datatoplot, 1, [datatoplot.event(1).latency_ms datatoplot.e
 % here so that it's easy to look at different methods
 oldEEG = EEG; % Save a backup of EEG so you don't need to reload.
 
-EEG = B_eegbandpass;
+EEG = E_eegbandpass;
 
 
 %% Epoch the data
@@ -152,9 +154,16 @@ for i = 1:size(EEG.event); evtype{i} = EEG.event(i).type;end; unique(evtype)
 % Markers for sustained attention
 adetails.markers.types = {'111','121','211','221'};
 adetails.markers.names = {'Left F1','Left F2','Right F1','Right F2'};
-adetails.markers.epochwindow = [0 9];
+adetails.markers.epochwindow = [2 7];
+% adetails.markers.epochwindow = [0 9];
 % Attended location (left/right) and frequency (F1 F2)
 % SWM: Should confirm that these marker labels are correct.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Markers for sustained attention, if you don't want to include time = 0
+adetails.markers.types = {'111','121','211','221'};
+adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Cue markers
@@ -195,7 +204,7 @@ adetails.reject.strategy = 'interpolate'; % or 'remove'
 pop_eegplot(epochEEG,1,1,0);
 
 % Inspect raw data in frequency domain
-figure; pop_spectopo(epochEEG, 1, [0  1000*epochEEG.xmax], 'EEG' ,...
+figure; pop_spectopo(epochEEG, 1, [1000*epochEEG.xmin  1000*epochEEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', [10 15 20], 'freqrange',[1 30],'electrodes','on');
 
 % Show candidates for rejection 
@@ -203,9 +212,15 @@ figure; pop_spectopo(epochEEG, 1, [0  1000*epochEEG.xmax], 'EEG' ,...
 %,'elec',1:32,'threhold',5,'norm','on','measure','kurt');
 % 'measure','probability'
 
+%%
 %Manually note other channels to reject
-rejEEG.reject.indelec = [2 6 7 25]; % manually in code
-rejEEG.reject.indelec = input('Input vector of bad channels between [] \n');
+
+%rejEEG.reject.indelec = [2 6 7 25]; % manually in code
+rejEEG.reject.indelec = []
+%rejEEG.reject.indelec = input('Input vector of bad channels between [] \n');
+
+%rejEEG.reject.indelec = [2 6 7 24 25]; % manually in code, for ERP to cue
+
 
 rejchnames = {rejEEG.chanlocs([rejEEG.reject.indelec]).labels}
 adetails.reject.channelnames = rejchnames;
@@ -216,12 +231,25 @@ if strcmp(adetails.reject.strategy, 'remove' )
 elseif strcmp(adetails.reject.strategy, 'interpolate' )
     % Interpolate rejected channels
     rejEEG = eeg_interp(rejEEG,rejEEG.reject.indelec,'spherical');
+    % Note: rejEEG.reject.indelec gets deleted when you run this
+    % interpolation
+    
 end
 
 % Confirm that the new data look good
 pop_eegplot(rejEEG,1,1,0);
-figure; pop_spectopo(rejEEG, 1, [0  1000*epochEEG.xmax], 'EEG' ,...
+figure; pop_spectopo(rejEEG, 1, [1000*epochEEG.xmin  1000*epochEEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', [10 15 20], 'freqrange',[1 30],'electrodes','on');
+
+%% Mark epochs for rejection (may skip this step for now)
+
+% Generate a list of all epochs and mark the ones for rejection with the
+% number 1
+adetails.reject.epochs = zeros(1,size(rejEEG.data,3)); 
+adetails.reject.epochs(1) = 1;
+
+% Actually remove the epochs from your data
+rejEEG = pop_rejepoch(rejEEG,adetails.reject.epochs);
 
 %% Run ICA to find eye movements and other artifacts
 
@@ -230,25 +258,87 @@ figure; pop_spectopo(rejEEG, 1, [0  1000*epochEEG.xmax], 'EEG' ,...
 
 icarejEEG = pop_runica(rejEEG);
 
-icaepochEEG = pop_runica(epochEEG);
-
+% Run ICA on the version without channel rejection for comparison
+%icaepochEEG = pop_runica(epochEEG);
 % These give similar results
+
+%% Plot the ICA components
+
+icarejEEG = pop_selectcomps(icarejEEG)
 
 %% Remove ICA components
 
+% Store numbers of components to reject (set manually)
+%adetails.reject.icacomponents = [1 3 7 19 22]; % For '20170727114720_PatientW1-8v15_Record';
+adetails.reject.icacomponents = []; %For 20170806164107_PatientW1-7.5v12-small
 %pop_selectcomp
+% Running this way will cause a pop-up, which allows you to see the before
+% and after by hitting Plot Single Trial (or plot ERPs, if this is what you're looking at),
+%before you actually reject these components. 
+% Here you're looking to see that this removed the eyeblinks and other
+% artifacts without drastically changing the overall signal.
 rejicarejEEG = pop_subcomp(icarejEEG);
 
 %% Plot data after removal of ICA components
-figure; pop_spectopo(rejicarejEEG, 1, [0  1000*rejicarejEEG.xmax], 'EEG' ,...
-    'percent', 100, 'freq', [8 10 15], 'freqrange',[1 30],'electrodes','on');
+figure; pop_spectopo(rejicarejEEG, 1, [1000*rejicarejEEG.xmin  1000*rejicarejEEG.xmax], 'EEG' ,...
+    'percent', 100, 'freq', [8.4 15 16], 'freqrange',[1 30],'electrodes','on');
 
-%% Generate plots for each condition
+%% Generate spectopo plots for each condition
 for i = 1:length(adetails.markers.types)
-    tempEEG = pop_selectevent(icarejEEG, 'type', adetails.markers.types(i));
-    figure; pop_spectopo(tempEEG, 1, [0  1000*tempEEG.xmax], 'EEG' ,...
+    %tempEEG = pop_selectevent(icarejEEG, 'type', adetails.markers.types(i));
+    tempEEG = pop_selectevent(rejEEG, 'type', adetails.markers.types(i));
+    figure; pop_spectopo(tempEEG, 1, [1000*tempEEG.xmin  1000*tempEEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', [8 10 15], 'freqrange',[1 30],'electrodes','on');
     title(adetails.markers.names(i));
 end
 
-%%
+%% Generate spectopo plots for each condition, grouped by frequency 
+% This only works if the events occur in the epochs
+for i = 1:2 %length(adetails.markers.types)
+    tempEEG = pop_selectevent(rejicarejEEG, 'type', {adetails.markers.types{i} adetails.markers.types{i+2}});
+    figure; pop_spectopo(tempEEG, 1, [1000*tempEEG.xmin 1000*tempEEG.xmax], 'EEG' ,...
+    'percent', 100, 'freq', [8.4 15 16], 'freqrange',[1 30],'electrodes','on');
+    title(adetails.markers.names(i));
+end
+
+%% Generate spectopo plots for each condition, if epochs trimmed to not include events.
+
+% First need to make a list of what condition each epoch is
+selevents = {'221','121'};
+%selevents = {'211','111'};
+
+selevents = {'111', '121'}; % left
+selevents = {'211', '221'}; %Right
+freqsofinterest = [7.5 12 15];
+tempEEG = pop_select(rejicarejEEG, 'trial', find(contains(adetails.markers.trialevents,selevents)));
+    figure; pop_spectopo(tempEEG, 1, [1000*tempEEG.xmin 1000*tempEEG.xmax], 'EEG' ,...
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
+
+adetails.markers.names(contains(adetails.markers.types,selevents))    
+%title(adetails.markers.names(i));
+
+%% Generate ERP plots for each condition by left or right
+for i = 1:2:3 %length(adetails.markers.types)
+    %tempEEG = pop_selectevent(icarejEEG, 'type', adetails.markers.types(i));
+    tempEEG = pop_selectevent(rejEEG, 'type', {adetails.markers.types{i} adetails.markers.types{i+1}});
+    figure; pop_timtopo(tempEEG, [-100  1000], [NaN], adetails.markers.names{i});
+    title(adetails.markers.names(i));
+end
+
+%% Generate time frequency plots
+
+selchan = 5;
+
+selevents = {'221','121'};
+%selevents = {'211','111'};
+
+selevents = {'111', '121'}; % left
+%selevents = {'211', '221'}; %Right
+
+
+tempEEG = pop_select(rejicarejEEG, 'trial', find(contains(adetails.markers.trialevents,selevents)));
+
+figure; pop_newtimef( tempEEG, 1, 1, [1000*tempEEG.xmin  1000*tempEEG.xmax],...
+    [3 0.5] , 'ntimesout',10, 'topovec', selchan, 'elocs', tempEEG.chanlocs, 'chaninfo', tempEEG.chaninfo,...
+     'baseline',[0], 'freqs', [[5 18]], 'plotphase', 'off', 'plotitc','off','padratio', 1,'caption',tempEEG.chanlocs(selchan).labels);
+
