@@ -14,15 +14,14 @@ oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 %% Experiment Parameters
 % Trial Options
 trialLength = 2;                   % Trial length (s)
-numTrials = 2;
+trialNum = 2;
 movieBool = 1;                      % 0: Checkerboards only | 1: Overlay movies
 
-runPause = 1;
-startTrialPause = 1;
+runPause = 2;
+startTrialPause = 2;
 fixationPause = 1;
 videoPause = 0.5;
-endTrialPause = 0;
-endPause = 2;
+endtrialPause = 2;
 
 
 % Background Display
@@ -51,12 +50,10 @@ movienameR = [ PsychtoolboxRoot 'PsychDemos/MovieDemos/DualDiscs.mov' ] ;
 
 % Marker Options
 lslBool = 1;
-mStartRun = 10;
-mStartTrial = 20;
-mFixation = 3;
-mEndTrial = 21;
-mEndRun = 11;
-
+startRun = 10;
+startTrial = 20;
+endTrial = 21;
+endRun = 11;
 
 %% Load LSL
 disp('Loading library...')
@@ -189,22 +186,26 @@ try
     
     
     % Beginning Run
-    outlet.push_sample(mStartRun)
-    disp(mStartRun)
+    outlet.push_sample(startRun)
+    disp(startRun)
     
     Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
     Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
+    Screen('DrawTexture', window, cross_texture, [], dstRect(1,:));
+    Screen('DrawTexture', window, cross_texture, [], dstRect(2,:));
     Screen('Flip', window);
     
-    pause(runPause)
+    pause on
+    disp('Wait for keyboard')
+    KbStrokeWait;
+    pause off
 
-%     % Start timing for trial length and to manually check frequencies
-%     start = tic;
-%     time_elapsedL = toc(start);
-%     time_elapsedR = toc(start);
+    % Start timing for trial length and to manually check frequencies
+    start = tic;
+    time_elapsedL = toc(start);
+    time_elapsedR = toc(start);
     
-    for n = 1:(numTrials*2)
-        
+    for n = 1:(trialNum*2)
         if mod(n, 2) == 1
             disp("Opening movie")
             movieL = Screen('OpenMovie', window, movienameL, 0, -1);
@@ -219,55 +220,30 @@ try
             texR = Screen('GetMovieImage', window, movieR,1,0); 
             ltexR = texR;
 
-            outlet.push_sample(mStartTrial)
-            disp(mStartTrial)
-            
-            Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
-            Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
-            Screen('Flip', window);
-            pause(startTrialPause)
-            
-         
-            % Draw texture on screen
-            Screen('DrawTexture', window, cross_texture, [], dstRect(1,:));
-            Screen('DrawTexture', window, cross_texture, [], dstRect(2,:));
-            Screen('Flip', window);
-            pause(fixationPause)
-            
-            
-            start = tic;
-            time_elapsedL = toc(start);
-            time_elapsedR = toc(start);
-                
-            
-            texL = Screen('GetMovieImage', window, movieL, 0, 0);     
-            texR = Screen('GetMovieImage', window, movieR, 0, 0);
-            
-            Screen('DrawTexture', window, texL, [], dstRect(1,:) );
-            Screen('DrawTexture', window, texR, [], dstRect(2,:) );
+            outlet.push_sample(startTrial)
+            disp(startTrial)
 
-            pause(videoPause)
-                
             while toc(start) < trialLength
             % Display movies if included
-                texL = Screen('GetMovieImage', window, movieL, 0, 0);     
-                texR = Screen('GetMovieImage', window, movieR, 0, 0);    
+                if movieBool == 1
+                    texL = Screen('GetMovieImage', window, movieL, 0, 0);     
+                    texR = Screen('GetMovieImage', window, movieR, 0, 0);    
 
-                % If found, display next frame, else display last found
-                if texL > 0
-                     Screen('DrawTexture', window, texL, [], dstRect(1,:) );
-                     ltexL = texL;
-                else 
-                     Screen('DrawTexture', window, ltexL, [], dstRect(1,:) );
-                end
+                    % If found, display next frame, else display last found
+                    if texL > 0
+                         Screen('DrawTexture', window, texL, [], dstRect(1,:) );
+                         ltexL = texL;
+                    else 
+                         Screen('DrawTexture', window, ltexL, [], dstRect(1,:) );
+                    end
 
-                if texR > 0
-                    Screen('DrawTexture', window, texR, [], dstRect(2,:) );
-                    ltexR = texR;
-                else 
-                    Screen('DrawTexture', window, ltexR, [], dstRect(2,:) );
+                    if texR > 0
+                        Screen('DrawTexture', window, texR, [], dstRect(2,:) );
+                        ltexR = texR;
+                    else 
+                        Screen('DrawTexture', window, ltexR, [], dstRect(2,:) );
+                    end
                 end
-                
 
                 % Increment frame counter per flip
                 frameCounterL = frameCounterL + waitframes;
@@ -278,7 +254,7 @@ try
                 Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), 0, filterMode);
                 Screen('DrawTexture', window, cross_texture, [], dstRect(1,:));
                 Screen('DrawTexture', window, cross_texture, [], dstRect(2,:));
-                 
+                
                 % Flip to update display at set time (at waitframes multiple of screen refresh rate)
                 vbl = Screen('Flip', window, vbl + (waitframes-buffer) * ifi);
 
@@ -316,16 +292,18 @@ try
 
             Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
             Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
+            Screen('DrawTexture', window, cross_texture, [], dstRect(1,:));
+            Screen('DrawTexture', window, cross_texture, [], dstRect(2,:));
             Screen('Flip', window);
             
-            outlet.push_sample(mEndTrial)
-            disp(mEndTrial)
+            outlet.push_sample(endTrial)
+            disp(endTrial)
             
-            if n ~= numTrials*2
+            if n ~= trialNum*2
                 disp('Pausing...')
-%                 while toc(start) < endTrialPause
-%                 end
-                pause(endTrialPause)
+                while toc(start) < endtrialPause
+                end
+%                 pause(trialPause)
                 start = tic;
             end
 
@@ -334,9 +312,8 @@ try
         end
     end
     
-    pause(endPause)
-    outlet.push_sample(mEndRun)
-    disp(mEndRun)
+    outlet.push_sample(endRun)
+    disp(endRun)
 
 catch SE
     sca; 
@@ -344,5 +321,10 @@ catch SE
 end
 
 % Closes screen with keyboard press
-
+disp('Pause')
+pause(1)
+disp('Press Keyboard to Exit')
+KbStrokeWait;
+disp('Closing') 
 sca;
+disp('Closed')
