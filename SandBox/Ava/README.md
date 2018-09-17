@@ -1,5 +1,7 @@
 ## Ava Scripts
 
+Video Attention - SSVEP experimental setup
+
 OpenClosedEyes - offline processing and classification on open/closed eye Muse data
 
 SSVEP - offline processing of SSVEP Enobio data
