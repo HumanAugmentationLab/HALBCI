@@ -11,13 +11,11 @@ oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
 oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 1);
 oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 addpath(genpath('/home/hal/Documents/BCILAB/dependencies/liblsl-Matlab'));
-
+ListenChar(2); % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 %% Experiment Parameters
 % Duration
-trialLength = 5;                    % Trial length (s) -- includes pauses defined below!
+trialLength = 15;                    % Trial length (s) -- includes pauses defined below!
 numTrials = 2;                      % Number of trials per run
-numRuns = 1;                        % Number of runs in experiment
-numTotal = numRuns*numTrials;
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
@@ -40,31 +38,21 @@ backgroundColor = 0;                % 0: black
 scalingCoeff = 0.325;               % Fix bug of speed dependening on display size
 
 % Checkerboard Display
-Hz = [5 10];                        % Frequencies to display [L R]
+Hz = [6 1];                        % Frequencies to display [L R]
 transparencyChecker = 50;           % Transparency (0: none, 250: opaque)
-board_size = 4;                     % Number of checkers per side 
+boardSize = 4;                     % Number of checkers per side 
 color1 = 255;                       % Checker color 1 (255: black) %I am not sure if this is true
 color2 = 0;                         % Checker color 2 (0: white)
 filterMode = 0;                     % Color blending (0: nearest neighbour)
 waitframes = 1;                     % Flip rate in reference to monitor refresh
 buffer = 0.1;                       % Time buffer to prevent lag
 
-checkerboard_size = 100;            % Checkerboard size relative to display screen (0 to 100, 100:full size)
-video_size = 1;                     % Size of the Video (0-1, 1: largest without overlap)
-
-% Movie Options
-train = [ PsychtoolboxRoot 'PsychDemos/MovieDemos/v1.mp4' ];
-discs = [ PsychtoolboxRoot 'PsychDemos/MovieDemos/DualDiscs.mov' ] ;
-dog = [ PsychtoolboxRoot 'PsychDemos/MovieDemos/doglickingscreen.mp4' ] ;
-movies = { train , discs };
-
+checkerboardSize = 100;            % Checkerboard size relative to display screen (0 to 100, 100:full size)
+videoSize = 1;                     % Size of the Video (0-1, 1: largest without overlap)
 
 % Marker Options
-mStartExp = 10;
-mEndExp = 100;
-
-% mStartRun = 10;
-% mEndRun = 100;
+mStartRun = 10;
+mEndRun = 100;
 
 mStartTrial = 20;                   % Increments with trial number
 mEndTrial = 90;                     % Increments with trial number
@@ -76,36 +64,64 @@ mStimulusOnset = 50;                % Video appears - one's place increments wit
 mStimulusOffset = 60;               % Video removed - one's place increments with trial
 
 mResponsePeriodOnset = 70;          % Task reporting period  - do not use if report during trial
-mResponseOnset = 80;                % 80: event occured w/o key press (missed)
-                                    % 81: event w/key press (caught) 
-                                    % 82: no event w/key press (false positive)
+mResponseOnset = 80;             
+mEventOnset = 81;             
+
                                     
 mConditionA = 1;                    % Attend LEFT & LOW frequency
 mConditionB = 2;                    % Attend LEFT & HIGH frequency
 mConditionC = 3;                    % Attend RIGHT & LOW frequency
 mConditionD = 4;                    % Attend RIGHT & HIGH frequency
 
+%% Movie Options
+load eventTimes
+
+VideoRoot = '/home/hal/Documents/HALBCI/SandBox/Ava/VideoAttention/Videos/';
+train.name = [ VideoRoot 'v1.mp4' ];
+train.duration = 96;                                % Seconds
+train.delayMax = train.duration - trialLength;
+train.eventTimes = trainTimes;
+
+discs.name = [ VideoRoot 'DualDiscs.mov' ] ;
+discs.duration = 2;
+discs.delayMax = 0;
+
+ball1.name = [ VideoRoot 'bball1.mov' ] ;
+ball1.duration = (360*1) + (60*16) + 28;
+ball1.delayMax = ball1.duration - trialLength;
+bball1.fps = 30;                                            % Check multimedia properties for each video
+ball1.eventTimes = ball1Times;                              % Event times (s)
+                                                            % Make sure eventTimes mat file loaded and naming consistent
+ball1.eventFrames = floor(ball1.eventTimes/bball1.fps);     % Event times (frames)
+
+dog.name = [ VideoRoot 'doglickingscreen.mp4' ] ;
+dog.duration = 66;
+dog.delayMax = dog.duration - trialLength;
+
+% focusMovieList = { train , ball1 };
+focusMovieList = { ball1 };
+
 %% Randomize Targets
-numVideos = length(movies);
-half_size = floor(numTotal/2);
+numVideos = length(focusMovieList);
+halfSize = floor(numTrials/2);
 
-if mod(numTotal, 2) == 0
-    ordered_sides = [zeros(1, half_size) ones(1, half_size)];
+if mod(numTrials, 2) == 0
+    orderedSides = [zeros(1, halfSize) ones(1, halfSize)];
 else
-    extra_side = round(rand);
-    ordered_sides = [extra_side zeros(1, half_size) ones(1, half_size)];    
+    extraSide = round(rand);
+    orderedSides = [extraSide zeros(1, halfSize) ones(1, halfSize)];    
 end
-random_sides = ordered_sides(randperm(length(ordered_sides)));
-target_sides = random_sides;
+randomSides = orderedSides(randperm(length(orderedSides)));
+targetSides = randomSides;
 
-target_freqs = zeros(1, numTotal);
-for i = 1:numTotal
-    target_freqs(i) = Hz(random_sides(i) + 1);
+targetFreqs = zeros(1, numTrials);
+for i = 1:numTrials
+    targetFreqs(i) = Hz(randomSides(i) + 1);
 end
    
-target_videos = cell(1, numTotal);
-for i = 1:numTotal
-    target_videos{i} = movies{round(rand*(numVideos-1)+1)};
+targetVideos = cell(1, numTrials);
+for i = 1:numTrials
+    targetVideos{i} = focusMovieList{round(rand*(numVideos-1)+1)};
 end
 
 %% Load LSL
@@ -119,21 +135,20 @@ if lslBool == 1
     disp('Opening an outlet...')
     outlet = lsl_outlet(info);
 end
-%% Generate Initial Checkerboards
 
-new_board_size = round(board_size/checkerboard_size*100);
-removeCH = (new_board_size-board_size)/2;
-actual_checkerboard_size = board_size/new_board_size*100; % Actual checkerboard size
-board_size = new_board_size;
+%% Generate Initial Checkerboards
+new_boardSize = round(boardSize/checkerboardSize*100);
+removeCH = (new_boardSize-boardSize)/2;
+actual_checkerboardSize = boardSize/new_boardSize*100; % Actual checkerboard size
+boardSize = new_boardSize;
 
 % Populate matrices to represent checkerboard display
-% checkerboardL = repmat(eye(2), board_size/2, board_size/2, 2);
-checkerboardL = ones([board_size board_size 2]);
+checkerboardL = ones([boardSize boardSize 2]);
 checkerboardR = checkerboardL;
 
 % LAYER 1: Set checkerboard colors with opposite polarity
-for j = 1:board_size
-     for k = 1:board_size
+for j = 1:boardSize
+     for k = 1:boardSize
          if mod(j+k,2) == 1
              checkerboardL(j,k,:) = color1;
              checkerboardR(j,k,:) = color2;
@@ -145,24 +160,24 @@ for j = 1:board_size
 end
 
 % LAYER 2: Set transparency
-checkerboardL(:,:,2) = zeros(board_size, board_size) + transparencyChecker;  
-checkerboardR(:,:,2) = zeros(board_size, board_size) + transparencyChecker; 
+checkerboardL(:,:,2) = zeros(boardSize, boardSize) + transparencyChecker;  
+checkerboardR(:,:,2) = zeros(boardSize, boardSize) + transparencyChecker; 
 
 for i = 1:removeCH
     checkerboardL(i,:,2) = 0;
     checkerboardL(:,i,2) = 0;
-    checkerboardL(board_size-i+1,:,2) = 0;
-    checkerboardL(:,board_size-i+1,2) = 0; 
+    checkerboardL(boardSize-i+1,:,2) = 0;
+    checkerboardL(:,boardSize-i+1,2) = 0; 
     
     checkerboardR(i,:,2) = 0;
     checkerboardR(:,i,2) = 0;
-    checkerboardR(board_size-i+1,:,2) = 0;
-    checkerboardR(:,board_size-i+1,2) = 0;
+    checkerboardR(boardSize-i+1,:,2) = 0;
+    checkerboardR(:,boardSize-i+1,2) = 0;
 end
 %% Cross
-[cross_img, ~, alpha] = imread('cross_sm.png');
-cross_img(:,:,4) = alpha;
-cross_img = imresize(cross_img, 0.5);
+[crossImage, ~, alpha] = imread('cross_sm.png');
+crossImage(:,:,4) = alpha;
+crossImage = imresize(crossImage, 0.5);
 cross_window = 1;
 %% Display
 try
@@ -180,7 +195,7 @@ try
     
     % Set portion of window for displaying checkerboards (with margins)
     % Space checkerboards evenly for display
-    dispRect = [0 0 video_size*wW/3 video_size*wH/2];
+    dispRect = [0 0 videoSize*wW/3 videoSize*wH/2];
     dispRectL = CenterRectOnPointd(dispRect, xCenter*.5, yCenter);
     dispRectR = CenterRectOnPointd(dispRect, xCenter*1.5, yCenter);
     dstRect = [dispRectL; dispRectR];
@@ -192,29 +207,13 @@ try
     % Set up alpha-blending for smooth (anti-aliased) lines
     Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 
-%     % Setup movies if included
-%     if movieBool == 1
-%         % Open movies and load initial frames
-%         movieL = Screen('OpenMovie', window, movienameL, 0, -1);
-%         movieR = Screen('OpenMovie', window, movienameR, 0, -1);
-%     
-%         Screen('PlayMovie', movieL, 1, 1);
-%         Screen('PlayMovie', movieR, 1, 1);
-%         
-%         texL = Screen('GetMovieImage', window, movieL,1,0); 
-%         ltexL = texL;
-%         
-%         texR = Screen('GetMovieImage', window, movieR,1,0); 
-%         ltexR = texR;
-%     end
-
     % Black Screen
     blackCheckerboard = checkerboardL;
     blackCheckerboard(:,:,1) = 0;
     blackCheckerboard(:,:,2) = 0;
     blackTexture = Screen('MakeTexture', window, blackCheckerboard);
     
-    cross_texture = Screen('MakeTexture', window, cross_img);
+    crossTexture = Screen('MakeTexture', window, crossImage);
     
     % Flip Timing
     % Query refresh rate of monitor (s)
@@ -236,282 +235,327 @@ try
     vbl = Screen('Flip', window);
 
     if lslBool
-        outlet.push_sample(mStartExp)
-        disp(mStartExp)
+        outlet.push_sample(mStartRun)
+        disp(mStartRun)
     end
 
-    %% Run Level
-    for r = 1:numRuns
-        
-        % Begin Run
-%         if lslBool
-%             outlet.push_sample(mStartRun)
-%             disp(mStartRun)
-%         end
+    % Wait on black screen
+    Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
+    Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
+    Screen('Flip', window);
 
-        % Wait on black screen
-        Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
-        Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
-        Screen('Flip', window);
+    pause(runPause)
 
-        pause(runPause)
+%     % Start timing for trial length and to manually check frequencies
+%     start = tic;
+%     timeElapsedL = toc(start);
+%     timeElapsedR = toc(start);
 
-    %     % Start timing for trial length and to manually check frequencies
-    %     start = tic;
-    %     time_elapsedL = toc(start);
-    %     time_elapsedR = toc(start);
+%% Trial level
+    for n = 1:(numTrials*2)
 
-    %% Trial level
-        for n = 1:(numTrials*2)
+        if mod(n, 2) == 1
+            %% Randomized selection (target side, video, frequency, start)       
+            m = (n+1)/2;
 
-            if mod(n, 2) == 1
-                %% Setup trial         
-                m = (n+1)/2;
-              
-                % LEFT/RIGHT display condition:
-                current_side = target_sides(m);
+            % LEFT/RIGHT display condition:
+            currentSide = targetSides(m);
+            
+            % Associate target movie with target side
+            if currentSide == 0
+                movienameL = targetVideos{m}.name;
+                moviedelayL = rand * targetVideos{m}.delayMax;
+                currentdelay = moviedelayL;
                 
-                % Associate target movie with target side
-                if current_side == 0
-                    movienameL = target_videos{m};
-                    movienameR = dog;   % Change distracting video
-                else
-                    movienameR = target_videos{m};
-                    movienameL = dog;   % Change distracting video
-                end
+                movienameR = dog.name;   % Change distracting video
+                moviedelayR = rand * dog.delayMax;
+            else
+                movienameR = targetVideos{m}.name;
+                moviedelayR = rand * targetVideos{m}.delayMax;
+                currentdelay = moviedelayR;
                 
-                % HIGH/LOW freq condition:
-                if current_side == 0
-                    left_freq = target_freqs(m);
-                    right_freq = Hz(Hz ~= target_freqs(m));
-                    
-                    if lslBool
-                        if target_freqs(m) == min(target_freqs)
-                            % Condition A: LEFT LOW
-                            outlet.push_sample(mConditionA)
-                            disp(mConditionA)
-                        else
-                            % Condition B: LEFT HIGH
-                            outlet.push_sample(mConditionB)
-                            disp(mConditionB)
-                        end
-                    end
-                else
-                    right_freq = target_freqs(m);
-                    left_freq = Hz(Hz ~= target_freqs(m));
-                    
-                    if lslBool
-                        if target_freqs(m) == min(target_freqs)
-                            % Condition C: RIGHT LOW
-                            outlet.push_sample(mConditionC)
-                            disp(mConditionC)
-                        else
-                            % Condition D: RIGHT HIGH
-                            outlet.push_sample(mConditionD)
-                            disp(mConditionD)
-                        end
-                    end
-                end
-
-                % Try to open multimedia file
-                movieL = Screen('OpenMovie', window, movienameL, 0, -1);
-                movieR = Screen('OpenMovie', window, movienameR, 0, -1);
-
-                % Queue playback at normal speed forward
-                Screen('PlayMovie', movieL, 1, 1);
-                Screen('PlayMovie', movieR, 1, 1);
-
-                texL = Screen('GetMovieImage', window, movieL,1,0); 
-                ltexL = texL;
-
-                texR = Screen('GetMovieImage', window, movieR,1,0); 
-                ltexR = texR;
+                movienameL = dog.name;   % Change distracting video
+                moviedelayL = rand * dog.delayMax;
+            end
+            
+            disp("Video starting at...");
+            disp(currentdelay);
+            
+            % Event timing adjustment
+            % Find first event after video start time ...
+            choppedEvents = targetVideos{m}.eventTimes - currentdelay;
+            % Round negative to zero for logical indexing
+            choppedEvents(choppedEvents < 0) = 0;
+            % Return index of first non-zero index (event time after start time)
+            startIndex = find(choppedEvents, 1);
+            eventCounter = startIndex;
+            
+            % HIGH/LOW freq condition:
+            if currentSide == 0
+                leftFreq = targetFreqs(m);
+                rightFreq = Hz(Hz ~= targetFreqs(m));
 
                 if lslBool
-                    outlet.push_sample(mStartTrial + m)
-                    disp(mStartTrial + m)
+                    if targetFreqs(m) == min(targetFreqs)
+                        % Condition A: LEFT LOW
+                        outlet.push_sample(mConditionA)
+                        disp(mConditionA)
+                    else
+                        % Condition B: LEFT HIGH
+                        outlet.push_sample(mConditionB)
+                        disp(mConditionB)
+                    end
                 end
-                
-                Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
-                Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
+            else
+                rightFreq = targetFreqs(m);
+                leftFreq = Hz(Hz ~= targetFreqs(m));
 
-                Screen('Flip', window);
-                pause(startTrialPause)  
-                %% Fixation display
-                % Draw texture on screen
-                Screen('DrawTexture', window, cross_texture, [], dstRect(current_side + 1,:));
-                Screen('Flip', window);
-                
                 if lslBool
-                    outlet.push_sample(mCueOnset + m)
-                    disp(mCueOnset + m)
+                    if targetFreqs(m) == min(targetFreqs)
+                        % Condition C: RIGHT LOW
+                        outlet.push_sample(mConditionC)
+                        disp(mConditionC)
+                    else
+                        % Condition D: RIGHT HIGH
+                        outlet.push_sample(mConditionD)
+                        disp(mConditionD)
+                    end
                 end
+            end
 
-                pause(fixationPause)
-                %% Initial movie display
-                start = tic;
-                time_elapsedL = toc(start);
-                time_elapsedR = toc(start);
+            %% Buffer movie and initial display
+            % Try to open multimedia file
+            movieL = Screen('OpenMovie', window, movienameL, 0, -1);
+            movieR = Screen('OpenMovie', window, movienameR, 0, -1);
+            
+            % Set start time from file ( name, delay from start, 0: in seconds | 1: in frames)
+            Screen('SetMovieTimeIndex', movieL, moviedelayL, 0);
+            Screen('SetMovieTimeIndex', movieR, moviedelayR, 0); 
+    
+             % Queue playback at normal speed forward
+            Screen('PlayMovie', movieL, 1, 1);
+            Screen('PlayMovie', movieR, 1, 1);
 
-                texL = Screen('GetMovieImage', window, movieL, 0, 0);     
-                texR = Screen('GetMovieImage', window, movieR, 0, 0);
+            texL = Screen('GetMovieImage', window, movieL,1,0); 
+            ltexL = texL;
 
-                Screen('DrawTexture', window, texL, [], dstRect(1,:) );
-                Screen('DrawTexture', window, texR, [], dstRect(2,:) );
-                
-                % Uncomment to display first frame of video before playing
+            texR = Screen('GetMovieImage', window, movieR,1,0); 
+            ltexR = texR;
+
+            if lslBool
+                outlet.push_sample(mStartTrial + m)
+                disp(mStartTrial + m)
+            end
+
+            Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
+            Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
+
+            Screen('Flip', window);
+            pause(startTrialPause)  
+            
+            %% Fixation display
+            % Draw texture on screen
+            Screen('DrawTexture', window, crossTexture, [], dstRect(currentSide + 1,:));
+            Screen('Flip', window);
+
+            if lslBool
+                outlet.push_sample(mCueOnset + m)
+                disp(mCueOnset + m)
+            end
+
+            pause(fixationPause)
+            %% Initial movie display
+            start = tic;
+            timeElapsedL = toc(start);
+            timeElapsedR = toc(start);
+
+            texL = Screen('GetMovieImage', window, movieL, 0, 0);     
+            texR = Screen('GetMovieImage', window, movieR, 0, 0);
+
+            Screen('DrawTexture', window, texL, [], dstRect(1,:) );
+            Screen('DrawTexture', window, texR, [], dstRect(2,:) );
+
+            % Uncomment to display first frame of video before playing
 %               Screen('Flip', window);
 %               pause(videoPause)
 
-                if lslBool
-                    outlet.push_sample(mStimulusOnset + m)
-                    disp(mStimulusOnset + m)
+            if lslBool
+                outlet.push_sample(mStimulusOnset + m)
+                disp(mStimulusOnset + m)
+            end
+
+            %% Play movie
+            while toc(start) < trialLength
+                % Display movies if included
+                texL = Screen('GetMovieImage', window, movieL, 0, 0);     
+                texR = Screen('GetMovieImage', window, movieR, 0, 0);    
+
+                % If found, display next frame, else display last found
+                if texL > 0
+                     Screen('DrawTexture', window, texL, [], dstRect(1,:) );
+                     ltexL = texL;
+                else 
+                     Screen('DrawTexture', window, ltexL, [], dstRect(1,:) );
                 end
 
-                %% Play movie
-                while toc(start) < trialLength
-                    % Display movies if included
-                    texL = Screen('GetMovieImage', window, movieL, 0, 0);     
-                    texR = Screen('GetMovieImage', window, movieR, 0, 0);    
-
-                    % If found, display next frame, else display last found
-                    if texL > 0
-                         Screen('DrawTexture', window, texL, [], dstRect(1,:) );
-                         ltexL = texL;
-                    else 
-                         Screen('DrawTexture', window, ltexL, [], dstRect(1,:) );
-                    end
-
-                    if texR > 0
-                        Screen('DrawTexture', window, texR, [], dstRect(2,:) );
-                        ltexR = texR;
-                    else 
-                        Screen('DrawTexture', window, ltexR, [], dstRect(2,:) );
-                    end
-
-                    % Increment frame counter per flip
-                    frameCounterL = frameCounterL + waitframes;
-                    frameCounterR = frameCounterR + waitframes;
-
-                    % Draw texture on screen
-                    Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), 0, filterMode);
-                    Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), 0, filterMode);
-                    Screen('DrawTexture', window, cross_texture, [], dstRect(current_side + 1,:));
-
-                    % Flip to update display at set time (at waitframes multiple of screen refresh rate)
-                    vbl = Screen('Flip', window, vbl + (waitframes-buffer) * ifi);
-                    
-                    % For each checkerboard, reverse texture cue/polarity at interval of frequency
-                    if frameCounterL >= scalingCoeff/(ifi*left_freq)
-                         % Manually check duration of each flash
-                         LeftTime = toc(start) - time_elapsedL;
-                         %disp({'LeftTime', LeftTime})
-
-                         % Flip texture
-                         textureCueL = fliplr(textureCueL);
-
-                         % Reset counter and time
-                         frameCounterL = 0;
-                         time_elapsedL = toc(start);
-                    end
-
-                    if frameCounterR >= scalingCoeff/(ifi*right_freq)
-                        RightTime = toc(start) - time_elapsedR;
-                        %disp({'RightTime', RightTime})
-
-                        textureCueR = fliplr(textureCueR);
-
-                        frameCounterR = 0;
-                        time_elapsedR = toc(start);
-                    end
-                    
-                    % ADD -reading events from file, waiting for key press, and sending markers!
-                    
+                if texR > 0
+                    Screen('DrawTexture', window, texR, [], dstRect(2,:) );
+                    ltexR = texR;
+                else 
+                    Screen('DrawTexture', window, ltexR, [], dstRect(2,:) );
                 end
-%                 disp('Display end')
-                start = tic;
-            elseif  mod(n, 2) == 0
-                %% Close movie
-%                 disp('Closing movie...')
-                Screen('CloseMovie', movieL);
-                Screen('CloseMovie', movieR);
 
-                Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
-                Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
-                Screen('Flip', window);
+                % Increment frame counter per flip
+                frameCounterL = frameCounterL + waitframes;
+                frameCounterR = frameCounterR + waitframes;
+
+                % Draw texture on screen
+                Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), 0, filterMode);
+                Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), 0, filterMode);
+                Screen('DrawTexture', window, crossTexture, [], dstRect(currentSide + 1,:));
+
+                % Flip to update display at set time (at waitframes multiple of screen refresh rate)
+                vbl = Screen('Flip', window, vbl + (waitframes-buffer) * ifi);
+
+                % For each checkerboard, reverse texture cue/polarity at interval of frequency
+                if frameCounterL >= scalingCoeff/(ifi*leftFreq)
+                     % Manually check duration of each flash
+                     leftTime = toc(start) - timeElapsedL;
+                     %disp({'leftTime', leftTime})
+
+                     % Flip texture
+                     textureCueL = fliplr(textureCueL);
+
+                     % Reset counter and time
+                     frameCounterL = 0;
+                     timeElapsedL = toc(start);
+                end
+
+                if frameCounterR >= scalingCoeff/(ifi*rightFreq)
+                    rightTime = toc(start) - timeElapsedR;
+                    %disp({'rightTime', rightTime})
+
+                    textureCueR = fliplr(textureCueR);
+
+                    frameCounterR = 0;
+                    timeElapsedR = toc(start);
+                end
+
+                % ADD -reading events from file, waiting for key press, and sending markers!
+                [ keyIsDown, seconds, keyCode ] = KbCheck;
                 
-                if lslBool
-                    outlet.push_sample(mCueOffset + m)
-                    disp(mCueOffset + m)
-                    
-                    outlet.push_sample(mStimulusOffset + m)
-                    disp(mStimulusOffset + m)
-                    
-                    outlet.push_sample(mEndTrial + m)
-                    disp(mEndTrial + m)
-                end
                 
-                if surveyBool
-                    textX = wW/6;
-                    textY = wH/5;
-                    space = 20;
-                    Screen('TextSize', window, 12);
-                    Screen('DrawText', window, 'Rate your focus during this past session by keying in the number of the most accurate statement:', textX, textY, [255, 255, 255]);
-                    Screen('DrawText', window, '1: I did not pay attention in this session', textX, textY+space*2, [255, 255, 255]);
-                    Screen('DrawText', window, '2: I was focused, lost attention, and then caught myself multiple times', textX, textY+space*3, [255, 255, 255]);
-                    Screen('DrawText', window, '3: I did well at the beginning, but my attention faded near the end', textX, textY+space*4, [255, 255, 255]);
-                    Screen('DrawText', window, '4: I was able to maintain my attention the entire time', textX, textY+space*5, [255, 255, 255]);
-
-                    Screen('DrawText', window, 'Press the right arrow key to continue.', textX, textY+space*7, [255, 255, 255]);
-                    Screen('Flip', window);
+                if keyIsDown && lslBool
+                    outlet.push_sample(mResponseOnset);
+                    disp(mResponseOnset);
+                    FlushEvents('keyDown');
                     
-                    endKey = KbName('RightArrow'); % Pressing right arrow leaves survey
-                    while KbCheck; end % Wait until all keys are released.
+                    disp(videoTime)
+                    % KbReleaseWait;
+                end
 
-                    while 1 % Wait until answer submitted
-                        [keyIsDown, seconds, keyCode] = KbCheck;
-                        keyCode = find(keyCode, 1);
+                videoTime = currentdelay + timeElapsedL;
+
+                % Event matrix does not match video
+%                  disp("Next event")
+%                  disp(targetVideos{m}.eventTimes(eventCounter));
+%                  disp("Time")
+%                  disp(videoTime)
+                
+                % If time matches with event times, send event marker
+                if ( eventCounter <= length(targetVideos{m}.eventTimes) && ...
+                    videoTime > targetVideos{m}.eventTimes(eventCounter) - 0.05 && ...
+                        videoTime < targetVideos{m}.eventTimes(eventCounter) + 0.05)
+                    if lslBool
+                        disp("Event at")
+                        disp(targetVideos{m}.eventTimes(eventCounter))
                         
-                        % If key is pressed, display its code number or name.
-                        if keyIsDown
-                            % Note that we use find(keyCode) because keyCode is an array.
-                            %fprintf('You pressed key %i which is %s\n', keyCode, KbName(keyCode));
-                            fprintf('You pressed key %s\n', KbName(keyCode));
-
-                            if keyCode == endKey
-                                break;
-                            end
-                            
-                            % If the user holds down a key, KbCheck will report multiple events.
-                            % To condense multiple 'keyDown' events into a single event, we wait until all
-                            % keys have been released.
-                            KbReleaseWait;
-                        end
+                        outlet.push_sample(mEventOnset);
+                        disp(mEventOnset)
                     end
+                    eventCounter = eventCounter + 1;
                 end
 
-                if n ~= numTrials*2
+            end
+            
+            start = tic;
+        elseif  mod(n, 2) == 0
+            %% Close movie
+%           disp('Closing movie...')
+            Screen('CloseMovie', movieL);
+            Screen('CloseMovie', movieR);
+
+            Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
+            Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
+            Screen('Flip', window);
+
+            if lslBool
+                outlet.push_sample(mCueOffset + m)
+                disp(mCueOffset + m)
+
+                outlet.push_sample(mStimulusOffset + m)
+                disp(mStimulusOffset + m)
+
+                outlet.push_sample(mEndTrial + m)
+                disp(mEndTrial + m)
+            end
+
+            if surveyBool
+                textX = wW/6;
+                textY = wH/5;
+                space = 20;
+                Screen('TextSize', window, 12);
+                Screen('DrawText', window, 'Rate your focus during this past session by keying in the number of the most accurate statement:', textX, textY, [255, 255, 255]);
+                Screen('DrawText', window, '1: I did not pay attention in this session', textX, textY+space*2, [255, 255, 255]);
+                Screen('DrawText', window, '2: I was focused, lost attention, and then caught myself multiple times', textX, textY+space*3, [255, 255, 255]);
+                Screen('DrawText', window, '3: I did well at the beginning, but my attention faded near the end', textX, textY+space*4, [255, 255, 255]);
+                Screen('DrawText', window, '4: I was able to maintain my attention the entire time', textX, textY+space*5, [255, 255, 255]);
+
+                Screen('DrawText', window, 'Press the right arrow key to continue.', textX, textY+space*7, [255, 255, 255]);
+                Screen('Flip', window);
+
+                endKey = KbName('RightArrow'); % Pressing right arrow leaves survey
+                while KbCheck; end % Wait until all keys are released.
+
+                while 1 % Wait until answer submitted
+                    [keyIsDown, seconds, keyCode] = KbCheck;
+                    keyCode = find(keyCode, 1);
+
+                    % If key is pressed, display its code number or name.
+                    if keyIsDown
+                        % Note that we use find(keyCode) because keyCode is an array.
+                        % fprintf('You pressed key %i which is %s\n', keyCode, KbName(keyCode));
+                        % fprintf('You pressed key %s\n', KbName(keyCode));
+
+                        if keyCode == endKey
+                            break;
+                        end
+
+                        % If the user holds down a key, KbCheck will report multiple events.
+                        % To condense multiple 'keyDown' events into a single event, we wait until all
+                        % keys have been released.
+                        KbReleaseWait;
+                    end
+                end
+            end
+
+            if n ~= numTrials*2
 %                     disp('Pausing...')
 %                     while toc(start) < endTrialPause
 %                     end
-                    pause(endTrialPause)
-                    start = tic;
-                end
-            else
-                disp("error")
+                pause(endTrialPause)
+                start = tic;
             end
+        else
+            disp("error")
         end
-
-        pause(endPause)
-%         if lslBool
-%             outlet.push_sample(mEndRun)
-%             disp(mEndRun)
-%         end
     end
+
+    pause(endPause)
     
     if lslBool
-        outlet.push_sample(mEndExp)
-        disp(mEndExp)
+        outlet.push_sample(mEndRun)
+        disp(mEndRun)
     end
 catch SE
     sca; 
@@ -519,5 +563,5 @@ catch SE
 end
 
 % Closes screen with keyboard press
-
 sca;
+ListenChar(0);
