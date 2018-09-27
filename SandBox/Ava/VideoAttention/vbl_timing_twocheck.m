@@ -14,15 +14,15 @@ addpath(genpath('/home/hal/Documents/BCILAB/dependencies/liblsl-Matlab'));
 ListenChar(2); % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 %% Experiment Parameters
 % Duration
-trialLength = 15;                    % Trial length (s) -- includes pauses defined below!
+trialLength = 30;                    % Trial length (s)
 numTrials = 2;                      % Number of trials per run
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
-runPause = 1;                       % Pause before run (s)
+runPause = 0;                       % Pause before run (s)
 startTrialPause = 1;                % Pause before trial (s)
-fixationPause = 1;                  % Pause before fixation cross (s)
-videoPause = 1;                     % Pause before video starts (s)
+fixationPause = 5;                  % Pause before fixation cross (s)
+videoPause = 1;                     % Pause before video starts (s) -- NOT USED
 endTrialPause = 1;                  % Pause after trial ends (s)
 endPause = 2;                       % Pause after run ends (s)
 
@@ -38,7 +38,7 @@ backgroundColor = 0;                % 0: black
 scalingCoeff = 0.325;               % Fix bug of speed dependening on display size
 
 % Checkerboard Display
-Hz = [6 1];                        % Frequencies to display [L R]
+Hz = [6 15];                        % Frequencies to display [L R]
 transparencyChecker = 50;           % Transparency (0: none, 250: opaque)
 boardSize = 4;                     % Number of checkers per side 
 color1 = 255;                       % Checker color 1 (255: black) %I am not sure if this is true
@@ -88,15 +88,15 @@ discs.delayMax = 0;
 
 ball1.name = [ VideoRoot 'bball1.mov' ] ;
 ball1.duration = (360*1) + (60*16) + 28;
-ball1.delayMax = ball1.duration - trialLength;
+ball1.delayMax = ball1.duration - trialLength - fixationPause;
 bball1.fps = 30;                                            % Check multimedia properties for each video
-ball1.eventTimes = ball1Times;                              % Event times (s)
+ball1.eventTimes = ball1Times - fixationPause;                              % Event times (s)
                                                             % Make sure eventTimes mat file loaded and naming consistent
 ball1.eventFrames = floor(ball1.eventTimes/bball1.fps);     % Event times (frames)
 
 dog.name = [ VideoRoot 'doglickingscreen.mp4' ] ;
 dog.duration = 66;
-dog.delayMax = dog.duration - trialLength;
+dog.delayMax = dog.duration - trialLength - fixationPause;
 
 % focusMovieList = { train , ball1 };
 focusMovieList = { ball1 };
@@ -278,8 +278,8 @@ try
                 moviedelayL = rand * dog.delayMax;
             end
             
-            disp("Video starting at...");
-            disp(currentdelay);
+%             disp("Video starting at...");
+%             disp(currentdelay);
             
             % Event timing adjustment
             % Find first event after video start time ...
@@ -363,7 +363,8 @@ try
                 disp(mCueOnset + m)
             end
 
-            pause(fixationPause)
+            pause(fixationPause) % movie playing in background during this pause
+            
             %% Initial movie display
             start = tic;
             timeElapsedL = toc(start);
@@ -450,26 +451,25 @@ try
                     disp(mResponseOnset);
                     FlushEvents('keyDown');
                     
-                    disp(videoTime)
+                    % disp(videoTime)
                     % KbReleaseWait;
                 end
 
-                videoTime = currentdelay + timeElapsedL;
+                videoTime = currentdelay + toc(start);
 
                 % Event matrix does not match video
 %                  disp("Next event")
 %                  disp(targetVideos{m}.eventTimes(eventCounter));
 %                  disp("Time")
 %                  disp(videoTime)
+%                  disp("Next event at")
+%                  disp(targetVideos{m}.eventTimes(eventCounter))
                 
                 % If time matches with event times, send event marker
                 if ( eventCounter <= length(targetVideos{m}.eventTimes) && ...
-                    videoTime > targetVideos{m}.eventTimes(eventCounter) - 0.05 && ...
-                        videoTime < targetVideos{m}.eventTimes(eventCounter) + 0.05)
+                    videoTime > targetVideos{m}.eventTimes(eventCounter) - 0.5 && ...
+                        videoTime < targetVideos{m}.eventTimes(eventCounter) + 0.5)
                     if lslBool
-                        disp("Event at")
-                        disp(targetVideos{m}.eventTimes(eventCounter))
-                        
                         outlet.push_sample(mEventOnset);
                         disp(mEventOnset)
                     end
