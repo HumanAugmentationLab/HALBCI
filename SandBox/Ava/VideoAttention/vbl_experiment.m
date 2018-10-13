@@ -8,7 +8,7 @@
 AssertOpenGL;
 PsychDefaultSetup(2);  
 oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
-oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 5);
+% oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 5);
 % oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
@@ -18,7 +18,7 @@ experimentName = 'experiment_log.txt';      % Log file name
 
 % Duration
 trialLength = 60;                   % Trial length (s)
-numTrials = 3;                      % Number of trials per run
+numTrials = 9;                      % Number of trials per run
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
@@ -42,8 +42,8 @@ backgroundColor = 0;                % 0: black
 scalingCoeff = 0.325;               % Fix bug of speed dependening on display size
 
 % Checkerboard Display
-Hz = [6 15];                        % Frequencies to display [L R]
-transparencyChecker = 25;           % Transparency (0: none, 250: opaque)
+Hz = [6 15];                        % Frequencies to display 
+transparencyChecker = 250;           % Transparency (0: none, 250: opaque)
 boardSize = 4;                      % Number of checkers per side 
 color1 = 255;                       % Checker color 1 (255: black) %I am not sure if this is true
 color2 = 0;                         % Checker color 2 (0: white)
@@ -352,14 +352,14 @@ end
             %% Buffer movie and initial display
             % Try to open multimedia file
             if movieBool
-                % movieL = Screen('OpenMovie', window, movienameL, 0, -1);
-                % movieR = Screen('OpenMovie', window, movienameR, 0, -1);
+%                 movieL = Screen('OpenMovie', window, movienameL, 0, -1);
+%                 movieR = Screen('OpenMovie', window, movienameR, 0, -1);
                 movieL = Screen('OpenMovie', window, movienameL, 0);
-                movieR = Screen('OpenMovie', window, movienameR, 0);
+%                 movieR = Screen('OpenMovie', window, movienameR, 0);
 
                 % Set start time from file ( name, delay from start, 0: in seconds | 1: in frames)
                 Screen('SetMovieTimeIndex', movieL, moviedelayL, 0);
-                Screen('SetMovieTimeIndex', movieR, moviedelayR, 0); 
+%                 Screen('SetMovieTimeIndex', movieR, moviedelayR, 0); 
             end
 
             if lslBool
@@ -393,13 +393,13 @@ end
             if movieBool
                  % Queue playback at normal speed forward
                 Screen('PlayMovie', movieL, 1, 1);
-                Screen('PlayMovie', movieR, 1, 1);
+%                 Screen('PlayMovie', movieR, 1, 1);
 
-                texL = Screen('GetMovieImage', window, movieL, 0, 0);     
-                texR = Screen('GetMovieImage', window, movieR, 0, 0);
+                texL = Screen('GetMovieImage', window, movieL, 0, 0)     
+%                 texR = Screen('GetMovieImage', window, movieR, 0, 0)
 
                 ltexL = texL;
-                ltexR = texR;
+%                 ltexR = texR;
             end
             
             % Uncomment to display first frame of video before playing
@@ -415,57 +415,21 @@ end
 
             %% Play movie
             while toc(start) < trialLength
-                
-                if movieBool
-                    % Display movies if included
-                     texL = Screen('GetMovieImage', window, movieL, 0, 0);     
-                     texR = Screen('GetMovieImage', window, movieR, 0, 0);
-
-                     % disp('Got image')
-                     % If found, display next frame, else display last found
-                     if texL > 0
-                          if ltexL > 0
-                            Screen('Close', ltexL);
-                          end
-                          Screen('DrawTexture', window, texL, [], dstRect(1,:));
-                          ltexL = texL;
-                          disp(strcat('texl: ',num2str(texL)))
-                          
-                     else 
-                          Screen('DrawTexture', window, ltexL, [], dstRect(1,:));
-                          disp(strcat('ltexl: ',num2str(ltexL)))
-                     end
-
-                    if texR > 0
-                        if ltexR > 0
-                            Screen('Close', ltexR);
-                          end
-                        Screen('DrawTexture', window, texR, [], dstRect(2,:));
-                        ltexR = texR;
-                        %disp(strcat('texR: ',num2str(texR)))
-                        
-                    else 
-                        Screen('DrawTexture', window, ltexR, [], dstRect(2,:));
-                        %disp(strcat('ltexR: ',num2str(ltexR)))
-                    end
-                end
 
                 % Increment frame counter per flip
                 frameCounterL = frameCounterL + waitframes;
                 frameCounterR = frameCounterR + waitframes;
 
                 % Draw texture on screen
-                Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
-                Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
-                Screen('DrawTexture', window, crossTexture, [], dstRect(currentSide + 1,:));
-                % disp('Drew')
+%                Screen('DrawTexture', window, crossTexture, [], dstRect(currentSide + 1,:));
                 
                 % Flip to update display at set time (at waitframes multiple of screen refresh rate)
-                vbl = Screen('Flip', window, vbl + (waitframes-buffer) * ifi);
-                % disp('Flipped')
-                
+                 vbl = Screen('Flip', window, vbl + (waitframes-buffer) * ifi);
+
                 % For each checkerboard, reverse texture cue/polarity at interval of frequency
                 if frameCounterL >= scalingCoeff/(ifi*leftFreq)
+                     Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
+                     
                      % Manually check duration of each flash
                      leftTime = toc(start) - timeElapsedL;
                      %disp({'leftTime', leftTime})
@@ -476,19 +440,52 @@ end
                      % Reset counter and time
                      frameCounterL = 0;
                      timeElapsedL = toc(start);
-                     % disp('Left polarity')
+                     
+                     if movieBool
+                        % Display movies if included
+                         texL = Screen('GetMovieImage', window, movieL, 0, 0);     
+
+                         % If found, display next frame, else display last found
+                         if texL > 0
+                              Screen('DrawTexture', window, texL, [], dstRect(1,:));
+                              % Screen('Close', texL);            % release texture
+                              ltexL = texL;
+                              % disp(strcat('texl: ',num2str(texL)))
+                              Screen('Close', texL);
+                         else 
+                              Screen('DrawTexture', window, ltexL, [], dstRect(1,:));
+                              % disp(strcat('ltexl: ',num2str(ltexL)))
+                         end
+                    end
+                     
                 end
 
-                if frameCounterR >= scalingCoeff/(ifi*rightFreq)
-                    rightTime = toc(start) - timeElapsedR;
-                    %disp({'rightTime', rightTime})
-
-                    textureCueR = fliplr(textureCueR);
-
-                    frameCounterR = 0;
-                    timeElapsedR = toc(start);
-                    % disp('Right polarity')
-                end
+%                 if frameCounterR >= scalingCoeff/(ifi*rightFreq)
+%                     Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
+%                     rightTime = toc(start) - timeElapsedR;
+%                     %disp({'rightTime', rightTime})
+% 
+%                     textureCueR = fliplr(textureCueR);
+% 
+%                     frameCounterR = 0;
+%                     timeElapsedR = toc(start);
+%                     % disp('Right polarity')
+%                     
+%                     if movieBool
+%                          texR = Screen('GetMovieImage', window, movieR, 0, 0);
+% 
+%                          % If found, display next frame, else display last found
+%                         if texR > 0
+%                             Screen('DrawTexture', window, texR, [], dstRect(2,:));
+%                             % Screen('Close', texR); 
+%                             ltexR = texR;
+%                             % disp(strcat('texR: ',num2str(texR)))
+%                         else 
+%                             Screen('DrawTexture', window, ltexR, [], dstRect(2,:));
+%                             % disp(strcat('ltexR: ',num2str(ltexR)))
+%                         end
+%                     end
+%                 end
 
                 % ADD -reading events from file, waiting for key press, and sending markers!
                 [ keyIsDown, seconds, keyCode ] = KbCheck;
@@ -539,13 +536,13 @@ end
             % disp('Re tic')
         elseif  mod(n, 2) == 0
             if movieBool
+                % Stop movie playback
                 Screen('PlayMovie', movieL, 0);
-                Screen('PlayMovie', movieR, 0);
+%                 Screen('PlayMovie', movieR, 0);
                 
                 % Close movie
-                 % disp('Closing movie...')
                  Screen('CloseMovie', movieL);
-                 Screen('CloseMovie', movieR);
+%                  Screen('CloseMovie', movieR);
             end
             Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
             Screen('DrawTexture', window, blackTexture, [], dstRect(2,:));
@@ -645,6 +642,7 @@ end
         fclose(fileID); % close log file in last trial
     end
 catch SE
+    SE
     sca; 
     psychrethrow(psychlasterror);
 end
