@@ -16,8 +16,8 @@ ListenChar(2);                      % Disable key presses from showing up in MAT
 experimentName = 'experiment_log.txt';      % Log file name
 
 % Duration
-trialLength = 10;                   % Trial length (s)
-numTrials = 3;                      % Number of trials per run
+trialLength = 30;                   % Trial length (s)
+numTrials = 5;                      % Number of trials per run
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
@@ -34,16 +34,16 @@ movieBool = 1;
 
 % Background Display
 WindowCoords = [];                  % Size of display: [x1, y1, x2, y2] or [] for full screen
-%WindowCoords = [200 200 1000 600];       % Size of display: [x1, y1, x2, y2] or [] for full screen
 backgroundColor = 0;                % 0: black
 scalingCoeff = 0.325;               % Fix bug of speed dependening on display size
 
 % Checkerboard Display
 Hz = [6 15];                        % Frequencies to display [L R]
-transparencyChecker = 25;           % Transparency (0: none, 250: opaque)
 boardSize = 4;                      % Number of checkers per side 
-color1 = 255;                       % Checker color 1 (255: black) %I am not sure if this is true
-color2 = 0;                         % Checker color 2 (0: white)
+color1 = 0;                         % Checker color 1 (0: black)
+color2 = 255;                         % Checker color 2 (255: white)
+color1Transp = 150;                   % Transparency (0: transparent, 250: opaque)
+color2Transp = 0;                 % Transparency (0: transparent, 250: opaque)
 filterMode = 0;                     % Color blending (0: nearest neighbour)
 waitframes = 1;                     % Flip rate in reference to monitor refresh
 buffer = 0.1;                       % Time buffer to prevent lag
@@ -73,33 +73,70 @@ mConditionB = 2;                    % Attend LEFT & HIGH frequency
 mConditionC = 3;                    % Attend RIGHT & LOW frequency
 mConditionD = 4;                    % Attend RIGHT & HIGH frequency
 
-%% Movie Options
+%% Movie Loading
 load eventTimes
 VideoRoot = '/home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/';
 
-ball0.name = [ VideoRoot 'FocusVideos/bball0.mp4' ] ;
-ball0.duration = (60*5);
-ball0.delayMax = ball0.duration - trialLength;
-ball0.eventTimes = ball0Times;                                              % Event times (s)
+ball1.name = [ VideoRoot 'FocusVideos/bball1.mp4' ] ;
+ball1.eventTimes = ball1Times;
+
+ball2.name = [ VideoRoot 'FocusVideos/bball2.mp4' ] ;
+ball2.eventTimes = ball2Times ;
+
+ball3.name = [ VideoRoot 'FocusVideos/bball3.mp4' ] ;
+ball3.eventTimes = ball3Times;
+
+ball4.name = [ VideoRoot 'FocusVideos/bball4.mp4' ] ;
+ball4.eventTimes = ball4Times;
 
 ball5.name = [ VideoRoot 'FocusVideos/bball5.mp4' ] ;
-ball5.duration = (60*5);
-ball5.delayMax = ball5.duration - trialLength;
-ball5.eventTimes = ball5Times - ball0.duration;                              % Offset 5 mins (start 0)
+ball5.eventTimes = ball5Times;
 
+ball6.name = [ VideoRoot 'FocusVideos/bball6.mp4' ] ;
+ball6.eventTimes = ball6Times;
+ 
+% Leave out - camera shifting and time jump
+ball7.name = [ VideoRoot 'FocusVideos/bball7.mp4' ] ;
+ball7.eventTimes = ball7Times;
+ 
+ball8.name = [ VideoRoot 'FocusVideos/bball8.mp4' ] ;
+ball8.eventTimes = ball8Times;
+ 
+ball9.name = [ VideoRoot 'FocusVideos/bball9.mp4' ] ;
+ball9.eventTimes = ball9Times;
+ 
 ball10.name = [ VideoRoot 'FocusVideos/bball10.mp4' ] ;
-ball10.duration = (60*5);
-ball10.delayMax = ball10.duration - trialLength;
-ball10.eventTimes = ball10Times - ball0.duration - ball5.duration;           % Offset 10 mins (start 0)
+ball10.eventTimes = ball10Times;
 
 dog.name = [ VideoRoot 'DistractVideos/doglickingscreen.mp4' ] ;
 dog.duration = 66;
 dog.delayMax = dog.duration;
 
-focusMovieList = { ball0 ball5 ball10 };
+dog1.name = [ VideoRoot 'DistractVideos/dog1.mp4' ] ;
+dog1.duration = 92;
+dog1.delayMax = dog1.duration;
+
+dog2.name = [ VideoRoot 'DistractVideos/dog2.mp4' ] ;
+dog2.duration = (60*3)+12;
+dog2.delayMax = dog2.duration;
+
+dog3.name = [ VideoRoot 'DistractVideos/dog3.mp4' ] ;
+dog3.duration = (60*3)+58;
+dog3.delayMax = dog3.duration;
+
+focusMovieList = { ball1 ball2 ball3 ball4 ball5 ball6 ball8 ball9 ball10 };
+% distractMovieList = { dog };
+distractMovieList = { dog1 dog2 dog3 };
+
+for i = 1:length(focusMovieList)
+    focusMovieList{i}.duration = 60*5;
+    focusMovieList{i}.delayMax = focusMovieList{i}.duration - trialLength;
+end
 
 %% Randomize Targets
-numVideos = length(focusMovieList);
+numFocusVideos = length(focusMovieList);
+numDistractVideos = length(distractMovieList);
+
 halfSize = floor(numTrials/2);
 
 if mod(numTrials, 2) == 0
@@ -117,8 +154,11 @@ for i = 1:numTrials
 end
    
 targetVideos = cell(1, numTrials);
+distractVideos = cell(1, numTrials);
+
 for i = 1:numTrials
-    targetVideos{i} = focusMovieList{round(rand*(numVideos-1)+1)};
+    targetVideos{i} = focusMovieList{round(rand*(numFocusVideos-1)+1)};
+    distractVideos{i} = distractMovieList{round(rand*(numDistractVideos-1)+1)};
 end
 
 %% Setup output: LSL and log
@@ -143,22 +183,22 @@ end
 checkerboardL = ones([boardSize boardSize 2]);
 checkerboardR = checkerboardL;
 
-% LAYER 1: Set checkerboard colors with opposite polarity
+% LAYER 1: Set checkerboard colors with opposite polarity | LAYER 2: Set transparency
 for j = 1:boardSize
      for k = 1:boardSize
          if mod(j+k,2) == 1
              checkerboardL(j,k,:) = color1;
+             checkerboardL(j,k,2) = color1Transp;
              checkerboardR(j,k,:) = color2;
+             checkerboardR(j,k,2) = color2Transp;
          else
              checkerboardL(j,k,:) = color2; 
+             checkerboardL(j,k,2) = color2Transp;
              checkerboardR(j,k,:) = color1;
+             checkerboardR(j,k,2) = color1Transp;
          end
      end
 end
-
-% LAYER 2: Set transparency
-checkerboardL(:,:,2) = zeros(boardSize, boardSize) + transparencyChecker;  
-checkerboardR(:,:,2) = zeros(boardSize, boardSize) + transparencyChecker; 
 
 % FIXATION CROSS
 [crossImage, ~, alpha] = imread('fixation-cross-white.png');
@@ -248,15 +288,15 @@ try
             moviedelayL = rand * targetVideos{n}.delayMax;
             currentdelay = moviedelayL;
 
-            movienameR = dog.name;
-            moviedelayR = rand * dog.delayMax;
+            movienameR = distractVideos{n}.name;
+            moviedelayR = rand * distractVideos{n}.delayMax;
         else
             movienameR = targetVideos{n}.name;
             moviedelayR = rand * targetVideos{n}.delayMax;
             currentdelay = moviedelayR;
 
-            movienameL = dog.name;
-            moviedelayL = rand * dog.delayMax;
+            movienameL = distractVideos{n}.name;
+            moviedelayL = rand * distractVideos{n}.delayMax;
         end
 
         % HIGH/LOW freq condition:
@@ -314,6 +354,8 @@ try
             fprintf(fileID,'Trial Number: %d\n', n);
             fprintf(fileID,'Target Movie: %s\n', targetVideos{n}.name);
             fprintf(fileID,'Start time: %.2f\n', currentdelay);
+            fprintf(fileID,'Target Frequency: %d\n', targetFreqs(n));
+            fprintf(fileID,'Target Side: %d\n', targetSides(n));
         end
         
         %% Buffer movie underneath blank initial display
@@ -372,7 +414,9 @@ try
             disp(mStimulusOnset + n)
         end
         
-        %% PLAY
+        prevSeconds = 0;
+        
+        %% PLAY        
         while toc(start) < trialLength
             %% Draw movie frame by frame
             if movieBool
@@ -443,7 +487,8 @@ try
 
             % USER-REPORTED EVENTS
             [ keyIsDown, seconds, keyCode ] = KbCheck;
-            if keyIsDown 
+            
+            if keyIsDown && (seconds-prevSeconds > 0.2)
                 responseTimes = [responseTimes videoTime];
 
                 if lslBool
@@ -452,6 +497,7 @@ try
                 end
 
                 FlushEvents('keyDown');                                 % Flush to reduce number of reported key presses
+                prevSeconds = seconds;
             end
 
             videoTime = currentdelay + toc(start);
@@ -459,8 +505,8 @@ try
             % SYSTEM EVENTS
             % If experiment time matches with event times, send event marker
             if ( eventCounter <= length(targetVideos{n}.eventTimes) && ...
-                videoTime > targetVideos{n}.eventTimes(eventCounter) - 0.5 && ...
-                    videoTime < targetVideos{n}.eventTimes(eventCounter) + 0.5)
+                videoTime > targetVideos{n}.eventTimes(eventCounter) - 0.1 && ...
+                    videoTime < targetVideos{n}.eventTimes(eventCounter) + 0.1)
 
                 eventlogTimes = [eventlogTimes videoTime];
 
