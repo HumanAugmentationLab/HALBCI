@@ -1,0 +1,14 @@
+Trial Number: 1
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball2.mp4
+Movie start time: 0.000
+Condition: 1 (Frequency: 6 | Side: 0)
+Event Times: 50.979 62.747 86.314 87.731 89.914 112.915 126.750 138.717 152.434 156.400 165.034 168.684 171.952 175.118 178.384 180.936 185.401 187.835 194.003 194.503 196.819 197.385 199.419 199.853 223.804 242.970 274.038 282.873 288.739 
+Response Times: 
+trialStart: 0.328 
+cueStart: 1.350 
+stimStart: 3.410 
+Trial Length: 300.037 
+Survey Response: 2 
+
+Total Time: 311.627 
+
