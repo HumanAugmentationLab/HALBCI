@@ -3,7 +3,7 @@
 % Display two square checkerboards flashing independently (with movies overlayed)
 
 %% PsychToolbox Setup
-
+clear;
 AssertOpenGL;
 PsychDefaultSetup(2);  
 oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
@@ -13,18 +13,18 @@ addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
-experimentName = 'experiment_log.txt';      % Log file name
+experimentName = 'experiment_log11.txt';      % Log file name
 
 % Duration
-trialLength = 30;                   % Trial length (s)
-numTrials = 5;                      % Number of trials per run
+trialLength = 30;                   % Trial length (s)  --- always add 100 ms for buffer
+numTrials = 30;                      % Number of trials per run
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
 startTrialPause = 1;                % Pause before trial (s)
 fixationPause = 2;                  % Pause before fixation cross (s)
-endTrialPause = 0;                  % Pause after survey, after trial ends (s)
-endPause = 2;                       % Pause after run ends (s)
+endTrialPause = 1;                  % Pause after survey, after trial ends (s)
+endPause = 1;                       % Pause after run ends (s)
 
 % Enable Parameters
 lslBool = 1;                        % 1: Send markers over LSL
@@ -41,9 +41,9 @@ scalingCoeff = 0.325;               % Fix bug of speed dependening on display si
 Hz = [6 15];                        % Frequencies to display [L R]
 boardSize = 4;                      % Number of checkers per side 
 color1 = 0;                         % Checker color 1 (0: black)
-color2 = 255;                         % Checker color 2 (255: white)
-color1Transp = 150;                   % Transparency (0: transparent, 250: opaque)
-color2Transp = 0;                 % Transparency (0: transparent, 250: opaque)
+color2 = 255;                       % Checker color 2 (255: white)
+color1Transp = 150;                 % Transparency (0: transparent, 250: opaque)
+color2Transp = 0;                   % Transparency (0: transparent, 250: opaque)
 filterMode = 0;                     % Color blending (0: nearest neighbour)
 waitframes = 1;                     % Flip rate in reference to monitor refresh
 buffer = 0.1;                       % Time buffer to prevent lag
@@ -66,7 +66,7 @@ mStimulusOffset = 60;               % Video removed - one's place increments wit
 
 mResponsePeriodOnset = 70;          % Task reporting period  - do not use if report during trial
 mResponseOnset = 80;             
-mEventOnset = 81;             
+mEventOnset = 81;                   % Actual movie event
                                     
 mConditionA = 1;                    % Attend LEFT & LOW frequency
 mConditionB = 2;                    % Attend LEFT & HIGH frequency
@@ -125,8 +125,8 @@ dog3.duration = (60*3)+58;
 dog3.delayMax = dog3.duration;
 
 focusMovieList = { ball1 ball2 ball3 ball4 ball5 ball6 ball8 ball9 ball10 };
-% distractMovieList = { dog };
-distractMovieList = { dog1 dog2 dog3 };
+distractMovieList = { dog };
+% distractMovieList = { dog1 dog2 dog3 };
 
 for i = 1:length(focusMovieList)
     focusMovieList{i}.duration = 60*5;
@@ -145,13 +145,13 @@ else
     extraSide = round(rand);
     orderedSides = [extraSide zeros(1, halfSize) ones(1, halfSize)];    
 end
-randomSides = orderedSides(randperm(length(orderedSides)));
-targetSides = randomSides;
+targetSides = orderedSides(randperm(length(orderedSides)));
 
-targetFreqs = zeros(1, numTrials);
+orderedFreqs = zeros(1, numTrials);
 for i = 1:numTrials
-    targetFreqs(i) = Hz(randomSides(i) + 1);
+    orderedFreqs(i) = Hz(randomSides(i) + 1);
 end
+targetFreqs = orderedFreqs(randperm(length(orderedFreqs)));
    
 targetVideos = cell(1, numTrials);
 distractVideos = cell(1, numTrials);
@@ -263,6 +263,7 @@ try
 
     if lslBool
         outlet.push_sample(mStartRun)
+        runStart = tic;
         disp(mStartRun)
     end
 
@@ -304,32 +305,23 @@ try
             leftFreq = targetFreqs(n);
             rightFreq = Hz(Hz ~= targetFreqs(n));
 
-            if lslBool
-                if targetFreqs(n) == min(targetFreqs)
-                    % Condition A: LEFT LOW
-                    outlet.push_sample(mConditionA)
-                    disp(mConditionA)
-                else
-                    % Condition B: LEFT HIGH
-                    outlet.push_sample(mConditionB)
-                    disp(mConditionB)
-                end
-
+            if targetFreqs(n) == min(targetFreqs)
+                % Condition A: LEFT LOW
+                mCondition = mConditionA;
+            else
+                % Condition B: LEFT HIGH
+                mCondition = mConditionB;
             end
         else
             rightFreq = targetFreqs(n);
             leftFreq = Hz(Hz ~= targetFreqs(n));
 
-            if lslBool
-                if targetFreqs(n) == min(targetFreqs)
-                    % Condition C: RIGHT LOW
-                    outlet.push_sample(mConditionC)
-                    disp(mConditionC)
-                else
-                    % Condition D: RIGHT HIGH
-                    outlet.push_sample(mConditionD)
-                    disp(mConditionD)
-                end
+            if targetFreqs(n) == min(targetFreqs)
+                % Condition C: RIGHT LOW
+                mCondition = mConditionC;
+            else
+                % Condition D: RIGHT HIGH
+                mCondition = mConditionD;
             end
         end
         
@@ -353,9 +345,8 @@ try
         if logBool
             fprintf(fileID,'Trial Number: %d\n', n);
             fprintf(fileID,'Target Movie: %s\n', targetVideos{n}.name);
-            fprintf(fileID,'Start time: %.2f\n', currentdelay);
-            fprintf(fileID,'Target Frequency: %d\n', targetFreqs(n));
-            fprintf(fileID,'Target Side: %d\n', targetSides(n));
+            fprintf(fileID,'Movie start time: %.3f\n', currentdelay);
+            fprintf(fileID,'Condition: %d (Frequency: %d | Side: %d)\n', mCondition, targetFreqs(n), targetSides(n));
         end
         
         %% Buffer movie underneath blank initial display
@@ -371,8 +362,10 @@ try
         end
 
         if lslBool
-            outlet.push_sample(mStartTrial + n)
-            disp(mStartTrial + n)
+            outlet.push_sample(mStartTrial + mCondition)
+            trialStart = toc(runStart);
+            disp(mStartTrial + mCondition)
+            disp(trialStart);
         end
 
         Screen('DrawTexture', window, blackTexture, [], dstRect(1,:));
@@ -386,38 +379,46 @@ try
         Screen('Flip', window);
 
         if lslBool
-            outlet.push_sample(mCueOnset + n)
-            disp(mCueOnset + n)
+            outlet.push_sample(mCueOnset + mCondition)
+            cueStart = toc(runStart);
+            disp(mCueOnset + mCondition)
+            disp(cueStart);
         end
 
         pause(fixationPause)
         
         %% Start movie, get first frame
-        start = tic;
-        timeElapsedL = toc(start);
-        timeElapsedR = toc(start);
 
         if movieBool
             % Queue playback at normal speed forward
             Screen('PlayMovie', movieL, 1, 1);
             Screen('PlayMovie', movieR, 1, 1);
+            start = tic;
 
             texL = Screen('GetMovieImage', window, movieL, 0, 0);     
             texR = Screen('GetMovieImage', window, movieR, 0, 0);
 
             ltexL = texL;
             ltexR = texR;
+        else
+            start = tic;
+        end
+        timeElapsedL = toc(start);
+        timeElapsedR = toc(start);
+        
+        if lslBool
+            outlet.push_sample(mStimulusOnset + mCondition)
+            stimStart = toc(runStart);
+            myStim = tic;
+            disp(mStimulusOnset + mCondition)
+            disp(stimStart);
         end
 
-        if lslBool
-            outlet.push_sample(mStimulusOnset + n)
-            disp(mStimulusOnset + n)
-        end
-        
         prevSeconds = 0;
-        
+        startOffset = toc(start);
+
         %% PLAY        
-        while toc(start) < trialLength
+        while toc(start) - startOffset < trialLength
             %% Draw movie frame by frame
             if movieBool
                 % Try to get next movie image
@@ -447,7 +448,7 @@ try
                 end
             end
             %% Draw checker texture at target frequency
-
+            
             % Increment frame counter per flip
             frameCounterL = frameCounterL + waitframes;
             frameCounterR = frameCounterR + waitframes;
@@ -484,6 +485,8 @@ try
                 timeElapsedR = toc(start);
             end
             %% Event listening
+            
+            videoTime = currentdelay + toc(start);
 
             % USER-REPORTED EVENTS
             [ keyIsDown, seconds, keyCode ] = KbCheck;
@@ -499,8 +502,6 @@ try
                 FlushEvents('keyDown');                                 % Flush to reduce number of reported key presses
                 prevSeconds = seconds;
             end
-
-            videoTime = currentdelay + toc(start);
 
             % SYSTEM EVENTS
             % If experiment time matches with event times, send event marker
@@ -539,29 +540,35 @@ try
 
             %% Send end of trial markers
             if lslBool
-                outlet.push_sample(mCueOffset + n)
-                disp(mCueOffset + n)
+%                 outlet.push_sample(mCueOffset + mCondition)
+%                 outlet.push_sample(mStimulusOffset + mCondition)
+                outlet.push_sample(mEndTrial + mCondition)
 
-                outlet.push_sample(mStimulusOffset + n)
-                disp(mStimulusOffset + n)
-
-                outlet.push_sample(mEndTrial + n)
-                disp(mEndTrial + n)
+                trialTime = toc(myStim);
+%                 disp(mCueOffset + mCondition)
+%                 disp(mStimulusOffset + mCondition)
+                disp(mEndTrial + mCondition)
+                disp(trialTime)
             end
             
             %% Log all response and event times
             if logBool
-                fprintf(fileID,'Response Times: ');
-                for i = 1:length(responseTimes)
-                    fprintf(fileID,'%.2f ', responseTimes(i));
+                fprintf(fileID,'Event Times: ');
+                for i = 1:length(eventlogTimes)
+                    fprintf(fileID,'%.3f ', eventlogTimes(i));
                 end
                 fprintf(fileID, '\n');
 
-                fprintf(fileID,'Event Times: ');
-                for i = 1:length(eventlogTimes)
-                    fprintf(fileID,'%.2f ', eventlogTimes(i));
+                fprintf(fileID,'Response Times: ');
+                for i = 1:length(responseTimes)
+                    fprintf(fileID,'%.3f ', responseTimes(i));
                 end
                 fprintf(fileID, '\n');
+                
+                fprintf(fileID, 'trialStart: %.3f \n', trialStart); 
+                fprintf(fileID, 'cueStart: %.3f \n', cueStart); 
+                fprintf(fileID, 'stimStart: %.3f \n', stimStart); 
+                fprintf(fileID, 'Trial Length: %.3f \n', trialTime);
             end
                         
             %% Survey
@@ -582,6 +589,8 @@ try
                 endKey = KbName('RightArrow'); % Pressing right arrow leaves survey
                 
                 while KbCheck; end % Wait until all keys are released.
+                
+                lastKey = '';
 
                 while 1 % Wait until answer submitted
                     [keyIsDown, seconds, keyCode] = KbCheck;
@@ -590,7 +599,13 @@ try
                     % If key is pressed, display its code number or name.
                     if keyIsDown
                         if keyCode == endKey
-                            fprintf(fileID, 'Survey Response: %s \n', KbName(lastKey)); 
+                            keyName = KbName(lastKey);
+                            fprintf(fileID, 'Survey Response: %s \n', keyName); 
+                            
+                            if lslBool
+                                outlet.push_sample(str2double(keyName) + 85)
+                                disp(str2double(keyName) + 85)
+                            end
                             break;
                         end
                         
@@ -599,21 +614,27 @@ try
                     end
                 end
                 
-                fprintf(fileID, '\n');
+                 fprintf(fileID, '\n');
             end
             
 
         %% End of experiment
-            if n ~= numTrials                           % Allow for pause between trials
+            if n ~= numTrials                                               % Allow for pause between trials
                 pause(endTrialPause)
             else
+                pause(endPause)
+                
                 if lslBool
                     outlet.push_sample(mEndRun)
+                    totalTime = toc(runStart);
+                    disp(totalTime)
                     disp(mEndRun)
                 end
 
                 if logBool
-                    fclose(fileID);                     % Close log file in last trial
+                    fprintf(fileID, 'Total Time: %.3f \n', totalTime); 
+                    fprintf(fileID, '\n');
+                    fclose(fileID);                                         % Close log file in last trial
                 end
             end
     end
