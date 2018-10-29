@@ -13,7 +13,7 @@ addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
-experimentName = 'experiment_log11.txt';      % Log file name
+experimentName = 'experiment_log12.txt';      % Log file name
 
 % Duration
 trialLength = 30;                   % Trial length (s)  --- always add 100 ms for buffer
