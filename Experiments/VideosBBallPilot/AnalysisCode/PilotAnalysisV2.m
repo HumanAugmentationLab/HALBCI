@@ -1,0 +1,160 @@
+%% Directory for EEG data (K drive is \fsvs01\Research\)
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
+% File name without extension
+fnameeeg = '20181029150401_-ZZZ-VideosPilot2_RECORD';
+% fnameeeg = '20181029151624_-ZZZ-VideosPilot3_RECORD';
+% fnameeeg = '20181029152928_-ZZZ-VideosPilot4_RECORD';
+% fnameeeg = '20181029154331_-ZZZ-VideosPilot5_RECORD';
+% fnameeeg = '20181029155409_-ZZZ-VideosPilot6_RECORD';
+% fnameeeg = '20181029160603_-ZZZ-VideosPilot7_RECORD';
+
+% Load the .easy file version of the data
+ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
+EEG = exp_eval(ioeasy); % Force bcilab to evaluate the expression and load the data
+
+%% 2. Chop run between start/end markers (10 to 100)
+[~, start_idx] = pop_selectevent(EEG, 'type', 10);
+start_pt = EEG.event(start_idx).latency;
+
+[~, end_idx] = pop_selectevent(EEG, 'type', 100);
+end_pt = EEG.event(end_idx).latency;
+
+% eeg_cropped = eeg_eegrej(EEG, [1 start_pt-1]);
+EEG = eeg_eegrej(EEG, [1 start_pt-1; end_pt+1 EEG.pnts]);
+
+%% 3. Filter the continuous data
+lastEEG = EEG;
+
+adetails.filter.mode = 'highpass'; % band pass
+
+% for a band-pass/stop filter, this is: [low-transition-start,
+% low-transition-end, hi-transition-start, hi-transition-end], in Hz
+%adetails.filter.freqs = [.25 .75 50 54]; 
+adetails.filter.freqs = [.25 .75]; 
+
+%  Type         :   * 'minimum-phase' minimum-hase filter -- pro: introduces minimal signal delay;
+%                         con: distorts the signal (default)
+%                      * 'linear-phase' linear-phase filter -- pro: no signal distortion; con: delays
+%                         the signal
+%                      * 'zero-phase' zero-phase filter -- pro: no signal delay or distortion; con:
+%                         can not be used for online purposes
+adetails.filter.type = 'linear-phase';
+
+adetails.filter.state = []; 
+%previous filter state, as obtained by a previous execution of flt_fir on an
+%immediately preceding data set (default: [])
+
+[EEG, adetails.filter.state] = exp_eval(flt_fir(EEG,adetails.filter.freqs, ...
+    adetails.filter.mode, adetails.filter.type));
+
+%% Plot the filtered EEG data 
+
+% Plot the raw data
+pop_eegplot(EEG,1,1,0);
+
+% Plot the spectra
+% Event 2 skips over EEGLAB boundary marker
+figure; pop_spectopo(EEG, 1, [EEG.event(2).latency_ms EEG.event(end).latency_ms], 'EEG' , 'percent', 15, 'freq', [30 60 120], 'freqrange',[.5 130],'electrodes','on');
+% again zoomed in
+figure; pop_spectopo(EEG, 1, [EEG.event(2).latency_ms EEG.event(end).latency_ms], 'EEG' , 'percent', 15, 'freq', [6 9 11 12 15], 'freqrange',[2 24],'electrodes','on');
+
+%% 4. Epoch each trial into long epochs OR skip this step and make short epochs below
+lastEEG = EEG;
+
+% Markers for sustained attention
+adetails.markers.types = {'51','52','53','54'};
+adetails.markers.names = {'LEFT & LOW','LEFT & HIGH','RIGHT & LOW','RIGHT & HIGH'};
+evtype = [];
+for i = 1:length(EEG.event)
+    evtype = [evtype, ""+EEG.event(i).type];
+end
+unique(evtype)
+adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
+
+adetails.markers.epochwindow = [2 60]; 
+
+
+EEG = pop_epoch(EEG,adetails.markers.types, adetails.markers.epochwindow);
+
+%% 
+lastEEG = EEG;
+% Markers for sustained attention
+adetails.markers.types = {'51','52','53','54'};
+adetails.markers.names = {'LEFT & LOW','LEFT & HIGH','RIGHT & LOW','RIGHT & HIGH'};
+evtype = [];
+
+adetails.markers.epochwindow = [2 60]; % window after standard markers to look at
+adetails.markers.epochsize = 1; % size of miniepochs to chop regular markered epoch up into
+adetails.markers.numeventsperwindow = floor((adetails.markers.epochwindow(2)-adetails.markers.epochwindow(1))/adetails.markers.epochsize);
+
+k = 1; % New event index
+for i = 1:length(lastEEG.event) 
+    if any(contains(adetails.markers.types,lastEEG.event(i).type))
+        markerstring = EEG.event(i).type;
+        
+        for j = 0:(adetails.markers.numeventsperwindow-1) %For how many markers we are doing per window     
+            EEG.event(k).type = lastEEG.event(i).type;
+            EEG.event(k).latency = lastEEG.event(i).latency + (j*lastEEG.srate*adetails.markers.epochsize); 
+            EEG.event(k).latency_ms = lastEEG.event(i).latency_ms + (j*adetails.markers.epochsize*1000); 
+            EEG.event(k).duration = adetails.markers.epochsize; % seconds for continuous data
+            k = k+1; 
+        end        
+    else
+        EEG.event(k) = lastEEG.event(i); % Write into new index
+        k = k+1;
+    end
+end
+
+EEG = pop_epoch(EEG,adetails.markers.types, [0 adetails.markers.epochsize]);
+
+%% 5. Inspect for bad channels and epochs
+lastEEG = EEG;
+% Show candidates for rejection 
+[~,badelec] = pop_rejchan(EEG,'elec',1:32,'threshold',5,'norm','on','measure','prob');
+
+% Plot data to look at "bad" channels
+% Plot the epoched data
+figure; pop_eegplot(EEG,1,1,0);
+
+% Inspect epoched data in frequency domain
+figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
+    'percent', 100, 'freq', [6 10 15], 'freqrange',[1 30],'electrodes','on');
+
+%% Actually reject the bad channels from the data
+adetails.reject.strategy = 'interpolate'; % or 'remove'
+
+% Here you can add additional bad electrodes, besides the ones in badelec
+
+adetails.reject.channelidx = badelec;
+
+
+
+
+adetails.reject.channelnames =  {EEG.chanlocs(adetails.reject.channelidx).labels}
+
+% Actually remove the bad channels
+if strcmp(adetails.reject.strategy, 'remove' )
+    EEG = pop_select(EEG,'nochannel',adetails.reject.channelnames);
+elseif strcmp(adetails.reject.strategy, 'interpolate' )
+    % Interpolate rejected channels
+    EEG = eeg_interp(EEG,adetails.reject.channelidx,'spherical');
+end
+
+%% Confirm that the new data look good (skip)
+pop_eegplot(EEG,1,1,0);
+figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
+    'percent', 100, 'freq', [6 10 15], 'freqrange',[1 30],'electrodes','on');
+
+%%  Reject bad epochs
+% save some data with rejected epochs
+
+%%
+% run ica 
+% reject components that have eye blinks and other artifacts
+
+% do this for all runs
+
+% combine all runs
+
+% compare high and low freq trials 
+
