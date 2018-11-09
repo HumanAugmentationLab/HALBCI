@@ -11,11 +11,14 @@
 %  Settings for this section (put at top of analysis)                     %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Directory for EEG data (K drive is \fsvs01\Research\)
-direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\Testing SSVEP\';
+%direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\Testing SSVEP\';
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
 % File name without extension
 %fnameeeg = '20170727114720_PatientW1-8v15_Record'; 
-fnameeeg = '20170806164107_PatientW1-7.5v12-small';
+%fnameeeg = '20170806164107_PatientW1-7.5v12-small';
 %fnameeeg = '20170710171359_Patient01_SSVEP-P0-8ch';
+fnameeeg = '20181029155409_-ZZZ-VideosPilot6_RECORD';
+
 
 adetails.headset = 'enobio'; % 'enobio' or 'muse'
 

@@ -9,6 +9,14 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% mydir = pwd;
+% cd C:\Users\Public\Research\BCILAB\
+% bcilab
+% 
+% %%
+% cd(mydir);
+%%
+
 % Clear the workspace and the screen and set the variables
 sca;
 close all;
@@ -16,7 +24,7 @@ clearvars;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Settings 
 opts.photodiode = false;
-opts.keyboardsetup = true; % Set up keyboard numbers
+opts.keyboardsetup = false; % Set up keyboard numbers
 startdelaytime = 5;
 
 %This next part will find the keyboard indexes of the desired kyes
