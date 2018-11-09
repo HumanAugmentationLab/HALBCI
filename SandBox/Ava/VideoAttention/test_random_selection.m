@@ -3,7 +3,7 @@ numTrials = 5;
 numTotal = numRuns*numTrials;
 
 videos = ['a', 'b', 'c', 'd', 'e'];
-frequencies = [10 15];
+Hz = [10 15];
 
 numVideos = length(videos);
 half_size = floor(numTotal/2);
@@ -19,7 +19,7 @@ display_sides = random_sides;
 
 freq_sides = zeros(1, numTotal);
 for i = 1:numTotal
-    freq_sides(i) = frequencies(random_sides(i) + 1);
+    freq_sides(i) = Hz(random_sides(i) + 1);
 end
    
 video_target = zeros(1, numTotal);

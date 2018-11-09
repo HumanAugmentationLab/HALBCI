@@ -119,6 +119,6 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 disp("submit")
 
-handles = guidata(hObject)
+handles = guidata(hObject);
 val = handles.uibuttongroup1.SelectedObject.String;
 disp(val)

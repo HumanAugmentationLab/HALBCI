@@ -1,0 +1,44 @@
+Trial Number: 1
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball3.mp4
+Start time: 56.00
+Target Frequency: 6
+Target Side: 0
+Response Times: 59.38 65.62 76.25 90.00 106.20 129.70 138.19 145.10 147.40 159.95 163.30 169.30 
+Event Times: 65.42 76.12 
+Survey Response: 4 
+
+Trial Number: 2
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball5.mp4
+Start time: 77.44
+Target Frequency: 15
+Target Side: 1
+Response Times: 87.65 
+Event Times: 87.60 
+Survey Response: 1 
+
+Trial Number: 3
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball9.mp4
+Start time: 162.88
+Target Frequency: 15
+Target Side: 1
+Response Times: 
+Event Times: 165.35 175.66 180.61 192.38 194.36 203.70 215.38 224.41 236.98 243.83 257.62 272.28 278.10 
+Survey Response: 2 
+
+Trial Number: 4
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball3.mp4
+Start time: 79.00
+Target Frequency: 6
+Target Side: 0
+Response Times: 175.82 181.05 181.28 
+Event Times: 89.93 106.11 129.62 138.08 145.03 147.43 159.70 163.03 169.23 196.68 
+Survey Response: 2 
+
+Trial Number: 5
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball3.mp4
+Start time: 46.45
+Target Frequency: 6
+Target Side: 0
+Response Times: 134.39 
+Event Times: 55.24 65.40 76.10 
+Survey Response: 2 
