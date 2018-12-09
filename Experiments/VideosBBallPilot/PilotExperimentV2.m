@@ -122,18 +122,21 @@ halfSize = floor(numTrials/2);
 % For PilotV2, always attend left
 targetSides = zeros(1, numTrials);
 
-if mod(numTrials, 2) == 0
-    orderedFreqs = [repelem(Hz(1), halfSize) repelem(Hz(2), halfSize)];     % Attending frequency
-    orderedDisplay = [zeros(1, halfSize) ones(1, halfSize)];                % Checker v. video trial
+if mod(numTrials, 4) == 0
+    rep = numTrials/4;
+    orderedConds = [repelem(mConditionA, rep) repelem(mConditionB, rep) ...
+        repelem(mConditionC, rep) repelem(mConditionD, rep)];
 else
-    extraSide = round(rand);
-    orderedFreqs = [Hz(extraSide+1) repelem(Hz(1), halfSize) repelem(Hz(2), halfSize)];
-    orderedDisplay = [extraSide zeros(1, halfSize) ones(1, halfSize)];
+    rep = floor(numTrials/4);
+    orderedConds = [repelem(mConditionA, rep) repelem(mConditionB, rep) ...
+        repelem(mConditionC, rep) repelem(mConditionD, rep)];
+    for r = 1: mod(numTrials,4)
+       orderedConds = [orderedConds round((rand*3)+1)];
+    end
 end
 
-targetFreqs = orderedFreqs(randperm(length(orderedFreqs)));
-targetDisplay = orderedDisplay(randperm(length(orderedDisplay)));
-   
+targetConds = orderedConds(randperm(length(orderedConds)));
+
 leftVideos = cell(1, numTrials);
 rightVideos = cell(1, numTrials);
 
@@ -264,11 +267,14 @@ try
         %% Randomized selection (target side, video, frequency, start)       
 
         % Video v. checkerboard display condition:
-        displayType = targetDisplay(n);
-
-        if displayType == 0         % Checkerboard - checkerboard display
-            movieBool = 0;
-        else                        % Movie - movie display
+        mCondition = targetConds(n);
+        
+        
+        % EVEN (52, 54): Video | ODD (51, 53): Checkerboard
+        % LOW (51, 52): Low freq | HIGH (52, 54): High freq
+        if mod(mCondition, 2) == 0      % Movie - movie display
+            displayType = 1;
+            
             movieBool = 1;
             movienameL = leftVideos{n}.name;
             moviedelayL = rand * leftVideos{n}.delayMax;
@@ -276,19 +282,21 @@ try
 
             movienameR = rightVideos{n}.name;
             moviedelayR = rand * rightVideos{n}.delayMax;
+        else            % Checkerboard - checkerboard display
+            displayType = 0;
+            movieBool = 0;
+            currentdelay = 0;
         end
         
-        % Frequency display condition:
-        leftFreq = targetFreqs(n);
-        rightFreq = Hz(Hz ~= targetFreqs(n));
-
-        if targetFreqs(n) == min(targetFreqs)
-            % Condition A: LEFT LOW
-            mCondition = mConditionA;
+        if mCondition < 3
+            targetFreq = min(Hz);
         else
-            % Condition B: LEFT HIGH
-            mCondition = mConditionB;
+            targetFreq = max(Hz);
         end
+        % Frequency display condition:
+        leftFreq = targetFreq;
+        rightFreq = Hz(Hz ~= targetFreq);
+
                 
         % Event timing adjustment
         % Find first event after video start time ...
@@ -311,7 +319,7 @@ try
             fprintf(fileID,'Trial Number: %d\n', n);
             fprintf(fileID,'Target Movie: %s\n', leftVideos{n}.name);
             fprintf(fileID,'Movie start time: %.3f\n', currentdelay);
-            fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreqs(n), targetDisplay(n));
+            fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreq, displayType);
         end
         
         %% Buffer movie underneath blank initial display
