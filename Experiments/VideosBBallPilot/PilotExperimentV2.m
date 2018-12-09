@@ -23,7 +23,7 @@ numTrials = 20;                      % Number of trials per run
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
 startTrialPause = 1;                % Pause before trial (s)
 fixationPause = 2;                  % Pause before fixation cross (s)
-endTrialPause = 1;                  % Pause after survey, after trial ends (s)
+endTrialPause = 2;                  % Pause after survey, after trial ends (s)
 endPause = 1;                       % Pause after run ends (s)
 
 % Enable Parameters
@@ -42,8 +42,8 @@ Hz = [15 20];                        % Frequencies to display
 boardSize = 4;                      % Number of checkers per side 
 color1 = 0;                         % Checker color 1 (0: black)
 color2 = 255;                       % Checker color 2 (255: white)
-color1Transp = 200;                 % Transparency (0: transparent, 250: opaque)
-color2Transp = 0;                   % Transparency (0: transparent, 250: opaque)
+color1Transp = 250;                 % Transparency (0: transparent, 250: opaque)
+color2Transp = 150;                   % Transparency (0: transparent, 250: opaque)
 filterMode = 0;                     % Color blending (0: nearest neighbour)
 waitframes = 1;                     % Flip rate in reference to monitor refresh
 buffer = 0.1;                       % Time buffer to prevent lag
@@ -168,6 +168,8 @@ end
 % Populate matrices to represent checkerboard 
 checkerboardL = ones([boardSize boardSize 2]);
 checkerboardR = checkerboardL;
+checkerFullL = checkerboardL;
+checkerFullR = checkerboardL;
 
 % LAYER 1: Set checkerboard colors with opposite polarity | LAYER 2: Set transparency
 for j = 1:boardSize
@@ -177,11 +179,17 @@ for j = 1:boardSize
              checkerboardL(j,k,2) = color1Transp;
              checkerboardR(j,k,:) = color2;
              checkerboardR(j,k,2) = color2Transp;
+             
+             checkerFullL(j,k,:) = color1;
+             checkerFullR(j,k,:) = color2;
          else
              checkerboardL(j,k,:) = color2; 
              checkerboardL(j,k,2) = color2Transp;
              checkerboardR(j,k,:) = color1;
              checkerboardR(j,k,2) = color1Transp;
+             
+             checkerFullL(j,k,:) = color2;
+             checkerFullR(j,k,:) = color1;
          end
      end
 end
@@ -216,7 +224,10 @@ try
     % Make the checkerboard into a texure
     checkerTexture(1) = Screen('MakeTexture', window, checkerboardL);
     checkerTexture(2) = Screen('MakeTexture', window, checkerboardR);
-    
+
+    checkerFullTexture(1) = Screen('MakeTexture', window, checkerFullL);
+    checkerFullTexture(2) = Screen('MakeTexture', window, checkerFullR);
+                
     % Set up alpha-blending for smooth (anti-aliased) lines
     Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 
@@ -267,6 +278,7 @@ try
         %% Randomized selection (target side, video, frequency, start)       
 
         % Video v. checkerboard display condition:
+<<<<<<< HEAD
         mCondition = targetConds(n);
         
         
@@ -275,6 +287,14 @@ try
         if mod(mCondition, 2) == 0      % Movie - movie display
             displayType = 1;
             
+=======
+        displayType = targetDisplay(n);
+
+        if displayType == 0         % Checkerboard - checkerboard display
+            movieBool = 0;
+            
+        else                        % Movie - movie display
+>>>>>>> 3babc52554b065be0162fe2d31ced573e90fa14b
             movieBool = 1;
             movienameL = leftVideos{n}.name;
             moviedelayL = rand * leftVideos{n}.delayMax;
@@ -348,7 +368,7 @@ try
         pause(startTrialPause)  
         
         %% Draw fixation cross
-        Screen('DrawTexture', window, crossTexture, [], dstRect(displayType + 1,:));
+        Screen('DrawTexture', window, crossTexture, [], dstRect(targetSides(n) + 1,:));
         Screen('Flip', window);
 
         if lslBool
@@ -426,10 +446,15 @@ try
             frameCounterL = frameCounterL + waitframes;
             frameCounterR = frameCounterR + waitframes;
 
-            % Draw texture on screen
-            Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
-            Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
-            Screen('DrawTexture', window, crossTexture, [], dstRect(displayType + 1,:));
+            % Draw texture on screen\
+            if movieBool
+                Screen('DrawTexture', window, checkerTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
+                Screen('DrawTexture', window, checkerTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
+            else
+                 Screen('DrawTexture', window, checkerFullTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
+                 Screen('DrawTexture', window, checkerFullTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
+            end
+            Screen('DrawTexture', window, crossTexture, [], dstRect(targetSides(n) + 1,:));
 
             % Flip to update display at set time (at waitframes multiple of screen refresh rate)
             vbl = Screen('Flip', window, vbl + (waitframes-buffer) * ifi);
