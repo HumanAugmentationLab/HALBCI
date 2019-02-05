@@ -1,11 +1,10 @@
 %% Directory for EEG data (K drive is \fsvs01\Research\)
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
+
 % File name without extension
-% fnameeeg = '20181127095853_-ZZZ-VideosCheckPilot-1_Record';
-% fnameeeg = '20181127101550_-ZZZ-VideosCheckPilot-2_Record';        % stops at trial 16
-% fnameeeg = '20181127102816_-ZZZ-VideosCheckPilot-3_Record';
-% fnameeeg = '20181127104013_-ZZZ-VideosCheckPilot-4_Record';        % stops at trial 13
-fnameeeg = '20181127110440_-ZZZ-VideosCheckPilot-5_Record';
+% fnameeeg = '20190131150343_ZZZ-Pilot-1_Test';
+fnameeeg = '20190131152830_ZZZ-Pilot-2_Test';
+% fnameeeg = '20190131155150_ZZZ-Pilot-3_Test';
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
@@ -51,6 +50,7 @@ adetails.filter.state = [];
 disp('Filtering...')
 [EEG, adetails.filter.state] = exp_eval(flt_fir(EEG,adetails.filter.freqs, ...
     adetails.filter.mode, adetails.filter.type));
+EEG.history = adetails;
 
 %% Plot the filtered EEG data (may skip)
 
@@ -79,7 +79,6 @@ figure; pop_eegplot(EEG, 1);
 %% Interpolate/remove the bad channels from the data
 adetails.reject.strategy = 'interpolate'; % or 'remove'
 
-badelec = [badelec];
 % Here you can add additional bad electrodes, besides the ones in badelec
 adetails.reject.channelidx = badelec;
 
@@ -105,7 +104,7 @@ adetails.markers.types = {'51','52','53','54'};
 adetails.markers.names = {'LEFT & LOW','LEFT & HIGH','RIGHT & LOW','RIGHT & HIGH'};
 evtype = [];
 
-adetails.markers.epochwindow = [0 20]; % window after standard markers to look at
+adetails.markers.epochwindow = [2 60]; % window after standard markers to look at
 adetails.markers.epochsize = 10; % size of miniepochs to chop regular markered epoch up into
 adetails.markers.numeventsperwindow = floor((adetails.markers.epochwindow(2)-adetails.markers.epochwindow(1))/adetails.markers.epochsize);
 
@@ -160,11 +159,11 @@ EEG = pop_runica(EEG, 'runica');
 % These give similar results
 
 % Write ICA to file for later use
-dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckerV2\';
-pop_saveset(EEG, 'filename', 'EEG5', 'filepath', dirica)
+dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckerV4\';
+pop_saveset(EEG, 'filename', 'EEG2', 'filepath', dirica)
 
 %% Read ICA from each run
-dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckerV1\';
+dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckerV4\';
 
 EEG = pop_loadset('filename', 'EEG1.set', 'filepath', dirica);
 EEG2 = pop_loadset('filename', 'EEG2.set', 'filepath', dirica);
@@ -188,13 +187,10 @@ EEG = pop_selectcomps(EEG);
 %% Remove ICA components
 % Store numbers of components to reject (set manually)
 lastEEG = EEG;
-rej1 = 2;
-rej2 = [1 7 27];
-rej3 = [1 6 17];
-rej4 = [1 5 6 13 17 23:24];
-rej5 = [1 10 16:17 19 24 25 30];
+rej1 = [1 10 21];
+rej2 = [1 15 22 24:26 29];
 
-rej_comps = rej5;
+rej_comps = rej2;
 adetails.reject.icacomponents = rej_comps;
 
 % Running this way will cause a pop-up, which allows you to see the before
@@ -205,18 +201,18 @@ adetails.reject.icacomponents = rej_comps;
 disp('Subtracing ICA component from data...')
 EEG = pop_subcomp(EEG, rej_comps);
 
-pop_saveset(EEG, 'filename', 'EEG5sub', 'filepath', dirica)
+pop_saveset(EEG, 'filename', 'EEG2sub', 'filepath', dirica)
 
-%% Plot data after removal of ICA components
-% Reference to original data
+%% Plot data before/after removal of ICA components
+freqsofinterest = [6 7.5 15 18 30];
+
 figure; pop_spectopo(lastEEG, 1, [1000*lastEEG.xmin  1000*lastEEG.xmax], 'EEG' ,...
-    'percent', 100, 'freq', [5 10 12 15], 'freqrange',[1 30],'electrodes','on');
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
-    'percent', 100, 'freq', [5 10 12 15], 'freqrange',[1 30],'electrodes','on');
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Combine post-ICA runs
-dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckerV2\';
 
 EEG1sub = pop_loadset('filename', 'EEG1sub.set', 'filepath', dirica);
 EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', dirica);
@@ -230,17 +226,20 @@ allEEGsub = exp_eval(allEEGsub);
 adetails.markers.types = {'51','52','53','54'};
 adetails.markers.names = {'LEFT & LOW','LEFT & HIGH','RIGHT & LOW','RIGHT & HIGH'};
 
+lastEEG = EEG;
+EEG = allEEGsub;
+
 evtype = [];
-for i = 1:length(allEEGsub.event)
-    evtype = [evtype, ""+allEEGsub.event(i).type];
+for i = 1:length(EEG.event)
+    evtype = [evtype, ""+EEG.event(i).type];
 end
 unique(evtype)
 adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
 
 
 %% Compare high and low freq trials
-EEG = allEEGsub;
 lastEEG = EEG;
+EEG = allEEGsub;
 
 lowevents = {'51', '53'};
 highevents = {'52', '54'};
@@ -255,29 +254,17 @@ EEGlowvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents,
 EEGhighvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '54')));
 
 %% Generate spectopo plots for each condition, if epochs trimmed to not include events.
-freqsofinterest = [5 11.8 15];
+freqsofinterest = [6 12 15 18 30];
     
-EEGlow = EEGlowall; EEGhigh = EEGhighall;
+EEGlow = EEGlowall;
+EEGhigh = EEGhighall;
 
 figure; pop_spectopo(EEGlow, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 figure; pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
-
-figure; pop_spectopo(EEGlowcheck, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
-
-figure; pop_spectopo(EEGhighcheck, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
-
-
-figure; pop_spectopo(EEGlowvid, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
-
-figure; pop_spectopo(EEGhighvid, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
 
 %% Plot spectopo for single channel
 singlelow = EEGlow;
@@ -291,13 +278,13 @@ end
 pop_spectopo(singlelow, 1, [0 2000], 'EEG', 'percent', 100, 'freq', [6.1 9 15 18], 'freqrange',[3 25],'electrodes','on')
 
 %% Plot relative powers while varying attention 
-lowfreq = 15;
-highfreq = 12;
+lowfreq = 6;
+highfreq = 15;
 thresh = 0.5;
 channum = 20;
 
-EEGlow = EEGlowcheck;
-EEGhigh = EEGhighcheck;
+% EEGlow = EEGlowcheck;
+% EEGhigh = EEGhighcheck;
 
 % --------------- Attending LOW -------------- %
 lsize = size(EEGlow.data);
@@ -433,10 +420,10 @@ T = 1/Fs;
 L = 4999;
 t = (0:L-1)*T; % Time vector
 channum = 20;
-data = squeeze(EEGhighall.data(channum,:,:));
+data = squeeze(EEGlowall.data(channum,:,:));
 
 figure; hold on;
-title(sprintf('FFT: %s attend Low Checker', EEGlow.chanlocs(channum).labels))
+title(sprintf('FFT: %s attend Low', EEGlow.chanlocs(channum).labels))
 
 for i = 1:size(data, 2)
     
