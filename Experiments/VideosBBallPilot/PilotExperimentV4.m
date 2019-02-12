@@ -25,8 +25,8 @@ addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 experimentName = 'experiment_20190131-log3.txt';      % Log file name
 
 % Duration
-trialLength = 60.1;                  % Trial length (s)  --- always add 100 ms for buffer
-numTrials = 16;                      % Number of trials per run - must be even number
+trialLength = 10.1;                  % Trial length (s)  --- always add 100 ms for buffer
+numTrials = 2;                      % Number of trials per run - must be even number
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
@@ -167,7 +167,8 @@ if lslBool == 1
 end
 
 if logBool
-    fileID = fopen(experimentName,'w'); % Open log file
+    fileID = fopen(experimentName,'w');                         % Open general log file
+    markerfileID = fopen(['marker' experimentName], 'w');       % Open marker log file
 end
 
 %% Generate Checkerboard and Cross Display
@@ -341,6 +342,8 @@ try
             fprintf(fileID,'Target Movie: %s\n', leftVideos{n}.name);
             fprintf(fileID,'Movie start time: %.3f\n', currentdelay);
             fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreqs(n), targetDisplay(n));
+                            
+            fprintf(markerfileID, 'type,latency,latency_ms');
         end
         
         %% Buffer movie underneath blank initial display
@@ -579,6 +582,7 @@ try
                 outlet.push_sample(mEndTrial + mCondition)
 
                 trialTime = toc(myStim);
+                trialEnd = toc(runStart);
 %                 disp(mCueOffset + mCondition)
 %                 disp(mStimulusOffset + mCondition)
                 disp(mEndTrial + mCondition)
@@ -603,6 +607,12 @@ try
                 fprintf(fileID, 'cueStart: %.3f \n', cueStart); 
                 fprintf(fileID, 'stimStart: %.3f \n', stimStart); 
                 fprintf(fileID, 'Trial Length: %.3f \n', trialTime);
+                
+                fprintf('%d,%.3f,%d \n', mStartTrial + mCondition, trialStart, trialStart * 1000);
+                fprintf('%d,%.3f,%d \n', mCueOnset + mCondition, cueStart, cueStart * 1000);
+                fprintf('%d,%.3f,%d \n', mStimulusOnset + mCondition, stimStart, stimStart * 1000);
+                fprintf('%d,%.3f,%d \n', mEndTrial + mCondition, trialEnd, trialEnd * 1000);
+
             end
                         
             %% Survey
@@ -669,6 +679,7 @@ try
                     fprintf(fileID, 'Total Time: %.3f \n', totalTime); 
                     fprintf(fileID, '\n');
                     fclose(fileID);                                         % Close log file in last trial
+                    fclose(markerfileID)
                 end
             end
     end
