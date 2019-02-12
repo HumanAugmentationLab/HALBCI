@@ -22,11 +22,11 @@ addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 %ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
-experimentName = 'experiment_20190131-log3.txt';      % Log file name
+experimentName = 'test-log1.txt';      % Log file name
 
 % Duration
-trialLength = 10.1;                  % Trial length (s)  --- always add 100 ms for buffer
-numTrials = 2;                      % Number of trials per run - must be even number
+trialLength = 1.1;                  % Trial length (s)  --- always add 100 ms for buffer
+numTrials = 4;                      % Number of trials per run - must be even number
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
@@ -39,7 +39,7 @@ endPause = 1;                       % Pause after run ends (s)
 lslBool = 1;                        % 1: Send markers over LSL
 logBool = 1;                        % 1: Write trial data to text file
 surveyBool = 1;                     % 0: Trials only | 1: Attention Survey
-movieBool = 1;                      % 0: Checkerboard only | 1: checkerboard and movie
+movieBool = 0;                      % 0: Checkerboard only | 1: checkerboard and movie
 
 % Background Display
 WindowCoords = [];                  % Size of display: [x1, y1, x2, y2] or [] for full screen
@@ -168,7 +168,9 @@ end
 
 if logBool
     fileID = fopen(experimentName,'w');                         % Open general log file
-    markerfileID = fopen(['marker' experimentName], 'w');       % Open marker log file
+    markerfileID = fopen(['marker_' experimentName], 'w');       % Open marker log file
+    fprintf(markerfileID, 'type,latency,latency_ms\n');
+    fprintf(markerfileID, '%d,%.3f,%d \n', mStartRun, 0, 0);
 end
 
 %% Generate Checkerboard and Cross Display
@@ -270,6 +272,7 @@ try
         outlet.push_sample(mStartRun)
         runStart = tic;
         disp(mStartRun)
+        
     end
 
     % Wait on black screen
@@ -300,6 +303,10 @@ try
             movienameR = rightVideos{n}.name;
             moviedelayR = 0; %rand * rightVideos{n}.delayMax;
         end
+        
+        % Frequency display condition:
+        leftFreq = targetFreqs(n);
+        rightFreq = Hz(Hz ~= targetFreqs(n));
         
         % Output ALL FOUR conditions
         if displayType == 0
@@ -341,9 +348,7 @@ try
             fprintf(fileID,'Trial Number: %d\n', n);
             fprintf(fileID,'Target Movie: %s\n', leftVideos{n}.name);
             fprintf(fileID,'Movie start time: %.3f\n', currentdelay);
-            fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreqs(n), targetDisplay(n));
-                            
-            fprintf(markerfileID, 'type,latency,latency_ms');
+            fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreqs(n), targetDisplay(n));        
         end
         
         %% Buffer movie underneath blank initial display
@@ -531,8 +536,13 @@ try
                 responseTimes = [responseTimes videoTime];
 
                 if lslBool
+                     responseTime = toc(runStart);
                     outlet.push_sample(mResponseOnset);                 % Send response onset marker
                     disp(mResponseOnset);
+                end
+                
+                if logBool
+                    fprintf(markerfileID, '%d,%.3f,%d \n', mResponseOnset, responseTime, responseTime * 1000);
                 end
 
                 FlushEvents('keyDown');                                 % Flush to reduce number of reported key presses
@@ -548,8 +558,13 @@ try
                 eventlogTimes = [eventlogTimes videoTime];
 
                 if lslBool
+                    eventTime = toc(runStart);
                     outlet.push_sample(mEventOnset);                    % Send event onset marker
                     disp(mEventOnset)
+                end
+                
+                if logBool
+                    fprintf(markerfileID, '%d,%.3f,%d \n', mEventOnset, eventTime, eventTime * 1000);
                 end
 
                 eventCounter = eventCounter + 1;
@@ -608,10 +623,10 @@ try
                 fprintf(fileID, 'stimStart: %.3f \n', stimStart); 
                 fprintf(fileID, 'Trial Length: %.3f \n', trialTime);
                 
-                fprintf('%d,%.3f,%d \n', mStartTrial + mCondition, trialStart, trialStart * 1000);
-                fprintf('%d,%.3f,%d \n', mCueOnset + mCondition, cueStart, cueStart * 1000);
-                fprintf('%d,%.3f,%d \n', mStimulusOnset + mCondition, stimStart, stimStart * 1000);
-                fprintf('%d,%.3f,%d \n', mEndTrial + mCondition, trialEnd, trialEnd * 1000);
+                fprintf(markerfileID, '%d,%.3f,%d \n', mStartTrial + mCondition, trialStart, trialStart * 1000);
+                fprintf(markerfileID, '%d,%.3f,%d \n', mCueOnset + mCondition, cueStart, cueStart * 1000);
+                fprintf(markerfileID, '%d,%.3f,%d \n', mStimulusOnset + mCondition, stimStart, stimStart * 1000);
+                fprintf(markerfileID, '%d,%.3f,%d \n', mEndTrial + mCondition, trialEnd, trialEnd * 1000);
 
             end
                         
@@ -678,8 +693,11 @@ try
                 if logBool
                     fprintf(fileID, 'Total Time: %.3f \n', totalTime); 
                     fprintf(fileID, '\n');
+                    
+                    fprintf(markerfileID, '%d,%.3f,%d \n', mEndRun, totalTime, totalTime * 1000);
+                   
                     fclose(fileID);                                         % Close log file in last trial
-                    fclose(markerfileID)
+                    fclose(markerfileID);
                 end
             end
     end
