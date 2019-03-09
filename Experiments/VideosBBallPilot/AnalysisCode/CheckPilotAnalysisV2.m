@@ -1,3 +1,6 @@
+cd C:\Users\Public\Research\BCILAB
+bcilab
+
 %% Directory for EEG data (K drive is \fsvs01\Research\)
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
 
@@ -11,8 +14,8 @@ ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info 
 EEG = exp_eval(ioeasy); % Force bcilab to evaluate the expression and load the data
 
 %% Load data with corrected condition markers
-dirload = 'C:\Users\alakmazaheri\Desktop\';
-EEG = importdata([dirload 'EEG5corr.mat']);
+dirload = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
+EEG = importdata([dirload 'run1-updatedevents-corr.mat']);
 
 %% Chop run between start and end markers 
 [~, start_idx] = pop_selectevent(EEG, 'type', 10);
@@ -50,7 +53,6 @@ adetails.filter.state = [];
 disp('Filtering...')
 [EEG, adetails.filter.state] = exp_eval(flt_fir(EEG,adetails.filter.freqs, ...
     adetails.filter.mode, adetails.filter.type));
-EEG.history = adetails;
 
 %% Plot the filtered EEG data (may skip)
 
@@ -79,6 +81,8 @@ figure; pop_eegplot(EEG, 1);
 %% Interpolate/remove the bad channels from the data
 adetails.reject.strategy = 'interpolate'; % or 'remove'
 
+badelec = 12; %RUN 1
+
 % Here you can add additional bad electrodes, besides the ones in badelec
 adetails.reject.channelidx = badelec;
 
@@ -93,7 +97,7 @@ elseif strcmp(adetails.reject.strategy, 'interpolate' )
     EEG = eeg_interp(EEG,adetails.reject.channelidx,'spherical');
 end
 
-%% Re-reference data against average of all channels
+%% Re-reference data against average of all channels -- skip
 lastEEG = EEG;
 EEG = pop_reref(EEG);
 
@@ -213,21 +217,24 @@ figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Combine post-ICA runs
+dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckerV4\';
 
-EEG1sub = pop_loadset('filename', 'EEG1sub.set', 'filepath', dirica);
+% TWO CONDITIONS
+% EEG1sub = pop_loadset('filename', 'EEG1sub.set', 'filepath', dirica);
 EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', dirica);
-EEG3sub = pop_loadset('filename', 'EEG3sub.set', 'filepath', dirica);
-EEG4sub = pop_loadset('filename', 'EEG4sub.set', 'filepath', dirica);
-EEG5sub = pop_loadset('filename', 'EEG5sub.set', 'filepath', dirica);
+% 
+% allEEGsub = set_merge(EEG1sub, EEG2sub);
+% allEEGsub = exp_eval(allEEGsub);
 
-allEEGsub = set_merge(EEG1sub, EEG2sub, EEG3sub, EEG4sub, EEG5sub);
-allEEGsub = exp_eval(allEEGsub);
+% FOUR (corrected) CONDITIONS
+EEG1sub = importdata([dirica 'EEG1subcorr.mat']);
 
 adetails.markers.types = {'51','52','53','54'};
-adetails.markers.names = {'LEFT & LOW','LEFT & HIGH','RIGHT & LOW','RIGHT & HIGH'};
+adetails.markers.names = {'LEFT & CHECK','RIGHT & CHECK','LEFT & VID','RIGHT & VID'};
 
-lastEEG = EEG;
-EEG = allEEGsub;
+
+
+EEG = EEG1sub;
 
 evtype = [];
 for i = 1:length(EEG.event)
@@ -236,10 +243,9 @@ end
 unique(evtype)
 adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
 
-
 %% Compare high and low freq trials
 lastEEG = EEG;
-EEG = allEEGsub;
+EEG = EEG1sub;
 
 lowevents = {'51', '53'};
 highevents = {'52', '54'};
@@ -248,16 +254,16 @@ EEGlowall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents,
 EEGhighall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, highevents)));
 
 EEGlowcheck = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '51')));
-EEGhighcheck = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '53')));
+EEGhighcheck = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '52')));
 
-EEGlowvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '52')));
+EEGlowvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '53')));
 EEGhighvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '54')));
 
 %% Generate spectopo plots for each condition, if epochs trimmed to not include events.
 freqsofinterest = [6 12 15 18 30];
     
-EEGlow = EEGlowall;
-EEGhigh = EEGhighall;
+EEGlow = EEGhighcheck;
+EEGhigh = EEGhighvid;
 
 figure; pop_spectopo(EEGlow, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
@@ -265,6 +271,92 @@ figure; pop_spectopo(EEGlow, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
 figure; pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
+
+%% Try some classification!
+
+%Make epoched data 'continuous'
+
+EEG1 = EEG1sub;
+epochdata = EEG1.data;
+contdata = reshape(epochdata,size(epochdata,1),[],1);
+EEG1.data = contdata;
+EEG1.epoch = [];
+EEG1.event = rmfield(EEG1.event, {'duration', 'epoch'});
+EEG1.event = EEG1.event';
+EEG1.pnts = EEG1.pnts*EEG1.trials;
+EEG1.trials = 1;
+EEG1.times =  0:(1000/EEG1.srate):(1000/EEG1.srate)*EEG1.pnts-1;
+EEG1.xmax = EEG1.times(end)/1000;
+
+EEG2 = EEG2sub;
+epochdata = EEG2.data;
+contdata = reshape(epochdata,size(epochdata,1),[],1);
+lastEEG = EEG2;
+EEG2.data = contdata;
+EEG2.epoch = [];
+EEG2.event = rmfield(EEG2.event, {'duration', 'epoch'});
+EEG2.event = EEG2.event';
+EEG2.pnts = EEG2.pnts*EEG2.trials;
+EEG2.trials = 1;
+EEG2.times =  0:(1000/EEG2.srate):(1000/EEG2.srate)*EEG2.pnts-1;
+EEG2.xmax = EEG2.times(end)/1000;
+
+
+%%
+myapproach = {'CSP', ...
+    'SignalProcessing', { 'EpochExtraction',[0 9.996], 'FIRFilter', {'Frequencies', [1 2 48 49], 'Type','minimum-phase'}} ...
+    'Prediction', {'FeatureExtraction',{'PatternPairs',2}} ...
+    };
+
+%finally we train the model on the data, specifying the target markers
+[trainloss,mymodel,laststats] = bci_train('Data',EEG2,'Approach', myapproach,...
+    'TargetMarkers',{'51','52'},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
+
+%Sisplay the results of the cross-validation tests
+disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
+%Visualize the results of the csp for this case
+laststats;
+bci_visualize(mymodel)
+
+%this will go through any given data, predict the result, and return the
+%classification accuracy. You may also use bci_annotate to find probaility
+%values of each
+%annotateData = bci_annotate(lastmodel, mydata)
+[prediction,loss,teststats,targets] = bci_predict(mymodel,EEG1);
+
+% Displays the information  from bci_predict
+disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
+%disp(['  predicted classes: ',num2str(round(prediction)')]);  % class probabilities * class values
+%disp(['  true classes     : ',num2str(round(targets)')]);
+
+
+%% Extract features from each epoch individually, to be fed into classification learner
+% One real epoch = 10 epochs in this dataset
+% This won't work because each epoch only has one condition, and the
+% classifier wants all conditions
+
+targetchan = 20;                    % Oz
+numepochs = size(EEG.data, 3);
+allfeatures = [];
+currEEG = EEG;
+
+for i = 1:numepochs
+    currEEG.data = EEG.data(:,:,i);
+    currEEG.epoch = [];
+    currEEG.event = rmfield(EEG.event, {'duration', 'epoch'});
+    currEEG.event = currEEG.event';
+    currEEG.trials = 1;
+
+    myapproach = {'CSP' 'SignalProcessing',{'FeatureExtraction',{'PatternPairs',1}, 'EpochExtraction',[0 currEEG.xmax],...
+    'FIRFilter', {'Frequencies', [1 2 48 49], 'Type','minimum-phase'}}};
+
+    %finally we train the model on the data, specifying the target markers
+    [trainloss,mymodel,laststats] = bci_train('Data',currEEG,'Approach', 'CSP',...
+    'TargetMarkers',{'51','52'},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
+
+    features = mymodel.featuremodel.patterns(:,targetchan)';
+    allfeatures = [allfeatures; features];                          % epochs x num features
+end
 
 %% Plot spectopo for single channel
 singlelow = EEGlow;
@@ -352,7 +444,7 @@ maxes = [max(llp_trunc) max(lhp_trunc) max(hlp_trunc) max(hhp_trunc)];
 figure; hold on
 bins = [10 20 35 45];
 bar(bins, meanpower)
-title(sprintf('Relative Powers Attending: %s | CHECK', EEGlow.chanlocs(channum).labels))
+title(sprintf('Relative Powers Attending: %s', EEGlow.chanlocs(channum).labels))
 
 xticks(bins)
 xticklabels({'Low att. Low'; 'Low att. High'; 'High att. Low'; 'High att. High'})
@@ -360,6 +452,18 @@ plot(bins, maxes, '*', 'Color', 'r', 'LineWidth', 1);
 % errorbar(bins, meanpower, maxes, 'Color', 'k', 'LineStyle', 'none', 'LineWidth', 2, 'Marker', '.')
 
 legend('Mean trial power', 'Max Value', 'Location', 'northwest')
+
+
+%%
+figure;
+histogram(llp, 0:10);
+hold on;
+histogram(lhp, 0:10);
+
+figure;
+histogram(hlp, 0:0.5:5);
+hold on;
+histogram(hhp, 0:0.5:5);
 
 %% Plot FFT of data for each channel (average trials)
 Fs = EEG.srate;
@@ -457,4 +561,3 @@ end
 figure; pop_spectopo(singlelow, 1, [0 2000], 'EEG', 'percent', 100, 'freq', freqsofinterest, 'freqrange',[3 25],'electrodes','on')
 figure; pop_spectopo(singlehigh, 1, [0 2000], 'EEG', 'percent', 100, 'freq', freqsofinterest, 'freqrange',[3 25],'electrodes','on')
 
-%% Plot 
