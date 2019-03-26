@@ -1,0 +1,34 @@
+training = subplot(2, 1,1);
+plot (1, training_rates(1, :), '*')
+hold on;
+
+plot (2, training_rates(2, :), '*')
+plot (3, training_rates(3, :), '*')
+xlim([0, 4]);
+ylim([50, 100]);
+xticks(training,[1 2 3])
+xticklabels(training,{'Checkerboard','Strong Video','Weak Video'})
+
+plot([1, 2, 3], 
+
+
+title("Training Data Classification Rate");
+legend("6 Hz Bandpower", "15 Hz Bandpower", "Spectral CSP", "Spectral Means - lda", "Spectral Means - logreg");
+legend('Location', 'southeast');
+legend('boxoff');
+
+testing = subplot(2, 1, 2);
+plot (1, testing_rates(1, :), '*')
+hold on;
+
+plot (2, testing_rates(2, :), '*')
+plot (3, testing_rates(3, :), '*')
+xlim([0, 4]);
+ylim([0, 100]);
+xticks(testing,[1 2 3])
+xticklabels(testing,{'Checkerboard','Strong Video','Weak Video'})
+
+title("Testing Data Classification Rate");
+legend("6 Hz Bandpower", "15 Hz Bandpower", "Spectral CSP", "Spectral Means - lda", "Spectral Means - logreg");
+legend('Location', 'southeast');
+legend('boxoff');
