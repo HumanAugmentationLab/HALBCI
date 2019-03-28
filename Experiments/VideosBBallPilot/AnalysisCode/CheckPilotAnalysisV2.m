@@ -217,47 +217,34 @@ figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Combine post-ICA runs
-dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckerV4\';
+dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckerV5-PK\';
 
-% TWO CONDITIONS
-% EEG1sub = pop_loadset('filename', 'EEG1sub.set', 'filepath', dirica);
-% EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', dirica);
-% 
-% allEEGsub = set_merge(EEG1sub, EEG2sub);
-% allEEGsub = exp_eval(allEEGsub);
+% EEG1sub = importdata([dirica 'EEG1subcorr.mat']);     % ZZZ
+EEG1sub = pop_loadset('filename', 'EEG1sub.set', 'filepath', dirica);
+EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', dirica);
+EEG3sub = pop_loadset('filename', 'EEG3sub.set', 'filepath', dirica);
+EEG4sub = pop_loadset('filename', 'EEG4sub.set', 'filepath', dirica);
 
-% FOUR (corrected) CONDITIONS
-EEG1sub = importdata([dirica 'EEG1subcorr.mat']);
-
-adetails.markers.types = {'51','52','53','54'};
-adetails.markers.names = {'LEFT & CHECK','RIGHT & CHECK','LEFT & VID','RIGHT & VID'};
+% Set aside one run
+EEGsub = set_merge(EEG1sub, EEG2sub, EEG3sub);
+EEGsub = exp_eval(EEGsub);
 
 
-
-EEG = EEG1sub;
-
-evtype = [];
-for i = 1:length(EEG.event)
-    evtype = [evtype, ""+EEG.event(i).type];
-end
-unique(evtype)
-adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
 
 %% Compare high and low freq trials
 lastEEG = EEG;
-EEG = EEG1sub;
+EEG = EEGsub;
 
-lowevents = {'51', '53'};
-highevents = {'52', '54'};
+% lowevents = {'51', '53'};
+% highevents = {'52', '54'};
+% 
+% EEGlowall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, lowevents)));
+% EEGhighall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, highevents)));
 
-EEGlowall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, lowevents)));
-EEGhighall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, highevents)));
+EEGcheck = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '52'})));
+EEGstrongvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'53', '54'})));
+EEGweakvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'55', '56'})));
 
-EEGlowcheck = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '51')));
-EEGhighcheck = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '52')));
-
-EEGlowvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '53')));
-EEGhighvid = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '54')));
 
 %% Generate spectopo plots for each condition, if epochs trimmed to not include events.
 freqsofinterest = [6 12 15 18 30];
@@ -272,11 +259,20 @@ figure; pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,.
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Put some epochs aside for prediction
-EEG = EEG1sub;
+EEG = EEGcheck;
+
+adetails.markers.types = {'51','52'};
+
+evtype = [];
+for i = 1:length(EEG.event)
+    evtype = [evtype, ""+EEG.event(i).type];
+end
+unique(evtype)
+adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
 
 markertypes = string(adetails.markers.types);
 
-keeppertrial = 3;
+keeppertrial = 4;
 test_trials = [];
 
 for i = 1:length(markertypes)
@@ -316,9 +312,10 @@ EEG1.times =  0:(1000/EEG1.srate):(1000/EEG1.srate)*EEG1.pnts-1;
 EEG1.xmax = EEG1.times(end)/1000;
 EEGtest = EEG1;
 
+
 disp('Made data continuous')
 
-%
+%%
 
 % myapproach = {'CSP', ...
 %     'SignalProcessing', { ...
@@ -327,7 +324,7 @@ disp('Made data continuous')
 %         } ...
 %     'Prediction', {'FeatureExtraction',{'PatternPairs',2}} ...
 %     };
-
+% 
 % myapproach = {'SpecCSP', ...
 %     'SignalProcessing', { ...
 %         'EpochExtraction', [0 9.99] , ...
@@ -339,26 +336,32 @@ disp('Made data continuous')
 %         }...
 %     } ...
 % };
-myapproach = {'Bandpower' ...
-    'SignalProcessing', { ...
-        'FIRFilter',[13 14 16 17], ...
-        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-     }, ...
-};
-
-% myapproach = {'Spectralmeans' ...
+% myapproach = {'Bandpower' ...
 %     'SignalProcessing', { ...
+%         'FIRFilter',[4 5 7 8], ...
 %         'EpochExtraction', {'TimeWindow',[0 9.996] } ...
 %      }, ...
-%      'Prediction', { ...
-%         'FeatureExtraction',{ 'FreqWindows', [5.5 7; 14.5 16] }, ...
-%         'MachineLearning', {'Learner', 'lda'} ...
-%         }...
 % };
+% myapproach = {'Bandpower' ...
+%     'SignalProcessing', { ...
+%         'FIRFilter',[13 14 16 17], ...
+%         'EpochExtraction', {'TimeWindow',[0 9.996] } ...
+%      }, ...
+% };
+
+myapproach = {'Spectralmeans' ...
+    'SignalProcessing', { ...
+        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
+     }, ...
+     'Prediction', { ...
+        'FeatureExtraction',{ 'FreqWindows', [5 7; 14 16] }, ...
+        'MachineLearning', {'Learner', 'logreg'} ...
+        }...
+};
 
 
 [trainloss,mymodel,laststats] = bci_train('Data',EEGtrain, 'Approach', myapproach,...
-    'TargetMarkers',{{'52'}, {'51'}},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
+    'TargetMarkers',{{'51'}, {'52'}},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
 
 
 disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
