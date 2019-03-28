@@ -1,13 +1,14 @@
-cd C:\Users\Public\Research\BCILAB
+cd C:\Users\adatar\Documents\Github\HAL\BCILAB
 bcilab
 
 %% Directory for EEG data (K drive is \fsvs01\Research\)
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
 
 % File name without extension
-fnameeeg = '20190131150343_ZZZ-Pilot-1_Test';
+% fnameeeg = '20190131150343_ZZZ-Pilot-1_Test';
 % fnameeeg = '20190131152830_ZZZ-Pilot-2_Test';
 % fnameeeg = '20190131155150_ZZZ-Pilot-3_Test';
+fnameeeg = '20190312101132_20190312-PK-VideosCheckPilot-1_Record';
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
@@ -221,7 +222,7 @@ dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\ic
 
 % TWO CONDITIONS
 % EEG1sub = pop_loadset('filename', 'EEG1sub.set', 'filepath', dirica);
-% EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', dirica);
+EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', dirica);
 % 
 % allEEGsub = set_merge(EEG1sub, EEG2sub);
 % allEEGsub = exp_eval(allEEGsub);
@@ -271,26 +272,12 @@ figure; pop_spectopo(EEGlow, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
 figure; pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
-%% Put some epochs aside for prediction
-EEG = EEG1sub;
 
-markertypes = string(adetails.markers.types);
+%% Try some classification!
 
-keeppertrial = 3;
-test_trials = [];
+%Make epoched data 'continuous'
 
-for i = 1:length(markertypes)
-    marker = markertypes(i);
-    idx = find(contains(adetails.markers.trialevents, marker));
-    test_trials = [test_trials randsample(idx, keeppertrial)];
-end
-
-EEGtrain_epoch = pop_select(EEG, 'notrial', test_trials);
-EEGtest_epoch = pop_select(EEG, 'trial', test_trials);
-
-% Make epoched data 'continuous'
-
-EEG1 = EEGtrain_epoch;
+EEG1 = EEG1sub;
 epochdata = EEG1.data;
 contdata = reshape(epochdata,size(epochdata,1),[],1);
 EEG1.data = contdata;
@@ -301,75 +288,47 @@ EEG1.pnts = EEG1.pnts*EEG1.trials;
 EEG1.trials = 1;
 EEG1.times =  0:(1000/EEG1.srate):(1000/EEG1.srate)*EEG1.pnts-1;
 EEG1.xmax = EEG1.times(end)/1000;
-EEGtrain = EEG1;
 
-EEG1 = EEGtest_epoch;
-epochdata = EEG1.data;
+EEG2 = EEG2sub;
+epochdata = EEG2.data;
 contdata = reshape(epochdata,size(epochdata,1),[],1);
-EEG1.data = contdata;
-EEG1.epoch = [];
-EEG1.event = rmfield(EEG1.event, {'duration', 'epoch'});
-EEG1.event = EEG1.event';
-EEG1.pnts = EEG1.pnts*EEG1.trials;
-EEG1.trials = 1;
-EEG1.times =  0:(1000/EEG1.srate):(1000/EEG1.srate)*EEG1.pnts-1;
-EEG1.xmax = EEG1.times(end)/1000;
-EEGtest = EEG1;
-
-disp('Made data continuous')
-
-%
-
-% myapproach = {'CSP', ...
-%     'SignalProcessing', { ...
-%         'EpochExtraction',[0 9.996], ...
-%         'FIRFilter', {'Frequencies', [1 2 48 49], 'Type','linear-phase'}...
-%         } ...
-%     'Prediction', {'FeatureExtraction',{'PatternPairs',2}} ...
-%     };
-
-% myapproach = {'SpecCSP', ...
-%     'SignalProcessing', { ...
-%         'EpochExtraction', [0 9.99] , ...
-%         'FIRFilter', {'Frequencies', [1 2 48 49], 'Type','linear-phase'}...
-%         } , ... 
-%     'Prediction', {'FeatureExtraction',{...
-%         'PatternPairs',4, ...
-%         'prior','@(f) f>=2 & f<=20' ...
-%         }...
-%     } ...
-% };
-myapproach = {'Bandpower' ...
-    'SignalProcessing', { ...
-        'FIRFilter',[13 14 16 17], ...
-        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-     }, ...
-};
-
-% myapproach = {'Spectralmeans' ...
-%     'SignalProcessing', { ...
-%         'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-%      }, ...
-%      'Prediction', { ...
-%         'FeatureExtraction',{ 'FreqWindows', [5.5 7; 14.5 16] }, ...
-%         'MachineLearning', {'Learner', 'lda'} ...
-%         }...
-% };
+lastEEG = EEG2;
+EEG2.data = contdata;
+EEG2.epoch = [];
+EEG2.event = rmfield(EEG2.event, {'duration', 'epoch'});
+EEG2.event = EEG2.event';
+EEG2.pnts = EEG2.pnts*EEG2.trials;
+EEG2.trials = 1;
+EEG2.times =  0:(1000/EEG2.srate):(1000/EEG2.srate)*EEG2.pnts-1;
+EEG2.xmax = EEG2.times(end)/1000;
 
 
-[trainloss,mymodel,laststats] = bci_train('Data',EEGtrain, 'Approach', myapproach,...
-    'TargetMarkers',{{'52'}, {'51'}},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
+%%
+myapproach = {'CSP', ...
+    'SignalProcessing', { 'EpochExtraction',[0 9.996], 'FIRFilter', {'Frequencies', [1 2 48 49], 'Type','minimum-phase'}} ...
+    'Prediction', {'FeatureExtraction',{'PatternPairs',2}} ...
+    };
 
+%finally we train the model on the data, specifying the target markers
+[trainloss,mymodel,laststats] = bci_train('Data',EEG2,'Approach', myapproach,...
+    'TargetMarkers',{'51','52'},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
 
+%Sisplay the results of the cross-validation tests
 disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
+%Visualize the results of the csp for this case
+laststats;
 bci_visualize(mymodel)
 
+%this will go through any given data, predict the result, and return the
+%classification accuracy. You may also use bci_annotate to find probaility
+%values of each
 %annotateData = bci_annotate(lastmodel, mydata)
-[prediction,loss,teststats,targets] = bci_predict(mymodel,EEGtest);
+[prediction,loss,teststats,targets] = bci_predict(mymodel,EEG1);
 
+% Displays the information  from bci_predict
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
-% disp(['  predicted classes: ',num2str(round(prediction)')]);  % class probabilities * class values
-% disp(['  true classes     : ',num2str(round(targets)')]);
+%disp(['  predicted classes: ',num2str(round(prediction)')]);  % class probabilities * class values
+%disp(['  true classes     : ',num2str(round(targets)')]);
 
 
 %% Extract features from each epoch individually, to be fed into classification learner
