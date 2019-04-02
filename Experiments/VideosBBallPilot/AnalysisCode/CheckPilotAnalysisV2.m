@@ -5,17 +5,14 @@ bcilab
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
 
 % File name without extension
-fnameeeg = '20190131150343_ZZZ-Pilot-1_Test';
-% fnameeeg = '20190131152830_ZZZ-Pilot-2_Test';
-% fnameeeg = '20190131155150_ZZZ-Pilot-3_Test';
+fnameeeg = '20190330095018_PKVideoCheckSizePilot-1_Test';
+% fnameeeg = '20190330101406_PKVideoCheckSizePilot-2_Test';
+% fnameeeg = '20190330103714_PKVideoCheckSizePilot-3_Test';
+% fnameeeg = '20190330105913_PKVideoCheckSizePilot-4_Test';
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
 EEG = exp_eval(ioeasy); % Force bcilab to evaluate the expression and load the data
-
-%% Load data with corrected condition markers
-dirload = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
-EEG = importdata([dirload 'run1-updatedevents-corr.mat']);
 
 %% Chop run between start and end markers 
 [~, start_idx] = pop_selectevent(EEG, 'type', 10);
