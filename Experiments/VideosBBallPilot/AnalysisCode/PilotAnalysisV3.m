@@ -163,18 +163,20 @@ EEG = pop_runica(EEG, 'runica');
 % These give similar results
 
 % Write ICA to file for later use
-path = 'C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Ava\VideoAttention\icafiles\';
+direeg = 'C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Ava\VideoAttention\icafiles\';
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
+
 pop_saveset(EEG, 'filename', 'EEG7', 'filepath', path)
 
 %% Read ICA from each run
-path = 'C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Ava\VideoAttention\icafiles\';
-
-EEG2 = pop_loadset('filename', 'EEG2.set', 'filepath', path);
-EEG3 = pop_loadset('filename', 'EEG3.set', 'filepath', path);
-EEG4 = pop_loadset('filename', 'EEG4.set', 'filepath', path);
-EEG5 = pop_loadset('filename', 'EEG5.set', 'filepath', path);
-EEG6 = pop_loadset('filename', 'EEG6.set', 'filepath', path);
-EEG7 = pop_loadset('filename', 'EEG7.set', 'filepath', path);
+direeg = 'C:\Users\alakmazaheri\Documents\BCI\HALBCI\SandBox\Ava\VideoAttention\icafiles\';
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\';
+EEG2 = pop_loadset('filename', 'EEG2.set', 'filepath', direeg);
+EEG3 = pop_loadset('filename', 'EEG3.set', 'filepath', direeg);
+EEG4 = pop_loadset('filename', 'EEG4.set', 'filepath', direeg);
+EEG5 = pop_loadset('filename', 'EEG5.set', 'filepath', direeg);
+EEG6 = pop_loadset('filename', 'EEG6.set', 'filepath', direeg);
+EEG7 = pop_loadset('filename', 'EEG7.set', 'filepath', direeg);
 
 %% Inspect ICA components
 EEG = pop_selectcomps(EEG);
@@ -212,12 +214,12 @@ figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', [6 10 12 15], 'freqrange',[1 30],'electrodes','on');
 
 %% Combine post-ICA runs
-EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', path);
-EEG3sub = pop_loadset('filename', 'EEG3sub.set', 'filepath', path);
-EEG4sub = pop_loadset('filename', 'EEG4sub.set', 'filepath', path);
-EEG5sub = pop_loadset('filename', 'EEG5sub.set', 'filepath', path);
-EEG6sub = pop_loadset('filename', 'EEG6sub.set', 'filepath', path);
-EEG7sub = pop_loadset('filename', 'EEG7sub.set', 'filepath', path);
+EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', direeg);
+EEG3sub = pop_loadset('filename', 'EEG3sub.set', 'filepath', direeg);
+EEG4sub = pop_loadset('filename', 'EEG4sub.set', 'filepath', direeg);
+EEG5sub = pop_loadset('filename', 'EEG5sub.set', 'filepath', direeg);
+EEG6sub = pop_loadset('filename', 'EEG6sub.set', 'filepath', direeg);
+EEG7sub = pop_loadset('filename', 'EEG7sub.set', 'filepath', direeg);
 
 allEEG = set_merge(EEG2sub, EEG3sub, EEG4sub, EEG5sub, EEG6sub, EEG7sub);
 allEEG = exp_eval(allEEG);
@@ -310,3 +312,109 @@ errorbar(bins, meanpower, stds, 'Color', 'k', 'LineStyle', 'none', 'LineWidth', 
 
 % compare high and low freq trials 
 
+%%
+for i = 1:size(allEEG.event,2)
+    eventtype(i) = str2double(allEEG.event(i).type);
+    eventlatency(i) = allEEG.event(i).latency;
+    eventlatencyms(i) = allEEG.event(i).latency_ms;
+    eventepoch(i) = allEEG.event(i).epoch;
+end
+
+eventtrialslow = eventepoch(eventtype==51 | eventtype==53);
+eventtrialshigh = eventepoch(eventtype==52 | eventtype==54);
+
+%%
+EEGnewlow = pop_select(allEEG, 'trial', evtl);
+EEGnewhigh = pop_select(allEEG, 'trial', evth);
+%%
+EEGlow = EEGnewlow;
+EEGhigh = EEGnewhigh;
+
+
+%% Generate spectopo plots for each condition, if epochs trimmed to not include events.
+
+freqsofinterest = [6 12 15];
+    
+figure; pop_spectopo(EEGlow, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
+
+figure; pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
+
+%% separate by marker
+et51 = unique(eventepoch(eventtype==51));
+et54 = unique(eventepoch(eventtype==54));
+et52 = unique(eventepoch(eventtype==52));
+et53 = unique(eventepoch(eventtype==53));
+%eventtrialshigh = eventepoch(eventtype==52 | eventtype==54);
+
+EEG51 = pop_select(allEEG, 'trial', et51);
+EEG54 = pop_select(allEEG, 'trial', et54);
+EEG52 = pop_select(allEEG, 'trial', et52);
+EEG53 = pop_select(allEEG, 'trial', et53);
+%%
+for i = 1:32
+    plow51(i,:) = bandpower(squeeze(EEG51.data(i,:,:)),EEG51.srate,[4 8]);
+    phigh51(i,:) = bandpower(squeeze(EEG51.data(i,:,:)),EEG51.srate,[12 16]);
+    
+    plow52(i,:) = bandpower(squeeze(EEG52.data(i,:,:)),EEG51.srate,[4 8]);
+    phigh52(i,:) = bandpower(squeeze(EEG52.data(i,:,:)),EEG51.srate,[12 16]);
+    
+    plow53(i,:) = bandpower(squeeze(EEG53.data(i,:,:)),EEG51.srate,[4 8]);
+    phigh53(i,:) = bandpower(squeeze(EEG53.data(i,:,:)),EEG51.srate,[12 16]);
+    
+    plow54(i,:) = bandpower(squeeze(EEG54.data(i,:,:)),EEG54.srate,[4 8]);
+    phigh54(i,:) = bandpower(squeeze(EEG54.data(i,:,:)),EEG54.srate,[12 16]);
+end
+    
+%% sloppy means
+
+mplow51 = median(plow51(selchan,:),2);
+mphigh51 = median(phigh51(selchan,:),2);
+mplow54 = median(plow54(selchan,:),2);
+mphigh54 = median(phigh54(selchan,:),2);
+
+mplow52 = median(plow52(selchan,:),2);
+mphigh52 = median(phigh52(selchan,:),2);
+mplow53 = median(plow53(selchan,:),2);
+mphigh53 = median(phigh53(selchan,:),2);
+%%
+figure
+for i = 1:10
+    subplot(2,5,i)
+    bar([mplow51(i),mplow52(i),mplow53(i), mplow54(i)]);
+    title(EEG.chanlocs(selchan(i)).labels)
+end
+
+figure
+for i = 1:10
+    subplot(2,5,i)
+    bar([mphigh51(i),mphigh52(i),mphigh53(i), mphigh54(i)]);
+    title(EEG.chanlocs(selchan(i)).labels)
+end
+
+%% plot power over trials
+
+figure
+for i = 1:10
+    subplot(2,5,i)
+    plot(1:size(plow51,2),plow51(selchan(i),:),'b'); %left low
+    hold on
+    plot(1:size(plow53,2),plow53(selchan(i),:),'c'); %right low
+    
+    plot(1:size(plow52,2),plow52(selchan(i),:),'r'); %left high
+    plot(1:size(plow54,2),plow54(selchan(i),:),'m'); %right high
+    title(strcat(EEG.chanlocs(selchan(i)).labels, ' : ','Low Freq Band'))
+end
+%%
+figure
+for i = 1:10
+    subplot(2,5,i)
+    plot(1:size(phigh51,2),phigh51(selchan(i),:),'b'); %left low
+    hold on
+    plot(1:size(phigh53,2),phigh53(selchan(i),:),'c'); %right low
+    
+    plot(1:size(phigh52,2),phigh52(selchan(i),:),'r'); %left high
+    plot(1:size(phigh54,2),phigh54(selchan(i),:),'m'); %right high
+    title(strcat(EEG.chanlocs(selchan(i)).labels, ' : ','High Freq Band'))
+end

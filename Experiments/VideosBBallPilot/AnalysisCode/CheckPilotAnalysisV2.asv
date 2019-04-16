@@ -107,16 +107,13 @@ elseif strcmp(adetails.reject.strategy, 'interpolate' )
 end
 
 %% Epoch into small trials
-% lastEEG = EEGtest;
-lastEEG = EEGtrain;
-
-EEG = lastEEG;
+EEG10s = EEG;
 % Markers for sustained attention
 adetails.markers.types = {'51','52','53','54','55','56'};
 % adetails.markers.names = {'LEFT & LOW','LEFT & HIGH','RIGHT & LOW','RIGHT & HIGH'};
 evtype = [];
 
-adetails.markers.epochwindow = [0 9.998]; % window after standard markers to look at
+adetails.markers.epochwindow = [0 10]; % window after standard markers to look at
 adetails.markers.epochsize = 5; % size of miniepochs to chop regular markered epoch up into
 adetails.markers.numeventsperwindow = floor((adetails.markers.epochwindow(2)-adetails.markers.epochwindow(1))/adetails.markers.epochsize);
 
@@ -127,7 +124,7 @@ for i = 1:length(lastEEG.event)
     if any(contains(adetails.markers.types,lastEEG.event(i).type))
         markerstring = EEG.event(i).type;
         
-        for j = 0:(adetails.markers.numeventsperwindow) %For how many markers we are doing per window     
+        for j = 0:(adetails.markers.numeventsperwindow-1) %For how many markers we are doing per window     
             EEG.event(k).type = lastEEG.event(i).type;
             EEG.event(k).latency = lastEEG.event(i).latency + (j*lastEEG.srate*adetails.markers.epochsize); 
             EEG.event(k).latency_ms = lastEEG.event(i).latency_ms + (j*adetails.markers.epochsize*1000); 
@@ -135,19 +132,14 @@ for i = 1:length(lastEEG.event)
             k = k+1; 
         end        
     else
-        EEG.event(k).type = lastEEG.event(i).type;
-        EEG.event(k).latency = lastEEG.event(i).latency; 
-        EEG.event(k).latency_ms = lastEEG.event(i).latency_ms; 
-        EEG.event(k).duration = 0;
+        EEG.event(k) = lastEEG.event(i); % Write into new index
         k = k+1;
     end
 end
 
-EEGtrain_newepoch = EEG;
-% EEGtest_newepoch = EEG;
-%% skip for making even smaller epochs
 disp('Epoching EEG into small increments...')
 EEG = pop_epoch(EEG,adetails.markers.types, [0 adetails.markers.epochsize-0.002]);
+
 
 evtype = [];
 for i = 1:length(EEG.event)
@@ -228,6 +220,7 @@ EEG4sub = pop_loadset('filename', 'EEG4sub.set', 'filepath', dirica);
 EEGsub = set_merge(EEG1sub, EEG2sub, EEG3sub, EEG4sub);
 EEGsub = exp_eval(EEGsub);
 
+% EEG = EEGsub;
 EEG = EEGsub;
 adetails.markers.types = {'51','52','53','54','55','56'};
 
@@ -295,17 +288,16 @@ figure; pop_spectopo(EEGsmall, 1, [1000*EEGsmall.xmin 1000*EEGsmall.xmax], 'EEG'
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Put some epochs aside for prediction
-% EEG = EEGbig;
-EEG = EEGsub;
+EEG = EEGsmall;
 
-markertype = {'51', '52', '53', '54', '55', '56'};
+markertype = {'55','56'};
 
-% evtype = [];
-% for i = 1:length(EEG.event)
-%     evtype = [evtype, ""+EEG.event(i).type];
-% end
-% unique(evtype)
-% adetails.markers.trialevents = evtype(contains(evtype,markertype));
+evtype = [];
+for i = 1:length(EEG.event)
+    evtype = [evtype, ""+EEG.event(i).type];
+end
+unique(evtype)
+adetails.markers.trialevents = evtype(contains(evtype,markertype));
 
 markertypes = string(markertype);
 
@@ -321,11 +313,10 @@ end
 EEGtrain_epoch = pop_select(EEG, 'notrial', test_trials);
 EEGtest_epoch = pop_select(EEG, 'trial', test_trials);
 
-
-
 %% Make epoched data 'continuous'
 
-EEG1 = EEGtrain_epoch;
+EEG1 = opacEEG;
+% EEG1 = EEGtrain_epoch;
 epochdata = EEG1.data;
 contdata = reshape(epochdata,size(epochdata,1),[],1);
 EEG1.data = contdata;
@@ -338,7 +329,8 @@ EEG1.times =  0:(1000/EEG1.srate):(1000/EEG1.srate)*EEG1.pnts-1;
 EEG1.xmax = EEG1.times(end)/1000;
 EEGtrain = EEG1;
 
-EEG1 = EEGtest_epoch;
+% EEG1 = EEGtest_epoch;
+EEG1 = EEGsub;
 epochdata = EEG1.data;
 contdata = reshape(epochdata,size(epochdata,1),[],1);
 EEG1.data = contdata;
@@ -351,10 +343,6 @@ EEG1.times =  0:(1000/EEG1.srate):(1000/EEG1.srate)*EEG1.pnts-1;
 EEG1.xmax = EEG1.times(end)/1000;
 EEGtest = EEG1;
 
-direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\combineddata\';
-
-pop_saveset(EEGtrain, 'filename', 'PK20190330_EEGtrain', 'filepath', direeg)
-pop_saveset(EEGtest, 'filename', 'PK20190330_EEGtest', 'filepath', direeg)
 
 disp('Made data continuous')
 
@@ -362,7 +350,7 @@ disp('Made data continuous')
 
 myapproach = {'SpecCSP', ...
     'SignalProcessing', { ...
-        'EpochExtraction', [0 4.998] , ...
+        'EpochExtraction', [0 1; 1 2] , ...
         'FIRFilter', {'Frequencies', [1 2 48 49], 'Type','linear-phase'}...
         } , ... 
     'Prediction', {'FeatureExtraction',{...
@@ -371,41 +359,39 @@ myapproach = {'SpecCSP', ...
         }...
     } ...
 };
-%%
-myapproach = {'Bandpower' ...
-    'SignalProcessing', { ...
-        'FIRFilter',[4 5 7 8], ...
-        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-     }, ...
-};
-%%
-myapproach = {'Bandpower' ...
-    'SignalProcessing', { ...
-        'FIRFilter',[13 14 16 17], ...
-        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-     }, ...
-};
-%%
-myapproach = {'Spectralmeans' ...
-    'SignalProcessing', { ...
-        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-     }, ...
-     'Prediction', { ...
-        'FeatureExtraction',{ 'FreqWindows', [5 7; 14 16] }, ...
-        'MachineLearning', {'Learner', 'lda'} ...
-        }...
-};
+% myapproach = {'Bandpower' ...
+%     'SignalProcessing', { ...
+%         'FIRFilter',[4 5 7 8], ...
+%         'EpochExtraction', {'TimeWindow',[0 9.996] } ...
+%      }, ...
+% };
+% myapproach = {'Bandpower' ...
+%     'SignalProcessing', { ...
+%         'FIRFilter',[13 14 16 17], ...
+%         'EpochExtraction', {'TimeWindow',[0 9.996] } ...
+%      }, ...
+% };
+% 
+% myapproach = {'Spectralmeans' ...
+%     'SignalProcessing', { ...
+%         'EpochExtraction', {'TimeWindow',[0 9.996] } ...
+%      }, ...
+%      'Prediction', { ...
+%         'FeatureExtraction',{ 'FreqWindows', [5 7; 14 16] }, ...
+%         'MachineLearning', {'Learner', 'lda'} ...
+%         }...
+% };
 
-%% Train
-[trainloss,mymodel,laststats] = bci_train('Data',EEGtrain_newepoch, 'Approach', myapproach,...
-    'TargetMarkers',{{'51'}, {'52'}},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
+
+[trainloss,mymodel,laststats] = bci_train('Data',EEGtrain, 'Approach', myapproach,...
+    'TargetMarkers',{{'51', '53', '55'}, {'52', '54', '56'}},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
 
 
 disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
 bci_visualize(mymodel)
 
 %annotateData = bci_annotate(lastmodel, mydata)
-[prediction,loss,teststats,targets] = bci_predict(mymodel,EEGtest_newepoch);
+[prediction,loss,teststats,targets] = bci_predict(mymodel,EEGtest);
 
 disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
 % disp(['  predicted classes: ',num2str(round(prediction)')]);  % class probabilities * class values
