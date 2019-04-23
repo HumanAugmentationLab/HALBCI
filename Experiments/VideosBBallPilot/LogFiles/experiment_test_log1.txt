@@ -1,0 +1,22 @@
+Trial Number: 1
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball9.mp4
+Movie start time: 0.000
+Condition: 3 (Frequency: 6 | Movie Display: 1)
+Event Times: 
+Response Times: 
+trialStart: 0.378 
+cueStart: 1.400 
+stimStart: 3.466 
+Trial Length: 10.185 
+Survey Response:  
+
+Trial Number: 2
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball8.mp4
+Movie start time: 0.000
+Condition: 6 (Frequency: 15 | Movie Display: 2)
+Event Times: 
+Response Times: 
+trialStart: 16.742 
+cueStart: 17.767 
+stimStart: 19.830 
+Trial Length: 10.171 
