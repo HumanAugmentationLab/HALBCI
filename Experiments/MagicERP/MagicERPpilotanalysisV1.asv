@@ -1,0 +1,35 @@
+
+
+%% Directory for EEG data (K drive is \fsvs01\Research\)
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\MLDebug\';
+% File name without extension
+fnameeeg = '20190423115609_ZZ-MagicLeapDucky_Record';
+
+% Load the .easy file version of the data
+ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
+EEG = exp_eval(ioeasy); % Force bcilab to evaluate the expression and load the data
+
+%% Chop run between start and end markers 
+[~, start_idx] = pop_selectevent(EEG, 'type', 10);
+start_pt = EEG.event(start_idx).latency;
+
+[~, end_idx] = pop_selectevent(EEG, 'type', 100);
+end_pt = EEG.event(end_idx).latency;
+
+% eeg_cropped = eeg_eegrej(EEG, [1 start_pt-1]);
+disp('Cropping start and end of raw data...')
+EEG = eeg_eegrej(EEG, [1 start_pt-1; end_pt+1 EEG.pnts]);
+
+
+%%
+myapproach = {'SpecCSP', ...
+                    'SignalProcessing', { ...
+                        'EpochExtraction', [ epochsizes(es)-0.002] , ...
+                        'FIRFilter', {'Frequencies', [1 2 48 49], 'Type','linear-phase'}...
+                        } , ... 
+                    'Prediction', {'FeatureExtraction',{...
+                        'PatternPairs',4, ...
+                        'prior','@(f) f>=2 & f<=20' ...
+                        }...
+                    } ...
+                };
