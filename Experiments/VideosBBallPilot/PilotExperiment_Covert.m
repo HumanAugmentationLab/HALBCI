@@ -20,7 +20,7 @@ experimentName = 'test_log1.txt';      % Log file name
 
 % Duration
 trialLength = 10.1;                  % Trial length (s)  --- always add 100 ms for buffer
-numTrials = 6;                      % Number of trials per run - must be even number
+numTrials = 16;                      % Number of trials per run - must be even number
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
@@ -143,8 +143,12 @@ leftVideos = cell(1, numTrials);
 rightVideos = cell(1, numTrials);
 
 for i = 1:numTrials
-    leftVideos{i} = focusMovieList{round(rand*(numFocusVideos-1)+1)};
-    rightVideos{i} = focusMovieList{round(rand*(numFocusVideos-1)+1)};
+    focusIdx = round(rand*(numFocusVideos-1)+1);
+    distractOpts = find( 1:numFocusVideos ~= focusIdx);
+    distractIdx = distractOpts(round(rand*(numFocusVideos-2)+1));
+    
+    leftVideos{i} = focusMovieList{focusIdx};
+    rightVideos{i} = focusMovieList{distractIdx};
 end
 
 % To display the same video on both sides, set rightVideos = leftVideos
@@ -445,7 +449,7 @@ try
                       if ltexL > 0
                         Screen('Close', ltexL);
                       end
-                      Screen('DrawTexture', window, texL, [], leftVideos(1,:)  + offset);
+                      Screen('DrawTexture', window, texL, [], dstRect(1,:)  + offset);
                       ltexL = texL;                          
                  else 
                       Screen('DrawTexture', window, ltexL, [], dstRect(1,:) + offset);
@@ -485,8 +489,15 @@ try
                 Screen('DrawTexture', window, checkerFullTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
                 Screen('DrawTexture', window, checkerFullTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
             end
-            Screen('DrawTexture', window, crossTexture, [], dstRect(targetSides(n) + 1,:));
-     
+            
+            if displayType == 0
+                % fixation cross in center of screen for covert
+                Screen('DrawTexture', window, crossTexture, [], dstRectC);
+            else
+                % fixation cross on video for overt
+                Screen('DrawTexture', window, crossTexture, [], dstRect(targetSides(n) + 1,:));
+            end
+                
             % Flip to update display at set time (at waitframes multiple of screen refresh rate) - 1 is very important to not have flips
             % missed and times doubled -- timestamps invalid, look at flip
             % timestamps
