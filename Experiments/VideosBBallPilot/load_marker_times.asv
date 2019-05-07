@@ -1,7 +1,6 @@
-function [new_marker_struct] =  load_marker_times(filename)
-
 % Import data from text file
 
+filename = 'K:/HumanAugmentationLab/EEGdata/EnobioTests/VideoSSVEP/Log Files/marker_test-log1.txt';
 delimiter = ',';
 startRow = 2;
 
@@ -22,4 +21,3 @@ new_marker_struct = table2struct(new_marker_table);
 
 % Clear temporary variables
 clearvars filename delimiter startRow formatSpec fileID dataArray ans;
-end

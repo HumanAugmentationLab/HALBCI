@@ -1,0 +1,290 @@
+Trial Number: 1
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball5.mp4
+Movie start time: 76.473
+Condition: 2 (Frequency: 5 | Movie Display: 1)
+Event Times: 76.884 87.600 
+Response Times: 
+trialStart: 0.468 
+cueStart: 1.500 
+stimStart: 3.605 
+Trial Length: 20.196 
+Survey Response: Return 
+
+Trial Number: 2
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball5.mp4
+Movie start time: 76.473
+Condition: 3 (Frequency: 12 | Movie Display: 0)
+Event Times: 76.874 87.606 
+Response Times: 
+trialStart: 31.375 
+cueStart: 32.402 
+stimStart: 34.403 
+Trial Length: 20.133 
+Survey Response: 4 
+
+Trial Number: 3
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball8.mp4
+Movie start time: 76.473
+Condition: 1 (Frequency: 5 | Movie Display: 0)
+Event Times: 
+Response Times: 
+trialStart: 59.663 
+cueStart: 60.686 
+stimStart: 62.687 
+Trial Length: 20.133 
+Survey Response: 4 
+
+Trial Number: 4
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball8.mp4
+Movie start time: 111.151
+Condition: 2 (Frequency: 5 | Movie Display: 1)
+Event Times: 114.611 123.594 
+Response Times: 
+trialStart: 86.881 
+cueStart: 87.904 
+stimStart: 90.002 
+Trial Length: 20.169 
+Survey Response: 4 
+
+Trial Number: 5
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball2.mp4
+Movie start time: 111.151
+Condition: 3 (Frequency: 12 | Movie Display: 0)
+Event Times: 112.915 126.732 
+Response Times: 
+trialStart: 113.732 
+cueStart: 114.756 
+stimStart: 116.759 
+Trial Length: 20.131 
+Survey Response: 4 
+
+Trial Number: 6
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball4.mp4
+Movie start time: 111.151
+Condition: 3 (Frequency: 12 | Movie Display: 0)
+Event Times: 115.901 130.735 
+Response Times: 
+trialStart: 140.190 
+cueStart: 141.222 
+stimStart: 143.224 
+Trial Length: 20.133 
+Survey Response: 4 
+
+Trial Number: 7
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball2.mp4
+Movie start time: 36.699
+Condition: 2 (Frequency: 5 | Movie Display: 1)
+Event Times: 50.978 
+Response Times: 
+trialStart: 167.648 
+cueStart: 168.673 
+stimStart: 170.797 
+Trial Length: 20.178 
+Survey Response: 4 
+
+Trial Number: 8
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball6.mp4
+Movie start time: 36.699
+Condition: 1 (Frequency: 5 | Movie Display: 0)
+Event Times: 
+Response Times: 
+trialStart: 194.192 
+cueStart: 195.225 
+stimStart: 197.225 
+Trial Length: 20.117 
+Survey Response: 4 
+
+Trial Number: 9
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball8.mp4
+Movie start time: 36.699
+Condition: 3 (Frequency: 12 | Movie Display: 0)
+Event Times: 54.016 
+Response Times: 
+trialStart: 220.590 
+cueStart: 221.626 
+stimStart: 223.626 
+Trial Length: 20.117 
+Survey Response: 4 
+
+Trial Number: 10
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball1.mp4
+Movie start time: 36.699
+Condition: 3 (Frequency: 12 | Movie Display: 0)
+Event Times: 
+Response Times: 
+trialStart: 247.198 
+cueStart: 248.227 
+stimStart: 250.227 
+Trial Length: 20.117 
+Survey Response: 4 
+
+Trial Number: 11
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball3.mp4
+Movie start time: 25.615
+Condition: 2 (Frequency: 5 | Movie Display: 1)
+Event Times: 26.975 34.942 
+Response Times: 
+trialStart: 274.306 
+cueStart: 275.328 
+stimStart: 277.441 
+Trial Length: 20.172 
+Survey Response: 4 
+
+Trial Number: 12
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball9.mp4
+Movie start time: 25.615
+Condition: 3 (Frequency: 12 | Movie Display: 0)
+Event Times: 36.381 
+Response Times: 
+trialStart: 301.054 
+cueStart: 302.079 
+stimStart: 304.079 
+Trial Length: 20.117 
+Survey Response: 4 
+
+Trial Number: 13
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball1.mp4
+Movie start time: 25.615
+Condition: 3 (Frequency: 12 | Movie Display: 0)
+Event Times: 
+Response Times: 
+trialStart: 327.452 
+cueStart: 328.480 
+stimStart: 330.480 
+Trial Length: 20.117 
+Survey Response: 4 
+
+Trial Number: 14
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball9.mp4
+Movie start time: 3.073
+Condition: 2 (Frequency: 5 | Movie Display: 1)
+Event Times: 11.617 21.534 
+Response Times: 
+trialStart: 354.693 
+cueStart: 355.714 
+stimStart: 357.796 
+Trial Length: 20.186 
+Survey Response: 4 
+
+Trial Number: 15
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball1.mp4
+Movie start time: 3.073
+Condition: 1 (Frequency: 5 | Movie Display: 0)
+Event Times: 16.207 17.040 
+Response Times: 
+trialStart: 381.548 
+cueStart: 382.582 
+stimStart: 384.583 
+Trial Length: 20.117 
+Survey Response: 3 
+
+Trial Number: 16
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball6.mp4
+Movie start time: 221.045
+Condition: 2 (Frequency: 5 | Movie Display: 1)
+Event Times: 
+Response Times: 
+trialStart: 411.257 
+cueStart: 412.283 
+stimStart: 414.427 
+Trial Length: 20.191 
+Survey Response: 4 
+
+Trial Number: 17
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball8.mp4
+Movie start time: 221.045
+Condition: 3 (Frequency: 12 | Movie Display: 0)
+Event Times: 227.645 234.179 240.613 
+Response Times: 
+trialStart: 437.916 
+cueStart: 438.951 
+stimStart: 440.951 
+Trial Length: 20.117 
+Survey Response: 4 
+
+Trial Number: 18
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball8.mp4
+Movie start time: 221.045
+Condition: 1 (Frequency: 5 | Movie Display: 0)
+Event Times: 227.645 234.179 240.613 
+Response Times: 
+trialStart: 464.364 
+cueStart: 465.385 
+stimStart: 467.386 
+Trial Length: 20.117 
+Survey Response: 3 
+
+Trial Number: 19
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball6.mp4
+Movie start time: 125.401
+Condition: 4 (Frequency: 12 | Movie Display: 1)
+Event Times: 132.146 143.980 
+Response Times: 
+trialStart: 491.592 
+cueStart: 492.620 
+stimStart: 494.717 
+Trial Length: 20.171 
+Survey Response: 3 
+
+Trial Number: 20
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball1.mp4
+Movie start time: 17.186
+Condition: 2 (Frequency: 5 | Movie Display: 1)
+Event Times: 
+Response Times: 
+trialStart: 518.533 
+cueStart: 519.554 
+stimStart: 521.651 
+Trial Length: 20.172 
+Survey Response: 3 
+
+Trial Number: 21
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball3.mp4
+Movie start time: 179.784
+Condition: 2 (Frequency: 5 | Movie Display: 1)
+Event Times: 196.679 
+Response Times: 
+trialStart: 546.488 
+cueStart: 547.522 
+stimStart: 549.638 
+Trial Length: 20.169 
+Survey Response: 4 
+
+Trial Number: 22
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball10.mp4
+Movie start time: 234.292
+Condition: 4 (Frequency: 12 | Movie Display: 1)
+Event Times: 244.537 
+Response Times: 
+trialStart: 574.053 
+cueStart: 575.073 
+stimStart: 577.159 
+Trial Length: 20.182 
+Survey Response: 3 
+
+Trial Number: 23
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball3.mp4
+Movie start time: 236.900
+Condition: 4 (Frequency: 12 | Movie Display: 1)
+Event Times: 242.077 
+Response Times: 
+trialStart: 601.371 
+cueStart: 602.391 
+stimStart: 604.491 
+Trial Length: 20.151 
+Survey Response: 4 
+
+Trial Number: 24
+Target Movie: /home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/FocusVideos/bball9.mp4
+Movie start time: 78.057
+Condition: 4 (Frequency: 12 | Movie Display: 1)
+Event Times: 92.136 
+Response Times: 
+trialStart: 628.326 
+cueStart: 629.359 
+stimStart: 631.477 
+Trial Length: 20.183 
+Survey Response: 3 
+
+Total Time: 654.228 
+
