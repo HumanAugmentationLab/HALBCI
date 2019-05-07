@@ -7,35 +7,38 @@ bcilab
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
 
 % File name without extension
-fnameeeg = '20190330095018_PKVideoCheckSizePilot-1_Test';
-% fnameeeg = '20190330101406_PKVideoCheckSizePilot-2_Test';
-% fnameeeg = '20190330103714_PKVideoCheckSizePilot-3_Test';
-% fnameeeg = '20190330105913_PKVideoCheckSizePilot-4_Test';
+fnameeeg = '20190423112233_ZZ-VideoCheckSizePilot-5_Record';
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
 EEG = exp_eval(ioeasy); % Force bcilab to evaluate the expression and load the data
 
-%% load corrected data
-dircorr = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
-
+% load corrected data
+% dircorr = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
 % fnameeeg = '20190330095018_PKVideoCheckSizePilot-1_Test_newmarkers.set';
-% fnameeeg = '20190330101406_PKVideoCheckSizePilot-2_Test_newmarkers.set';
-% fnameeeg = '20190330103714_PKVideoCheckSizePilot-3_Test_newmarkers.set';
-fnameeeg = '20190330105913_PKVideoCheckSizePilot-4_Test_newmarkers.set';
+% EEG = pop_loadset('filename', fnameeeg, 'filepath', dircorr);
 
-EEG = pop_loadset('filename', fnameeeg, 'filepath', dircorr);
+%% Check that all trial markers came through
+adetails.markers.types = {'51','52','53','54','55','56'};
+
+evtype = [];
+for i = 1:length(EEG.event)
+    evtype = [evtype, ""+EEG.event(i).type];
+end
+unique(evtype)
+numTrials = length(evtype(find(contains(evtype,adetails.markers.types))));
 
 %% Chop run between start and end markers 
 [~, start_idx] = pop_selectevent(EEG, 'type', 10);
 start_pt = EEG.event(start_idx).latency;
 
-% [~, end_idx] = pop_selectevent(EEG, 'type', 100);
-% end_pt = EEG.event(end_idx).latency;
+[~, end_idx] = pop_selectevent(EEG, 'type', 100);
+end_pt = EEG.event(end_idx).latency;
 
-EEG = eeg_eegrej(EEG, [1 start_pt-1]);        % use if missing end marker
+% EEG = eeg_eegrej(EEG, [1 1;end_pt+1 EEG.pnts ]);        % use if missing start marker
+%EEG = eeg_eegrej(EEG, [1 start_pt-1]);        % use if missing end marker
 disp('Cropping start and end of raw data...')
-% EEG = eeg_eegrej(EEG, [1 start_pt-1; end_pt+1 EEG.pnts]);
+EEG = eeg_eegrej(EEG, [1 start_pt-1; end_pt+1 EEG.pnts]);
 
 %% Filter the continuous data
 lastEEG = EEG;
@@ -81,7 +84,7 @@ lastEEG = EEG;
 
 % Plot data to look at "bad" channels
 % Plot the epoched data
-figure; pop_eegplot(EEG, 1);
+pop_eegplot(EEG, 1);
 
 % Inspect epoched data in frequency domain
 % figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
@@ -90,7 +93,7 @@ figure; pop_eegplot(EEG, 1);
 %% Interpolate/remove the bad channels from the data
 adetails.reject.strategy = 'interpolate'; % or 'remove'
 
-% badelec = []; %27: CP1?
+badelec = [1 8 9];
 
 % Here you can add additional bad electrodes, besides the ones in badelec
 adetails.reject.channelidx = badelec;
@@ -107,17 +110,15 @@ elseif strcmp(adetails.reject.strategy, 'interpolate' )
 end
 
 %% Epoch into small trials
-% lastEEG = EEGtest;
-lastEEG = EEGtrain;
+lastEEG = EEG;
 
-EEG = lastEEG;
 % Markers for sustained attention
 adetails.markers.types = {'51','52','53','54','55','56'};
 % adetails.markers.names = {'LEFT & LOW','LEFT & HIGH','RIGHT & LOW','RIGHT & HIGH'};
 evtype = [];
 
-adetails.markers.epochwindow = [0 9.998]; % window after standard markers to look at
-adetails.markers.epochsize = 5; % size of miniepochs to chop regular markered epoch up into
+adetails.markers.epochwindow = [0 60]; % window after standard markers to look at
+adetails.markers.epochsize = 10; % size of miniepochs to chop regular markered epoch up into
 adetails.markers.numeventsperwindow = floor((adetails.markers.epochwindow(2)-adetails.markers.epochwindow(1))/adetails.markers.epochsize);
 
 disp('Adding EEG markers...')
@@ -127,7 +128,7 @@ for i = 1:length(lastEEG.event)
     if any(contains(adetails.markers.types,lastEEG.event(i).type))
         markerstring = EEG.event(i).type;
         
-        for j = 0:(adetails.markers.numeventsperwindow) %For how many markers we are doing per window     
+        for j = 0:(adetails.markers.numeventsperwindow-1) %For how many markers we are doing per window     
             EEG.event(k).type = lastEEG.event(i).type;
             EEG.event(k).latency = lastEEG.event(i).latency + (j*lastEEG.srate*adetails.markers.epochsize); 
             EEG.event(k).latency_ms = lastEEG.event(i).latency_ms + (j*adetails.markers.epochsize*1000); 
@@ -143,10 +144,6 @@ for i = 1:length(lastEEG.event)
     end
 end
 
-EEGtrain_newepoch = EEG;
-% EEGtest_newepoch = EEG;
-%% skip for making even smaller epochs
-disp('Epoching EEG into small increments...')
 EEG = pop_epoch(EEG,adetails.markers.types, [0 adetails.markers.epochsize-0.002]);
 
 evtype = [];
@@ -171,8 +168,8 @@ EEG = pop_runica(EEG, 'runica');
 % These give similar results
 
 % Write ICA to file for later use
-dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckSize-PK\';
-pop_saveset(EEG, 'filename', 'EEG4', 'filepath', dirica)
+dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckSize-ZZZ\';
+pop_saveset(EEG, 'filename', 'EEG1', 'filepath', dirica)
 
 %% Inspect ICA components
 EEG = pop_selectcomps(EEG);
@@ -180,12 +177,8 @@ EEG = pop_selectcomps(EEG);
 %% Remove ICA components
 % Store numbers of components to reject (set manually)
 lastEEG = EEG;
-rej1 = [1 4 9 22 24 25 28 29 31];
-rej2 = [1 5 10 16 18 24 30];
-rej3 = [1 3 11 17 19 21:22 32];
-rej4 = [1 5 18 21 27 29:31];
 
-rej_comps = rej4;
+rej_comps = [1 20 21 23 27 30 32];
 adetails.reject.icacomponents = rej_comps;
 
 % Running this way will cause a pop-up, which allows you to see the before
@@ -196,7 +189,7 @@ adetails.reject.icacomponents = rej_comps;
 disp('Subtracing ICA component from data...')
 EEG = pop_subcomp(EEG, rej_comps);
 
-pop_saveset(EEG, 'filename', 'EEG4sub', 'filepath', dirica)
+pop_saveset(EEG, 'filename', 'EEG1sub', 'filepath', dirica)
 
 %% Plot data before/after removal of ICA components
 freqsofinterest = [6 7.5 15 18 30];
@@ -208,7 +201,7 @@ figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Combine ICA runs
-dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckSize-PK\';
+dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckSize-ZZZ';
 
 % EEG = pop_loadset('filename', 'EEG1.set', 'filepath', dirica);
 % EEG2 = pop_loadset('filename', 'EEG2.set', 'filepath', dirica);
@@ -220,7 +213,7 @@ dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\ic
 % allEEG = exp_eval(allEEG);
 
 EEG1sub = pop_loadset('filename', 'EEG1sub.set', 'filepath', dirica);
-EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', dirica);
+EEG2sub = pop_loadset('filename', 'EEG5sub.set', 'filepath', dirica);
 EEG3sub = pop_loadset('filename', 'EEG3sub.set', 'filepath', dirica);
 EEG4sub = pop_loadset('filename', 'EEG4sub.set', 'filepath', dirica);
 
@@ -259,8 +252,17 @@ opac_marker_trialevents = evtype(contains(evtype,opac_markertypes));
 
 
 %% Select by condition
-lastEEG = EEG;
+% adetails.markers.types = {'51','52','53','54','55','56'};
 
+evtype = [];
+for i = 1:length(EEG.event)
+    evtype = [evtype, ""+EEG.event(i).type];
+end
+unique(evtype)
+adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
+
+lastEEG = EEG;
+ 
 EEGbig = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '52'})));
 EEGmed = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'53', '54'})));
 EEGsmall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'55', '56'})));
@@ -275,37 +277,18 @@ EEGsmallhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialeven
 EEGattlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '53', '55'})));
 EEGatthigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'52', '54', '56'})));
 
-%% 
-opacEEGlow = pop_select(opacEEG, 'trial', find(contains(opac_marker_trialevents, {'51', '53', '55'})));
-opacEEGhigh = pop_select(opacEEG, 'trial', find(contains(opac_marker_trialevents, {'52', '54', '56'})));
-
-%% Generate spectopo plots for each condition, if epochs trimmed to not include events.
-freqsofinterest = [6 12 15 18 30];
-%     
-% EEGlow = EEGhighcheck;
-% EEGhigh = EEGhighvid;
-
-figure; pop_spectopo(EEGbig, 1, [1000*EEGbig.xmin 1000*EEGbig.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
-
-figure; pop_spectopo(EEGmed, 1, [1000*EEGmed.xmin 1000*EEGmed.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
-
-figure; pop_spectopo(EEGsmall, 1, [1000*EEGsmall.xmin 1000*EEGsmall.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
-
 %% Put some epochs aside for prediction
-% EEG = EEGbig;
-EEG = EEGsub;
+EEG = EEGsmall;
 
-markertype = {'51', '52', '53', '54', '55', '56'};
+% markertype = {'51', '52', '53', '54', '55', '56'};
+markertype = {'55', '56'};
 
-% evtype = [];
-% for i = 1:length(EEG.event)
-%     evtype = [evtype, ""+EEG.event(i).type];
-% end
-% unique(evtype)
-% adetails.markers.trialevents = evtype(contains(evtype,markertype));
+evtype = [];
+for i = 1:length(EEG.event)
+    evtype = [evtype, ""+EEG.event(i).type];
+end
+unique(evtype)
+adetails.markers.trialevents = evtype(contains(evtype,markertype));
 
 markertypes = string(markertype);
 
@@ -320,8 +303,6 @@ end
 
 EEGtrain_epoch = pop_select(EEG, 'notrial', test_trials);
 EEGtest_epoch = pop_select(EEG, 'trial', test_trials);
-
-
 
 %% Make epoched data 'continuous'
 
@@ -353,66 +334,25 @@ EEGtest = EEG1;
 
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\combineddata\';
 
-pop_saveset(EEGtrain, 'filename', 'PK20190330_EEGtrain', 'filepath', direeg)
-pop_saveset(EEGtest, 'filename', 'PK20190330_EEGtest', 'filepath', direeg)
+pop_saveset(EEGtrain, 'filename', 'ZZZ20190423_EEGtrain_small', 'filepath', direeg)
+pop_saveset(EEGtest, 'filename', 'ZZZ20190423_EEGtest_small', 'filepath', direeg)
 
 disp('Made data continuous')
 
-%% BCILAB Training
+%% Generate spectopo plots for each condition, if epochs trimmed to not include events.
+freqsofinterest = [6 12 15 18 30];
 
-myapproach = {'SpecCSP', ...
-    'SignalProcessing', { ...
-        'EpochExtraction', [0 4.998] , ...
-        'FIRFilter', {'Frequencies', [1 2 48 49], 'Type','linear-phase'}...
-        } , ... 
-    'Prediction', {'FeatureExtraction',{...
-        'PatternPairs',4, ...
-        'prior','@(f) f>=2 & f<=20' ...
-        }...
-    } ...
-};
-%%
-myapproach = {'Bandpower' ...
-    'SignalProcessing', { ...
-        'FIRFilter',[4 5 7 8], ...
-        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-     }, ...
-};
-%%
-myapproach = {'Bandpower' ...
-    'SignalProcessing', { ...
-        'FIRFilter',[13 14 16 17], ...
-        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-     }, ...
-};
-%%
-myapproach = {'Spectralmeans' ...
-    'SignalProcessing', { ...
-        'EpochExtraction', {'TimeWindow',[0 9.996] } ...
-     }, ...
-     'Prediction', { ...
-        'FeatureExtraction',{ 'FreqWindows', [5 7; 14 16] }, ...
-        'MachineLearning', {'Learner', 'lda'} ...
-        }...
-};
+figure; pop_spectopo(EEGbig, 1, [1000*EEGbig.xmin 1000*EEGbig.xmax], 'EEG' ,...
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
-%% Train
-[trainloss,mymodel,laststats] = bci_train('Data',EEGtrain_newepoch, 'Approach', myapproach,...
-    'TargetMarkers',{{'51'}, {'52'}},'EvaluationMetric', 'mse','EvaluationScheme',{'chron',5,0}); 
-
-
-disp(['training mis-classification rate: ' num2str(trainloss*100,3) '%']);
-bci_visualize(mymodel)
-
-%annotateData = bci_annotate(lastmodel, mydata)
-[prediction,loss,teststats,targets] = bci_predict(mymodel,EEGtest_newepoch);
-
-disp(['test mis-classification rate: ' num2str(loss*100,3) '%']);
-% disp(['  predicted classes: ',num2str(round(prediction)')]);  % class probabilities * class values
-% disp(['  true classes     : ',num2str(round(targets)')]);
+figure; pop_spectopo(EEGmed, 1, [1000*EEGmed.xmin 1000*EEGmed.xmax], 'EEG' ,...
+    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
+%
+% figure; pop_spectopo(EEGsmall, 1, [1000*EEGsmall.xmin 1000*EEGsmall.xmax], 'EEG' ,...
+%     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Bandpower
-numtrials = 54;
+numtrials = 68;
 posterior_channels = [4 7 8 20 21 32];    % Pz O1 O2 Oz PO4 PO3
 lowbin = [5 7];
 highbin = [14  16];
