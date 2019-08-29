@@ -7,7 +7,7 @@ bcilab
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\';
 
 % File name without extension
-fnameeeg = '20190423112233_ZZ-VideoCheckSizePilot-5_Record';
+fnameeeg = '20190503112903_ZZ-VideoCheckCovertPilot-4_Test';
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
@@ -19,14 +19,14 @@ EEG = exp_eval(ioeasy); % Force bcilab to evaluate the expression and load the d
 % EEG = pop_loadset('filename', fnameeeg, 'filepath', dircorr);
 
 %% Check that all trial markers came through
-adetails.markers.types = {'51','52','53','54','55','56'};
+adetails.markers.types = {'51','52','53','54'};
 
 evtype = [];
 for i = 1:length(EEG.event)
     evtype = [evtype, ""+EEG.event(i).type];
 end
-unique(evtype)
-numTrials = length(evtype(find(contains(evtype,adetails.markers.types))));
+unique(evtype);
+numTrials = length(evtype(find(contains(evtype,adetails.markers.types))))
 
 %% Chop run between start and end markers 
 [~, start_idx] = pop_selectevent(EEG, 'type', 10);
@@ -93,7 +93,7 @@ pop_eegplot(EEG, 1);
 %% Interpolate/remove the bad channels from the data
 adetails.reject.strategy = 'interpolate'; % or 'remove'
 
-badelec = [1 8 9];
+badelec = [8];
 
 % Here you can add additional bad electrodes, besides the ones in badelec
 adetails.reject.channelidx = badelec;
@@ -113,7 +113,7 @@ end
 lastEEG = EEG;
 
 % Markers for sustained attention
-adetails.markers.types = {'51','52','53','54','55','56'};
+adetails.markers.types = {'51','52','53','54'};
 % adetails.markers.names = {'LEFT & LOW','LEFT & HIGH','RIGHT & LOW','RIGHT & HIGH'};
 evtype = [];
 
@@ -168,8 +168,8 @@ EEG = pop_runica(EEG, 'runica');
 % These give similar results
 
 % Write ICA to file for later use
-dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckSize-ZZZ\';
-pop_saveset(EEG, 'filename', 'EEG1', 'filepath', dirica)
+dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\Covert-ZZZ\';
+pop_saveset(EEG, 'filename', 'EEG4', 'filepath', dirica)
 
 %% Inspect ICA components
 EEG = pop_selectcomps(EEG);
@@ -178,7 +178,7 @@ EEG = pop_selectcomps(EEG);
 % Store numbers of components to reject (set manually)
 lastEEG = EEG;
 
-rej_comps = [1 20 21 23 27 30 32];
+rej_comps = [1 8 12 15 16 19 22 25 27:31];
 adetails.reject.icacomponents = rej_comps;
 
 % Running this way will cause a pop-up, which allows you to see the before
@@ -189,7 +189,7 @@ adetails.reject.icacomponents = rej_comps;
 disp('Subtracing ICA component from data...')
 EEG = pop_subcomp(EEG, rej_comps);
 
-pop_saveset(EEG, 'filename', 'EEG1sub', 'filepath', dirica)
+pop_saveset(EEG, 'filename', 'EEG4sub', 'filepath', dirica)
 
 %% Plot data before/after removal of ICA components
 freqsofinterest = [6 7.5 15 18 30];
@@ -201,7 +201,7 @@ figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Combine ICA runs
-dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\CheckSize-ZZZ';
+dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\Covert-ZZZ';
 
 % EEG = pop_loadset('filename', 'EEG1.set', 'filepath', dirica);
 % EEG2 = pop_loadset('filename', 'EEG2.set', 'filepath', dirica);
@@ -213,16 +213,16 @@ dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\ic
 % allEEG = exp_eval(allEEG);
 
 EEG1sub = pop_loadset('filename', 'EEG1sub.set', 'filepath', dirica);
-EEG2sub = pop_loadset('filename', 'EEG5sub.set', 'filepath', dirica);
-EEG3sub = pop_loadset('filename', 'EEG3sub.set', 'filepath', dirica);
+EEG2sub = pop_loadset('filename', 'EEG2sub.set', 'filepath', dirica);
+% EEG3sub = pop_loadset('filename', 'EEG3sub.set', 'filepath', dirica);
 EEG4sub = pop_loadset('filename', 'EEG4sub.set', 'filepath', dirica);
 
 % Set aside one run ?
-EEGsub = set_merge(EEG1sub, EEG2sub, EEG3sub, EEG4sub);
+EEGsub = set_merge(EEG1sub, EEG2sub, EEG4sub);
 EEGsub = exp_eval(EEGsub);
 
 EEG = EEGsub;
-adetails.markers.types = {'51','52','53','54','55','56'};
+% adetails.markers.types = {'51','52','53','54','55','56'};
 
 evtype = [];
 for i = 1:length(EEG.event)
@@ -261,21 +261,27 @@ end
 unique(evtype)
 adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
 
+
+EEGcov_attlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51'})));
+EEGcov_atthigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'52'})));
+EEGov_attlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'53'})));
+EEGov_atthigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'54'})));
+
 lastEEG = EEG;
  
-EEGbig = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '52'})));
-EEGmed = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'53', '54'})));
-EEGsmall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'55', '56'})));
-
-EEGbiglow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '51')));
-EEGbighigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '52')));
-EEGmedlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '53')));
-EEGmedhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '54')));
-EEGsmalllow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '55')));
-EEGsmallhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '56')));
-
-EEGattlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '53', '55'})));
-EEGatthigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'52', '54', '56'})));
+% EEGbig = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '52'})));
+% EEGmed = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'53', '54'})));
+% EEGsmall = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'55', '56'})));
+% 
+% EEGbiglow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '51')));
+% EEGbighigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '52')));
+% EEGmedlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '53')));
+% EEGmedhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '54')));
+% EEGsmalllow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '55')));
+% EEGsmallhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '56')));
+% 
+% EEGattlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '53', '55'})));
+% EEGatthigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'52', '54', '56'})));
 
 %% Put some epochs aside for prediction
 EEG = EEGsmall;
@@ -342,79 +348,77 @@ disp('Made data continuous')
 %% Generate spectopo plots for each condition, if epochs trimmed to not include events.
 freqsofinterest = [6 12 15 18 30];
 
-figure; pop_spectopo(EEGbig, 1, [1000*EEGbig.xmin 1000*EEGbig.xmax], 'EEG' ,...
+figure; pop_spectopo(EEGcovert, 1, [1000*EEGcovert.xmin 1000*EEGcovert.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
-figure; pop_spectopo(EEGmed, 1, [1000*EEGmed.xmin 1000*EEGmed.xmax], 'EEG' ,...
+figure; pop_spectopo(EEGovert, 1, [1000*EEGovert.xmin 1000*EEGovert.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 %
 % figure; pop_spectopo(EEGsmall, 1, [1000*EEGsmall.xmin 1000*EEGsmall.xmax], 'EEG' ,...
 %     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 35],'electrodes','on');
 
 %% Bandpower
-numtrials = 68;
+numtrials_covert = size(EEGcov_atthigh.data, 3);
+numtrials_overt = size(EEGov_atthigh.data, 3);
+
 posterior_channels = [4 7 8 20 21 32];    % Pz O1 O2 Oz PO4 PO3
 lowbin = [5 7];
-highbin = [14  16];
+highbin = [14 16];
 
-clear powsm_lowATTlow powsm_highATTlow powsm_lowATThigh powsm_highATThigh ...
-    powmed_lowATTlow powmed_highATTlow powmed_lowATThigh powmed_highATThigh ...
-    powbig_lowATTlow powbig_highATTlow powbig_lowATThigh powbig_highATThigh
+clear powcov_lowATTlow powcov_highATTlow powcov_lowATThigh powcov_highATThigh ...
+    powovert_lowATTlow powovert_highATTlow powovert_lowATThigh powovert_highATThigh
  
-for i = 1:numtrials
-    powsm_lowATTlow(i,:) = bandpower(squeeze(EEGsmalllow.data(posterior_channels,:,i))',EEGsmalllow.srate,lowbin);
-    powsm_highATTlow(i,:) = bandpower(squeeze(EEGsmalllow.data(posterior_channels,:,i))',EEGsmalllow.srate,highbin);
+for i = 1:numtrials_covert
+    powcov_lowATTlow(i,:) = bandpower(squeeze(EEGcov_attlow.data(posterior_channels,:,i))',EEGcov_attlow.srate,lowbin);
+    powcov_highATTlow(i,:) = bandpower(squeeze(EEGcov_attlow.data(posterior_channels,:,i))',EEGcov_attlow.srate,highbin);
     
-    powsm_lowATThigh(i,:) = bandpower(squeeze(EEGsmallhigh.data(posterior_channels,:,i))',EEGsmallhigh.srate,lowbin);
-    powsm_highATThigh(i,:) = bandpower(squeeze(EEGsmallhigh.data(posterior_channels,:,i)'),EEGsmallhigh.srate,highbin);
+    powcov_lowATThigh(i,:) = bandpower(squeeze(EEGcov_atthigh.data(posterior_channels,:,i))',EEGcov_atthigh.srate,lowbin);
+    powcov_highATThigh(i,:) = bandpower(squeeze(EEGcov_atthigh.data(posterior_channels,:,i)'),EEGcov_atthigh.srate,highbin);
+end
+
+for i = 1:numtrials_overt
+    powovert_lowATTlow(i,:) = bandpower(squeeze(EEGov_attlow.data(posterior_channels,:,i)'),EEGov_attlow.srate,lowbin);
+    powovert_highATTlow(i,:) = bandpower(squeeze(EEGov_attlow.data(posterior_channels,:,i)'),EEGov_attlow.srate,highbin);
     
-    powmed_lowATTlow(i,:) = bandpower(squeeze(EEGmedlow.data(posterior_channels,:,i)'),EEGmedlow.srate,lowbin);
-    powmed_highATTlow(i,:) = bandpower(squeeze(EEGmedlow.data(posterior_channels,:,i)'),EEGmedlow.srate,highbin);
-    
-    powmed_lowATThigh(i,:) = bandpower(squeeze(EEGmedhigh.data(posterior_channels,:,i)'),EEGmedhigh.srate,lowbin);
-    powmed_highATThigh(i,:) = bandpower(squeeze(EEGmedhigh.data(posterior_channels,:,i)'),EEGmedhigh.srate,highbin);
-    
-    powbig_lowATTlow(i,:) = bandpower(squeeze(EEGbiglow.data(posterior_channels,:,i)'),EEGbiglow.srate,lowbin);
-    powbig_highATTlow(i,:) = bandpower(squeeze(EEGbiglow.data(posterior_channels,:,i)'),EEGbiglow.srate,highbin);
-    
-    powbig_lowATThigh(i,:) = bandpower(squeeze(EEGbighigh.data(posterior_channels,:,i)'),EEGbighigh.srate,lowbin);
-    powbig_highATThigh(i,:) = bandpower(squeeze(EEGbighigh.data(posterior_channels,:,i)'),EEGbighigh.srate,highbin);
+    powovert_lowATThigh(i,:) = bandpower(squeeze(EEGov_atthigh.data(posterior_channels,:,i)'),EEGov_atthigh.srate,lowbin);
+    powovert_highATThigh(i,:) = bandpower(squeeze(EEGov_atthigh.data(posterior_channels,:,i)'),EEGov_atthigh.srate,highbin);
 end
 disp('done');
 %% Plot bandpower
 % Average power over channels (15 trials x 6 conds)
-avgchanATTlow = [mean(powbig_lowATTlow,2) mean(powbig_lowATThigh,2) ...
-    mean(powmed_lowATTlow,2) mean(powmed_lowATThigh,2) ...
-    mean(powsm_lowATTlow,2) mean(powsm_lowATThigh,2) ];
+avgchanlowCOVERT = [mean(powcov_lowATTlow,2) mean(powcov_highATTlow,2) ];
+avgchanhighCOVERT = [mean(powcov_highATTlow,2) mean(powcov_highATThigh,2)];
 
-avgchanATThigh = [mean(powbig_highATTlow,2) mean(powbig_highATThigh,2)  ...
-    mean(powmed_highATTlow,2) mean(powmed_highATThigh,2) ...
-    mean(powsm_highATTlow,2) mean(powsm_highATThigh,2)];
+avgchanATTlowOVERT = [mean(powovert_lowATTlow,2) mean(powovert_highATTlow,2)];
+avgchanATThighOVERT = [mean(powovert_lowATThigh,2) mean(powovert_highATThigh,2)];
 
 figure; hold on
-bins = [10 20 35 45 60 70];
+bins = [10 20 35 45];
+binlabels = {'Covert Att. Low'; 'Covert Att. High'; 'Overt Att. Low'; 'Overt Att. High'; };
 
 subplot(2,1,1); hold on 
-bar(bins, mean(avgchanATTlow))          % Average across trials
-binlabels = {'Big Att. Low'; 'Big Att. High'; 'Med Att. Low'; 'Med Att. High'; 'Small Att. Low'; 'Small Att. High'; };
+bar(bins, [mean(avgchanlowCOVERT) mean(avgchanATTlowOVERT)])          % Average across trials
+plot(bins(1:2), avgchanlowCOVERT, '*', 'LineWidth', 1);               % All trials
+plot(bins(3:4), avgchanATTlowOVERT, '*', 'LineWidth', 1);
 
-plot(bins, avgchanATTlow, '*', 'LineWidth', 1);
 title('6 Hz Power');
 xticks(bins)
 xticklabels(binlabels)
 
 subplot(2,1,2); hold on
-bar(bins, mean(avgchanATThigh))
+bar(bins, [mean(avgchanhighCOVERT) mean(avgchanATThighOVERT)])          % Average across trials
+plot(bins(1:2), avgchanhighCOVERT, '*', 'LineWidth', 1);               % All trials
+plot(bins(3:4), avgchanATThighOVERT, '*', 'LineWidth', 1);
+
 title('15 Hz Power');
 xticks(bins)
 xticklabels(binlabels)
-plot(bins, avgchanATThigh, '*', 'LineWidth', 1);
 
 %% Scalp map
 lowbin = [5 7];
 highbin = [14 16];
 
-currEEGlow = EEGsmalllow;
+currEEGlow = EEGcovert;
 currEEGhigh = EEGsmallhigh;
 chanlocs = currEEGlow.chanlocs; % Same for all conditions
 
