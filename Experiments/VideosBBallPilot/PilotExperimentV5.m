@@ -2,8 +2,7 @@
 % PsychToolbox code for SSVEP attention experiment
 % Display two square checkerboards flashing independently (with movies overlayed)
 
-
-% Variable checkerboard transparencies
+% Variable checkerboard transparencies, checkerboard size, no movie
 
 %% PsychToolbox Setup
 clear;
@@ -16,11 +15,11 @@ addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 %ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
-experimentName = 'test_log1.txt';      % Log file name
+experimentName = 'experiment4-23-2019_ZZ_log5.txt';      % Log file name
 
 % Duration
-trialLength = 10.1;                  % Trial length (s)  --- always add 100 ms for buffer
-numTrials = 6;                      % Number of trials per run - must be even number
+trialLength = 5.1;               % Trial length (s)  --- always add 100 ms for buffer
+numTrials = 18;                      % Number of trials per run - must be divisible by # conditions
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
@@ -42,13 +41,13 @@ scalingCoeff = 1;                   % Alter driving frequency of checkerboard fl
 
 % Checkerboard Display
 Hz = [6 15];                         % Frequencies to display - should go into 60 Hz
-boardSize = 4;                      % Number of checkers per side 
+boardSizeBig = 1;                    % Number of BIG checkers per side (smaller number)
+boardSizeMed = 10;
+boardSizeSmall = 200;                 % Number of SMALL checkers per side (bigger number)
 color1 = 0;                         % Checker color 1 (0: black)
 color2 = 255;                       % Checker color 2 (255: white)
-color1TranspWeak = 75;              % Transparency (0: transparent, 250: opaque)
-color2TranspWeak = 20;              % Transparency (0: transparent, 250: opaque)
-color1TranspStrong = 175;           % Transparency (0: transparent, 250: opaque)
-color2TranspStrong = 50;            % Transparency (0: transparent, 250: opaque)
+color1Transp = 160;                 % Transparency (0: transparent, 250: opaque)
+color2Transp = 40;                  % Transparency (0: transparent, 250: opaque)
 filterMode = 0;                     % Color blending (0: nearest neighbour)
 waitframes = 1;                     % Flip rate in reference to monitor refresh
 buffer = 0.1;                       % Time buffer to prevent lag
@@ -72,14 +71,17 @@ mStimulusOffset = 60;               % Video removed - one's place increments wit
 mResponsePeriodOnset = 70;          % Task reporting period  - do not use if report during trial
 mResponseOnset = 80;             
 mEventOnset = 81;                   % Actual movie event
+mSurvey = 82;                       % Will add 1-4 depending on survey response
                                     
-mCondition1 = 1;                    % Attend CHECK & LOW frequency
-mCondition2 = 2;                    % Attend CHECK & HIGH frequency
-mCondition3 = 3;                    % Attend STRONG VID & LOW frequency
-mCondition4 = 4;                    % Attend STRONG VID & HIGH frequency
-mCondition5 = 5;                    % Attend SUBTLE VID & LOW frequency
-mCondition6 = 6;                    % Attend SUBTLE VID & HIGH frequency
+% BIG checks on checkerboard (e.g. 2x2) vs SMALL checks on checkerboard (e.g. 8x8)
+% CHECK only, STRONG (high opacity) check on video, WEAK (transp) check on video
 
+mCondition1 = 1;                    % Attend CHECK & BIG & LOW frequency
+mCondition2 = 2;                    % Attend CHECK & BIG & HIGH frequency
+mCondition3 = 3;                    % Attend STRONG VID & BIG & LOW frequency
+mCondition4 = 4;                    % Attend STRONG VID & BIG & HIGH frequency
+mCondition5 = 5;                    % Attend WEAK VID & BIG & LOW frequency
+mCondition6 = 6;                    % Attend WEAK VID & BIG & HIGH frequency
 
 %% Movie Loading
 load eventTimes
@@ -135,7 +137,7 @@ if mod(numTrials, 6) ~= 0
     error('Trial number must give even number of conditions')
 end
 
-orderedDisplay = [zeros(1, thirdSize) ones(1, thirdSize) repelem(2, thirdSize)];                % Checker v. video trial
+orderedDisplay = [zeros(1, thirdSize) ones(1, thirdSize) repelem(2, thirdSize)];                          % Checker size
 orderedFreqs = repmat([Hz(1) Hz(2)], 1, numTrials/2);                                                     % Attending frequency
 
 targetIndices = randperm(numTrials);
@@ -146,9 +148,15 @@ targetDisplay = orderedDisplay(targetIndices);
 leftVideos = cell(1, numTrials);
 rightVideos = cell(1, numTrials);
 
+% Ensure that the left and right videos are never the same. 
 for i = 1:numTrials
-    leftVideos{i} = focusMovieList{round(rand*(numFocusVideos-1)+1)};
-    rightVideos{i} = focusMovieList{round(rand*(numFocusVideos-1)+1)};
+    leftSelectedVideo = round(rand*(numFocusVideos-1)+1);
+    leftVideos{i} = focusMovieList{leftSelectedVideo};
+    rightSelectedVideo = leftSelectedVideo;
+    while rightSelectedVideo == leftSelectedVideo
+        rightSelectedVideo = round(rand*(numFocusVideos-1)+1);
+    end
+    rightVideos{i} = focusMovieList{rightSelectedVideo};
 end
 
 % To display the same video on both sides, set rightVideos = leftVideos
@@ -175,47 +183,64 @@ end
 %% Generate Checkerboard and Cross Display
 
 % Populate matrices to represent checkerboard 
-checkerWeakL = ones([boardSize boardSize 2]);
-checkerWeakR = checkerWeakL;
+checkerBigL = ones([boardSizeBig boardSizeBig 2]);
+checkerBigR = checkerBigL;
 
-checkerStrongL = checkerWeakL;
-checkerStrongR = checkerWeakL;
+checkerMedL = ones([boardSizeMed boardSizeMed 2]);
+checkerMedR = checkerBigL;
 
-checkerFullL = checkerWeakL;
-checkerFullR = checkerWeakL;
+checkerSmallL = ones([boardSizeSmall boardSizeSmall 2]);
+checkerSmallR = checkerBigL;
 
 % LAYER 1: Set checkerboard colors with opposite polarity | LAYER 2: Set transparency
-for j = 1:boardSize
-     for k = 1:boardSize
-         if mod(j+k,2) == 1
-             checkerWeakL(j,k,:) = color1;
-             checkerWeakL(j,k,2) = color1TranspWeak;
-             checkerWeakR(j,k,:) = color2;
-             checkerWeakR(j,k,2) = color2TranspWeak;
-             
-             checkerStrongL(j,k,:) = color1;
-             checkerStrongL(j,k,2) = color1TranspStrong;
-             checkerStrongR(j,k,:) = color2;
-             checkerStrongR(j,k,2) = color2TranspStrong;
-             
-             checkerFullL(j,k,:) = color1;
-             checkerFullR(j,k,:) = color2;
+for j = 1:boardSizeBig
+     for k = 1:boardSizeBig
+         if mod(j+k,2) == 1 
+             checkerBigL(j,k,:) = color1;
+             checkerBigL(j,k,2) = color1Transp;
+             checkerBigR(j,k,:) = color2;
+             checkerBigR(j,k,2) = color2Transp;
          else
-             checkerWeakL(j,k,:) = color2; 
-             checkerWeakL(j,k,2) = color2TranspWeak;
-             checkerWeakR(j,k,:) = color1;
-             checkerWeakR(j,k,2) = color1TranspWeak;
-             
-             checkerStrongL(j,k,:) = color2;
-             checkerStrongL(j,k,2) = color2TranspStrong;
-             checkerStrongR(j,k,:) = color1;
-             checkerStrongR(j,k,2) = color1TranspStrong;
-             
-             checkerFullL(j,k,:) = color2;
-             checkerFullR(j,k,:) = color1;
+             checkerBigL(j,k,:) = color2; 
+             checkerBigL(j,k,2) = color2Transp;
+             checkerBigR(j,k,:) = color1;
+             checkerBigR(j,k,2) = color1Transp;
          end
      end
 end
+
+for j = 1:boardSizeMed
+     for k = 1:boardSizeMed
+         if mod(j+k,2) == 1
+             checkerMedL(j,k,:) = color1;
+             checkerMedL(j,k,2) = color1Transp;
+             checkerMedR(j,k,:) = color2;
+             checkerMedR(j,k,2) = color2Transp;
+         else
+             checkerMedL(j,k,:) = color2;
+             checkerMedL(j,k,2) = color2Transp;
+             checkerMedR(j,k,:) = color1;
+             checkerMedR(j,k,2) = color1Transp;
+         end
+     end
+end
+
+for j = 1:boardSizeSmall
+     for k = 1:boardSizeSmall
+         if mod(j+k,2) == 1
+             checkerSmallL(j,k,:) = color1;
+             checkerSmallL(j,k,2) = color1Transp;
+             checkerSmallR(j,k,:) = color2;
+             checkerSmallR(j,k,2) = color2Transp;
+         else
+             checkerSmallL(j,k,:) = color2;
+             checkerSmallL(j,k,:) = color2Transp;
+             checkerSmallR(j,k,:) = color1;
+             checkerSmallR(j,k,2) = color1Transp;
+         end
+     end
+end
+
 
 % FIXATION CROSS
 [crossImage, ~, alpha] = imread('fixation-cross-white.png');
@@ -245,20 +270,20 @@ try
     dstRect = [dispRectL; dispRectR];
 
     % Make the checkerboard into a texure
-    checkerWeakTexture(1) = Screen('MakeTexture', window, checkerWeakL);
-    checkerWeakTexture(2) = Screen('MakeTexture', window, checkerWeakR);
+    checkerBigTexture(1) = Screen('MakeTexture', window, checkerBigL);
+    checkerBigTexture(2) = Screen('MakeTexture', window, checkerBigR);
     
-    checkerStrongTexture(1) = Screen('MakeTexture', window, checkerStrongL);
-    checkerStrongTexture(2) = Screen('MakeTexture', window, checkerStrongR);
+    checkerMedTexture(1) = Screen('MakeTexture', window, checkerMedL);
+    checkerMedTexture(2) = Screen('MakeTexture', window, checkerMedR);
     
-    checkerFullTexture(1) = Screen('MakeTexture', window, checkerFullL);
-    checkerFullTexture(2) = Screen('MakeTexture', window, checkerFullR);
-                
+    checkerSmallTexture(1) = Screen('MakeTexture', window, checkerSmallL);
+    checkerSmallTexture(2) = Screen('MakeTexture', window, checkerSmallR);
+    
     % Set up alpha-blending for smooth (anti-aliased) lines
     Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 
     % Black Screen
-    blackCheckerboard = checkerWeakL;
+    blackCheckerboard = checkerSmallR;
     blackCheckerboard(:,:,1) = 0;
     blackCheckerboard(:,:,2) = 0;
     blackTexture = Screen('MakeTexture', window, blackCheckerboard);
@@ -307,18 +332,14 @@ try
         % Video v. checkerboard display condition:
         displayType = targetDisplay(n);
 
-        if displayType == 0         % Checkerboard - checkerboard display
-            movieBool = 0;
-            currentdelay = 0;
-        else                        % Movie - movie display (for any transparency)
-            movieBool = 1;
-            movienameL = leftVideos{n}.name;
-            moviedelayL = 0; % rand * leftVideos{n}.delayMax;
-            currentdelay = moviedelayL;
+        % Movie - movie display (for any transparency)
+        movieBool = 1;
+        movienameL = leftVideos{n}.name;
+        moviedelayL = 0; % rand * leftVideos{n}.delayMax;
+        currentdelay = moviedelayL;
 
-            movienameR = rightVideos{n}.name;
-            moviedelayR = 0; %rand * rightVideos{n}.delayMax;
-        end
+        movienameR = rightVideos{n}.name;
+        moviedelayR = 0; %rand * rightVideos{n}.delayMax;
         
         % Frequency display condition:
         leftFreq = targetFreqs(n);
@@ -327,26 +348,26 @@ try
         % Output ALL  conditions
         if displayType == 0
             if targetFreqs(n) == min(targetFreqs)
-                % Condition 1: CHECK LOW
+                % Condition 1: CHECK BIG LOW
                 mCondition = mCondition1;
             else
-                % Condition 2: CHECK HIGH
+                % Condition 2: CHECK BIG HIGH
                 mCondition = mCondition2;
             end
         elseif displayType == 1
             if targetFreqs(n) == min(targetFreqs)
-                % Condition 3: STRONG VIDEO LOW
+                % Condition 3: CHECK MED LOW
                 mCondition = mCondition3;
             else
-                % Condition 4: STRONG VIDEO HIGH
+                % Condition 4: CHECK MED HIGH
                 mCondition = mCondition4;
             end
-        else
+        elseif displayType == 2
             if targetFreqs(n) == min(targetFreqs)
-                % Condition 5: SUBTLE VIDEO LOW
+                % Condition 5: CHECK SMALL LOW
                 mCondition = mCondition5;
             else
-                % Condition 6: SUBTLE VIDEO HIGH
+                % Condition 6: CHECK SMALL HIGH
                 mCondition = mCondition6;
             end
         end
@@ -371,8 +392,10 @@ try
         
         if logBool
             fprintf(fileID,'Trial Number: %d\n', n);
-            fprintf(fileID,'Target Movie: %s\n', leftVideos{n}.name);
+            fprintf(fileID,'Left Movie: %s\n', leftVideos{n}.name);
+            fprintf(fileID,'Right Movie (TARGET): %s\n', rightVideos{n}.name);
             fprintf(fileID,'Movie start time: %.3f\n', currentdelay);
+            % 0 is left, and 1 is right.
             fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreqs(n), targetDisplay(n));        
         end
         
@@ -504,14 +527,14 @@ try
             
             % Draw texture on screen
             if displayType == 0
-                Screen('DrawTexture', window, checkerFullTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
-                Screen('DrawTexture', window, checkerFullTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
+                Screen('DrawTexture', window, checkerBigTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
+                Screen('DrawTexture', window, checkerBigTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
             elseif displayType == 1
-                Screen('DrawTexture', window, checkerStrongTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
-                Screen('DrawTexture', window, checkerStrongTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
-            else
-                Screen('DrawTexture', window, checkerWeakTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
-                Screen('DrawTexture', window, checkerWeakTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
+                Screen('DrawTexture', window, checkerMedTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
+                Screen('DrawTexture', window, checkerMedTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
+            elseif displayType == 2
+                Screen('DrawTexture', window, checkerSmallTexture(textureCueL(1)), [], dstRect(1,:), [], filterMode);
+                Screen('DrawTexture', window, checkerSmallTexture(textureCueR(1)), [], dstRect(2,:), [], filterMode);
             end
             Screen('DrawTexture', window, crossTexture, [], dstRect(targetSides(n) + 1,:));
             
@@ -663,43 +686,56 @@ try
                 textX = wW/6;
                 textY = wH/5;
                 space = 40;
+                
+                white = [255 255 255];
+                black = [0 0 0];
+                
+                Screen('TextSize', window, 24);
+                      
+                disp("Got to ask");
+    
+                % Note that the 'ask' function is not robust to backspaces
+                % - while it still records input, it clears the screen.
+                message = 'How many times did a player shoot the ball? ';
+                Screen('DrawText', window, 'Press enter to continue.', textX, textY+space*2, [255, 255, 255]);
+                numberOfShots = Ask(window, message, white, black, 'GetChar', [textX textY textX+space textY+space], ['left'], [24]);
+                disp("Got to right arrow to continue");
+
+                Screen('Flip', window);                
+                
                 Screen('TextSize', window, 24);
                 Screen('DrawText', window, 'Rate your focus during this past session by keying in the number of the most accurate statement:', textX, textY, [255, 255, 255]);
                 Screen('DrawText', window, '1: I did not pay attention in this session', textX, textY+space*2, [255, 255, 255]);
                 Screen('DrawText', window, '2: I was focused, lost attention, and then caught myself multiple times', textX, textY+space*3, [255, 255, 255]);
                 Screen('DrawText', window, '3: I did well at the beginning, but my attention faded near the end', textX, textY+space*4, [255, 255, 255]);
                 Screen('DrawText', window, '4: I was able to maintain my attention the entire time', textX, textY+space*5, [255, 255, 255]);
+                Screen('DrawText', window, 'Press the enter key to continue.', textX, textY+space*8, [255, 255, 255]);
+                mSurveyAdd = Ask(window, 'Response: ', white, black, 'GetChar', [textX textY+space*6 textX+space textY+space*10], ['left'], [24]);
 
-                Screen('DrawText', window, 'Press the right arrow key to continue.', textX, textY+space*7, [255, 255, 255]);
                 Screen('Flip', window);
 
-                endKey = KbName('RightArrow'); % Pressing right arrow leaves survey
+                endKey = KbName('return'); % Pressing right arrow leaves survey
                 
                 while KbCheck; end % Wait until all keys are released.
                 
-                lastKey = '';
-
-                while 1 % Wait until answer submitted
-                    [keyIsDown, seconds, keyCode] = KbCheck;
-                    keyCode = find(keyCode, 1);
-
-                    % If key is pressed, display its code number or name.
-                    if keyIsDown
-                        if keyCode == endKey
-                            keyName = KbName(lastKey);
-                            fprintf(fileID, 'Survey Response: %s \n', keyName); 
+                currTime = toc(runStart);
                             
-                            if lslBool
-                                outlet.push_sample(str2double(keyName) + 85)
-                                disp(str2double(keyName) + 85)
-                            end
-                            break;
-                        end
-                        
-                        lastKey = keyCode;
-                        KbReleaseWait;
-                    end
+                if logBool
+                    fprintf(fileID, 'Shot Response: %s \n', numberOfShots);
+                    fprintf(fileID, 'Survey Response: %s \n', mSurveyAdd); 
+                    fprintf(markerfileID, '%d,%.3f,%d \n', mSurveyAdd + mSurvey, currTime, currTime * 1000);
                 end
+
+                if lslBool
+                    outlet.push_sample(mSurveyAdd + mSurvey)
+                    disp("Survey Response:");
+                    disp(mSurveyAdd + mSurvey)
+                    disp("End Survey Response:");
+
+                end
+
+                KbReleaseWait;
+               
                 
                  fprintf(fileID, '\n');
             end
