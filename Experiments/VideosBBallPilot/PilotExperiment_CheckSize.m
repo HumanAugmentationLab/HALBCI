@@ -15,11 +15,10 @@ addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 %ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
-experimentName = 'test.txt';      % Log file name
-
+experimentName = 'dummylog.txt';      % Log file name
 
 % Duration
-trialLength = 10.1;                  % Trial length (s)  --- always add 100 ms for buffer
+trialLength = 5.1;               % Trial length (s)  --- always add 100 ms for buffer
 numTrials = 6;                      % Number of trials per run - must be divisible by # conditions
 
 % Pauses
@@ -43,7 +42,7 @@ scalingCoeff = 1;                   % Alter driving frequency of checkerboard fl
 % Checkerboard Display
 Hz = [6 15];                         % Frequencies to display - should go into 60 Hz
 boardSizeBig = 1;                    % Number of BIG checkers per side (smaller number)
-boardSizeMed = 4;
+boardSizeMed = 10;
 boardSizeSmall = 200;                 % Number of SMALL checkers per side (bigger number)
 color1 = 0;                         % Checker color 1 (0: black)
 color2 = 255;                       % Checker color 2 (255: white)
@@ -72,6 +71,7 @@ mStimulusOffset = 60;               % Video removed - one's place increments wit
 mResponsePeriodOnset = 70;          % Task reporting period  - do not use if report during trial
 mResponseOnset = 80;             
 mEventOnset = 81;                   % Actual movie event
+mSurvey = 82;                       % Will add 1-4 depending on survey response
                                     
 % BIG checks on checkerboard (e.g. 2x2) vs SMALL checks on checkerboard (e.g. 8x8)
 % CHECK only, STRONG (high opacity) check on video, WEAK (transp) check on video
@@ -153,7 +153,16 @@ for i = 1:numTrials
     rightVideos{i} = focusMovieList{round(rand*(numFocusVideos-1)+1)};
 end
 
-% To display the same video on both sides, set rightVideos = leftVideos
+% Ensure that the left and right videos are never the same. 
+for i = 1:numTrials
+    leftSelectedVideo = round(rand*(numFocusVideos-1)+1);
+    leftVideos{i} = focusMovieList{leftSelectedVideo};
+    rightSelectedVideo = leftSelectedVideo;
+    while rightSelectedVideo == leftSelectedVideo
+        rightSelectedVideo = round(rand*(numFocusVideos-1)+1);
+    end
+    rightVideos{i} = focusMovieList{rightSelectedVideo};
+end
 
 % %  Setup output: LSL and log
 if lslBool == 1
@@ -386,7 +395,8 @@ try
         
         if logBool
             fprintf(fileID,'Trial Number: %d\n', n);
-            fprintf(fileID,'Target Movie: %s\n', leftVideos{n}.name);
+            fprintf(fileID,'Left Movie: %s\n', leftVideos{n}.name);
+            fprintf(fileID,'Right Movie (TARGET): %s\n', rightVideos{n}.name);
             fprintf(fileID,'Movie start time: %.3f\n', currentdelay);
             fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreqs(n), targetDisplay(n));        
         end
@@ -678,45 +688,50 @@ try
                 textX = wW/6;
                 textY = wH/5;
                 space = 40;
-                Screen('TextSize', window, 24);
-                Screen('DrawText', window, 'Rate your focus during this past session by keying in the number of the most accurate statement:', textX, textY, [255, 255, 255]);
-                Screen('DrawText', window, '1: I did not pay attention in this session', textX, textY+space*2, [255, 255, 255]);
-                Screen('DrawText', window, '2: I was focused, lost attention, and then caught myself multiple times', textX, textY+space*3, [255, 255, 255]);
-                Screen('DrawText', window, '3: I did well at the beginning, but my attention faded near the end', textX, textY+space*4, [255, 255, 255]);
-                Screen('DrawText', window, '4: I was able to maintain my attention the entire time', textX, textY+space*5, [255, 255, 255]);
-
-                Screen('DrawText', window, 'Press the right arrow key to continue.', textX, textY+space*7, [255, 255, 255]);
+                white = [255 255 255];
+                black = [0 0 0];
+                textSize = 24;
+                
+                % Note that the 'ask' function is not robust to backspaces - while it still records input, it clears the screen.
+                message = 'How many times did a player shoot the ball? ';
+                Screen('DrawText', window, 'Press enter to continue.', textX, textY+space*2, white);
+                numberOfShots = Ask(window, message, white, black, 'GetChar', [textX textY textX+space textY+space], 'left', textSize);
+                Screen('Flip', window);
+                
+                Screen('TextSize', window, textSize);
+                Screen('DrawText', window, 'Rate your focus during this past session by keying in the number of the most accurate statement:', textX, textY, white);
+                Screen('DrawText', window, '1: I did not pay attention in this session', textX, textY+space*2, white);
+                Screen('DrawText', window, '2: I was focused, lost attention, and then caught myself multiple times', textX, textY+space*3, white);
+                Screen('DrawText', window, '3: I did well at the beginning, but my attention faded near the end', textX, textY+space*4, white);
+                Screen('DrawText', window, '4: I was able to maintain my attention the entire time', textX, textY+space*5, white);
+                Screen('DrawText', window, 'Press enter to continue.', textX, textY+space*8, white);
+                
+                
+                mSurveyAdd = Ask(window, 'Response: ', white, black, 'GetChar', [textX textY+space*6 textX+space textY+space*10], 'left', textSize);
                 Screen('Flip', window);
 
-                endKey = KbName('RightArrow'); % Pressing right arrow leaves survey
-                
+                endKey = KbName('Return'); % Pressing right arrow leaves survey
+
                 while KbCheck; end % Wait until all keys are released.
                 
-                lastKey = '';
-
-                while 1 % Wait until answer submitted
-                    [keyIsDown, seconds, keyCode] = KbCheck;
-                    keyCode = find(keyCode, 1);
-
-                    % If key is pressed, display its code number or name.
-                    if keyIsDown
-                        if keyCode == endKey
-                            keyName = KbName(lastKey);
-                            fprintf(fileID, 'Survey Response: %s \n', keyName); 
-                            
-                            if lslBool
-                                outlet.push_sample(str2double(keyName) + 85)
-                                disp(str2double(keyName) + 85)
-                            end
-                            break;
-                        end
-                        
-                        lastKey = keyCode;
-                        KbReleaseWait;
-                    end
+                currTime = toc(runStart);
+                           
+                if logBool
+                    fprintf(fileID, 'Shot Response: %s \n', numberOfShots);
+                    fprintf(fileID, 'Survey Response: %s \n', mSurveyAdd); 
+                    fprintf(markerfileID, '%d,%.3f,%d \n', mSurveyAdd + mSurvey, currTime, currTime * 1000);
                 end
-                
-                 fprintf(fileID, '\n');
+
+                if lslBool
+                    outlet.push_sample(mSurveyAdd + mSurvey)
+                    disp("Survey Response:");
+                    disp(mSurveyAdd + mSurvey)
+                    disp("End Survey Response:");
+
+                end
+
+                KbReleaseWait;
+                fprintf(fileID, '\n');
             end
             
 
@@ -725,6 +740,25 @@ try
                 pause(endTrialPause)
             else
                 pause(endPause)
+                
+                if surveyBool
+                    rectCond1 = CenterRectOnPointd(dispRect, 2*xCenter/6, yCenter);
+                    rectCond2 = CenterRectOnPointd(dispRect, 6*xCenter/6, yCenter);
+                    rectCond3 = CenterRectOnPointd(dispRect, 10*xCenter/6, yCenter);
+                   
+                    Screen('DrawTexture', window, texL, [], rectCond1  + offset);
+                    Screen('DrawTexture', window, texL, [], rectCond2  + offset);
+                    Screen('DrawTexture', window, texL, [], rectCond3  + offset);
+                    
+                    Screen('DrawTexture', window, checkerBigTexture(textureCueR(1)), [], rectCond1, [], filterMode);
+                    Screen('DrawTexture', window, checkerMedTexture(textureCueR(1)), [], rectCond2, [], filterMode);
+                    Screen('DrawTexture', window, checkerSmallTexture(textureCueR(1)), [], rectCond3, [], filterMode);
+
+                    message = 'Imagine one of the flashing checkerboards you just saw would be overlaid on the next movie you watch. \n Rate the desirability of each checkerboard between 1 and 5 (1: hate it, 5: would not mind it). \n __, __, __:';
+                    Ask(window, message, white, black, 'GetChar', [0 0 textX+space textY+space*10], 'left', textSize);
+                    Screen('Flip', window);
+
+                end
                 
                 if lslBool
                     outlet.push_sample(mEndRun)
@@ -742,6 +776,9 @@ try
                     fclose(fileID);                                         % Close log file in last trial
                     fclose(markerfileID);
                 end
+                
+                 pause(endPause)
+
             end
     end
 catch SE
