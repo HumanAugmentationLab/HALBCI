@@ -224,17 +224,17 @@ for j = 1:boardSize
              checkerFullR(j,k,:) = color1;
          end
          
-         checkerWeakL(j,k,4) = alphaWeak;
-         checkerWeakR(j,k,4) = alphaWeak;
+         checkerWeakL(:,:,4) = alphaWeak;
+         checkerWeakR(:,:,4) = alphaWeak;
          
-         checkerMedL(j,k,4) = alphaMed;
-         checkerMedR(j,k,4) = alphaMed;
+         checkerMedL(:,:,4) = alphaMed;
+         checkerMedR(:,:,4) = alphaMed;
          
-         checkerStrongL(j,k,4) = alphaStrong;
-         checkerStrongR(j,k,4) = alphaStrong;
+         checkerStrongL(:,:,4) = alphaStrong;
+         checkerStrongR(:,:,4) = alphaStrong;
          
-         checkerFullL(j,k,4) = alphaFull;
-         checkerFullR(j,k,4) = alphaFull;
+         checkerFullL(:,:,4) = alphaFull;
+         checkerFullR(:,:,4) = alphaFull;
              
      end
 end

@@ -12,13 +12,13 @@ oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
 oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 5);
 % oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
-%ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
+ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
 experimentName = 'dummylog.txt';      % Log file name
 
 % Duration
-trialLength = 5.1;               % Trial length (s)  --- always add 100 ms for buffer
+trialLength = 2.1;               % Trial length (s)  --- always add 100 ms for buffer
 numTrials = 6;                      % Number of trials per run - must be divisible by # conditions
 
 % Pauses
@@ -27,6 +27,8 @@ startTrialPause = 1;                % Pause before trial (s)
 fixationPause = 2;                  % Pause before fixation cross (s)
 endTrialPause = 2;                  % Pause after survey, after trial ends (s)
 endPause = 1;                       % Pause after run ends (s)
+surveyPause = 5;                    % Pause after final survey text (s)
+surveyVideo = 15;                   % Duration of final survey video (s)
 
 % Enable Parameters
 lslBool = 1;                        % 1: Send markers over LSL
@@ -42,12 +44,11 @@ scalingCoeff = 1;                   % Alter driving frequency of checkerboard fl
 % Checkerboard Display
 Hz = [6 15];                         % Frequencies to display - should go into 60 Hz
 boardSizeBig = 1;                    % Number of BIG checkers per side (smaller number)
-boardSizeMed = 10;
+boardSizeMed = 20;
 boardSizeSmall = 200;                 % Number of SMALL checkers per side (bigger number)
 color1 = 0;                         % Checker color 1 (0: black)
 color2 = 255;                       % Checker color 2 (255: white)
-color1Transp = 160;                 % Transparency (0: transparent, 250: opaque)
-color2Transp = 40;                  % Transparency (0: transparent, 250: opaque)
+alphaMed = 100;                        % Transparency (0: transparent, 250:opaque)
 filterMode = 0;                     % Color blending (0: nearest neighbour)
 waitframes = 1;                     % Flip rate in reference to monitor refresh
 buffer = 0.1;                       % Time buffer to prevent lag
@@ -74,14 +75,13 @@ mEventOnset = 81;                   % Actual movie event
 mSurvey = 82;                       % Will add 1-4 depending on survey response
                                     
 % BIG checks on checkerboard (e.g. 2x2) vs SMALL checks on checkerboard (e.g. 8x8)
-% CHECK only, STRONG (high opacity) check on video, WEAK (transp) check on video
 
-mCondition1 = 1;                    % Attend CHECK & BIG & LOW frequency
-mCondition2 = 2;                    % Attend CHECK & BIG & HIGH frequency
-mCondition3 = 3;                    % Attend STRONG VID & BIG & LOW frequency
-mCondition4 = 4;                    % Attend STRONG VID & BIG & HIGH frequency
-mCondition5 = 5;                    % Attend WEAK VID & BIG & LOW frequency
-mCondition6 = 6;                    % Attend WEAK VID & BIG & HIGH frequency
+mCondition1 = 1;                    % Attend BIG & LOW frequency
+mCondition2 = 2;                    % Attend BIG & HIGH frequency
+mCondition3 = 3;                    % Attend MED & LOW frequency
+mCondition4 = 4;                    % Attend MED & HIGH frequency
+mCondition5 = 5;                    % Attend SMALL & LOW frequency
+mCondition6 = 6;                    % Attend SMALL & HIGH frequency
 
 %% Movie Loading
 load eventTimes
@@ -186,28 +186,24 @@ end
 %% Generate Checkerboard and Cross Display
 
 % Populate matrices to represent checkerboard 
-checkerBigL = ones([boardSizeBig boardSizeBig 2]);
+checkerBigL = zeros([boardSizeBig boardSizeBig 4]);
 checkerBigR = checkerBigL;
 
-checkerMedL = ones([boardSizeMed boardSizeMed 2]);
-checkerMedR = checkerBigL;
+checkerMedL = zeros([boardSizeMed boardSizeMed 4]);
+checkerMedR = checkerMedL;
 
-checkerSmallL = ones([boardSizeSmall boardSizeSmall 2]);
-checkerSmallR = checkerBigL;
+checkerSmallL = zeros([boardSizeSmall boardSizeSmall 4]);
+checkerSmallR = checkerSmallL;
 
 % LAYER 1: Set checkerboard colors with opposite polarity | LAYER 2: Set transparency
 for j = 1:boardSizeBig
      for k = 1:boardSizeBig
          if mod(j+k,2) == 1
              checkerBigL(j,k,:) = color1;
-             checkerBigL(j,k,2) = color1Transp;
              checkerBigR(j,k,:) = color2;
-             checkerBigR(j,k,2) = color2Transp;
          else
              checkerBigL(j,k,:) = color2; 
-             checkerBigL(j,k,2) = color2Transp;
              checkerBigR(j,k,:) = color1;
-             checkerBigR(j,k,2) = color1Transp;
          end
      end
 end
@@ -216,14 +212,10 @@ for j = 1:boardSizeMed
      for k = 1:boardSizeMed
          if mod(j+k,2) == 1
              checkerMedL(j,k,:) = color1;
-             checkerMedL(j,k,2) = color1Transp;
              checkerMedR(j,k,:) = color2;
-             checkerMedR(j,k,2) = color2Transp;
          else
              checkerMedL(j,k,:) = color2;
-             checkerMedL(j,k,2) = color2Transp;
              checkerMedR(j,k,:) = color1;
-             checkerMedR(j,k,2) = color1Transp;
          end
      end
 end
@@ -232,17 +224,22 @@ for j = 1:boardSizeSmall
      for k = 1:boardSizeSmall
          if mod(j+k,2) == 1
              checkerSmallL(j,k,:) = color1;
-             checkerSmallL(j,k,2) = color1Transp;
              checkerSmallR(j,k,:) = color2;
-             checkerSmallR(j,k,2) = color2Transp;
          else
              checkerSmallL(j,k,:) = color2;
-             checkerSmallL(j,k,:) = color2Transp;
              checkerSmallR(j,k,:) = color1;
-             checkerSmallR(j,k,2) = color1Transp;
          end
      end
 end
+
+checkerBigL(:,:,4) = alphaMed;
+checkerBigR(:,:,4) = alphaMed;
+
+checkerMedL(:,:,4) = alphaMed;
+checkerMedR(:,:,4) = alphaMed;
+
+checkerSmallL(:,:,4) = alphaMed;
+checkerSmallR(:,:,4) = alphaMed;
 
 
 % FIXATION CROSS
@@ -287,8 +284,7 @@ try
 
     % Black Screen
     blackCheckerboard = checkerSmallR;
-    blackCheckerboard(:,:,1) = 0;
-    blackCheckerboard(:,:,2) = 0;
+    blackCheckerboard(:,:,:) = 0;
     blackTexture = Screen('MakeTexture', window, blackCheckerboard);
     
     crossTexture = Screen('MakeTexture', window, crossImage);
@@ -742,22 +738,81 @@ try
                 pause(endPause)
                 
                 if surveyBool
-                    rectCond1 = CenterRectOnPointd(dispRect, 2*xCenter/6, yCenter);
-                    rectCond2 = CenterRectOnPointd(dispRect, 6*xCenter/6, yCenter);
-                    rectCond3 = CenterRectOnPointd(dispRect, 10*xCenter/6, yCenter);
+                    dispRectFinal = round(dispRect*0.8);
+                    rectCond1 = CenterRectOnPointd(dispRectFinal, 2*xCenter/6, yCenter);
+                    rectCond2 = CenterRectOnPointd(dispRectFinal, 6*xCenter/6, yCenter);
+                    rectCond3 = CenterRectOnPointd(dispRectFinal, 10*xCenter/6, yCenter);
                    
+                    movieL = Screen('OpenMovie', window, movienameL, 0, 30);
+                    Screen('SetMovieTimeIndex', movieL, moviedelayL, 0);
+                    
+                    Screen('PlayMovie', movieL, 1, 1);
+
+                    texL = Screen('GetMovieImage', window, movieL, 0, 0);     
+                    ltexL = texL;
+                    
                     Screen('DrawTexture', window, texL, [], rectCond1  + offset);
                     Screen('DrawTexture', window, texL, [], rectCond2  + offset);
                     Screen('DrawTexture', window, texL, [], rectCond3  + offset);
-                    
+
+                    demotic = tic;
+                    surveytic = tic;
                     Screen('DrawTexture', window, checkerBigTexture(textureCueR(1)), [], rectCond1, [], filterMode);
                     Screen('DrawTexture', window, checkerMedTexture(textureCueR(1)), [], rectCond2, [], filterMode);
                     Screen('DrawTexture', window, checkerSmallTexture(textureCueR(1)), [], rectCond3, [], filterMode);
 
-                    message = 'Imagine one of the flashing checkerboards you just saw would be overlaid on the next movie you watch. \n Rate the desirability of each checkerboard between 1 and 5 (1: hate it, 5: would not mind it). \n __, __, __:';
-                    Ask(window, message, white, black, 'GetChar', [0 0 textX+space textY+space*10], 'left', textSize);
+                    message = 'Imagine one of the flashing checkerboards you just saw would be overlaid on the next movie you watch. Rate the desirability of each checkerboard between 1 and 5 (1: hate it, 5: do not mind it). _ , _ , _ : ';
+                    wrapMessage = WrapString(message, 106);
+                    DrawFormattedText(window,wrapMessage,textX/3,textY/3,white);
                     Screen('Flip', window);
+                    
+                    pause(surveyPause)
+                    
+                    while toc(surveytic) < surveyVideo
+                        texL = Screen('GetMovieImage', window, movieL, 0, 0);     
+                        
+                         % If found, display next frame, else display last found
+                         if texL > 0
+                             % Try to close last frame for memory (if not already closed)
+                              if ltexL > 0
+                                Screen('Close', ltexL);
+                              end
+                              Screen('DrawTexture', window, texL, [], rectCond1);
+                              Screen('DrawTexture', window, texL, [], rectCond2);
+                              Screen('DrawTexture', window, texL, [], rectCond3);
+                              ltexL = texL;                   
+                         else 
+                              Screen('DrawTexture', window, ltexL, [], rectCond1);
+                              Screen('DrawTexture', window, ltexL, [], rectCond2);
+                              Screen('DrawTexture', window, ltexL, [], rectCond3);
+                         end
+                         
+                         
+                        Screen('DrawTexture', window, checkerBigTexture(textureCueR(1)), [], rectCond1, [], filterMode);
+                        Screen('DrawTexture', window, checkerMedTexture(textureCueR(1)), [], rectCond2, [], filterMode);
+                        Screen('DrawTexture', window, checkerSmallTexture(textureCueR(1)), [], rectCond3, [], filterMode);
+                        DrawFormattedText(window,wrapMessage,textX/3,textY/3,white);
+                        
+                        if toc(demotic) > ((1/rightFreq) - 0.015)
+                            textureCueR = fliplr(textureCueR);
+                            demotic = tic;
+                        end
+            
+                        [vbl,~, FlipTimestamp]  = Screen('Flip', window, vbl + (waitframes-buffer) * ifi, 0, 1);
+                    end
+                    
+                    Screen('DrawTexture', window, ltexL, [], rectCond1);
+                    Screen('DrawTexture', window, ltexL, [], rectCond2);
+                    Screen('DrawTexture', window, ltexL, [], rectCond3);
+                        
+                    Screen('DrawTexture', window, checkerBigTexture(textureCueR(1)), [], rectCond1, [], filterMode);
+                    Screen('DrawTexture', window, checkerMedTexture(textureCueR(1)), [], rectCond2, [], filterMode);
+                    Screen('DrawTexture', window, checkerSmallTexture(textureCueR(1)), [], rectCond3, [], filterMode);
 
+                    DrawFormattedText(window,wrapMessage,textX/3,textY/3,white);
+                    ergResponse = Ask(window, ' ', white, black, 'GetChar', [textX/3 textY/3+space textX textY], 'left', textSize);
+                    
+                    Screen('Flip', window);
                 end
                 
                 if lslBool
@@ -768,6 +823,7 @@ try
                 end
 
                 if logBool
+                    fprintf(fileID, 'Ergonomics Response (Big, Med, Small): %s \n', ergResponse);
                     fprintf(fileID, 'Total Time: %.3f \n', totalTime); 
                     fprintf(fileID, '\n');
                     
