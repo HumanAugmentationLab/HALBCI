@@ -12,13 +12,13 @@ oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
 oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 5);
 % oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
-ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
+% ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
 experimentName = 'dummylog.txt';      % Log file name
 
 % Duration
-trialLength = 2.1;               % Trial length (s)  --- always add 100 ms for buffer
+trialLength = 60.1;                 % Trial length (s)  --- always add 100 ms for buffer
 numTrials = 6;                      % Number of trials per run - must be divisible by # conditions
 
 % Pauses
@@ -48,7 +48,7 @@ boardSizeMed = 20;
 boardSizeSmall = 200;                 % Number of SMALL checkers per side (bigger number)
 color1 = 0;                         % Checker color 1 (0: black)
 color2 = 255;                       % Checker color 2 (255: white)
-alphaMed = 100;                        % Transparency (0: transparent, 250:opaque)
+alphaMed = 85;                        % Transparency (0: transparent, 250:opaque)
 filterMode = 0;                     % Color blending (0: nearest neighbour)
 waitframes = 1;                     % Flip rate in reference to monitor refresh
 buffer = 0.1;                       % Time buffer to prevent lag

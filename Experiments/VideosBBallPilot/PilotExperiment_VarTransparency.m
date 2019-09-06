@@ -19,7 +19,7 @@ ListenChar(2);                      % Disable key presses from showing up in MAT
 experimentName = 'experiment_test_log1.txt';      % Log file name
 
 % Duration
-trialLength = 2.1;                  % Trial length (s)  --- always add 100 ms for buffer
+trialLength = 5.1;                  % Trial length (s)  --- always add 100 ms for buffer
 numTrials = 8;                      % Number of trials per run - must be divisible by # conditions
 
 % Pauses
@@ -49,9 +49,9 @@ color1 = 0;                         % Checker color 1 (0: black)
 color2 = 255;                       % Checker color 2 (255: white)
 
 alphaWeak = 50;                    % Transparency (0: transparent, 250: opaque)
-alphaMed = 100;
-alphaStrong = 150;
-alphaFull = 250;                    
+alphaMed = 85;
+alphaStrong = 125;
+alphaFull = 255;                    
 
 filterMode = 0;                     % Color blending (0: nearest neighbour)
 waitframes = 1;                     % Flip rate in reference to monitor refresh
@@ -153,9 +153,15 @@ targetDisplay = orderedDisplay(targetIndices);
 leftVideos = cell(1, numTrials);
 rightVideos = cell(1, numTrials);
 
+% Ensure that the left and right videos are never the same. 
 for i = 1:numTrials
-    leftVideos{i} = focusMovieList{round(rand*(numFocusVideos-1)+1)};
-    rightVideos{i} = focusMovieList{round(rand*(numFocusVideos-1)+1)};
+    leftSelectedVideo = round(rand*(numFocusVideos-1)+1);
+    leftVideos{i} = focusMovieList{leftSelectedVideo};
+    rightSelectedVideo = leftSelectedVideo;
+    while rightSelectedVideo == leftSelectedVideo
+        rightSelectedVideo = round(rand*(numFocusVideos-1)+1);
+    end
+    rightVideos{i} = focusMovieList{rightSelectedVideo};
 end
 
 % To display the same video on both sides, set rightVideos = leftVideos
