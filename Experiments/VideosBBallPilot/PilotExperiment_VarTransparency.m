@@ -19,8 +19,8 @@ ListenChar(2);                      % Disable key presses from showing up in MAT
 experimentName = 'experiment_test_log1.txt';      % Log file name
 
 % Duration
-trialLength = 5.1;                  % Trial length (s)  --- always add 100 ms for buffer
-numTrials = 8;                      % Number of trials per run - must be divisible by # conditions
+trialLength = 60.1;                  % Trial length (s)  --- always add 100 ms for buffer
+numTrials = 16;                      % Number of trials per run - must be divisible by # conditions
 
 % Pauses
 calibrationPause = 0;               % Pause before the whole experiment starts, for EEG settling (s)
@@ -89,45 +89,14 @@ mCondition8 = 8;                    % Attend WEAK OPACITY & HIGH frequency
 
 
 %% Movie Loading
-load eventTimes
-VideoRoot = '/home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/';
+VideoRoot = '/media/hal/DATA/FocusVideos/';
 
-ball1.name = [ VideoRoot 'FocusVideos/bball1.mp4' ] ;
-ball1.eventTimes = ball1Times;
-
-ball2.name = [ VideoRoot 'FocusVideos/bball2.mp4' ] ;
-ball2.eventTimes = ball2Times ;
-
-ball3.name = [ VideoRoot 'FocusVideos/bball3.mp4' ] ;
-ball3.eventTimes = ball3Times;
-
-ball4.name = [ VideoRoot 'FocusVideos/bball4.mp4' ] ;
-ball4.eventTimes = ball4Times;
-
-ball5.name = [ VideoRoot 'FocusVideos/bball5.mp4' ] ;
-ball5.eventTimes = ball5Times;
-
-ball6.name = [ VideoRoot 'FocusVideos/bball6.mp4' ] ;
-ball6.eventTimes = ball6Times;
- 
-% Leave out - camera shifting and time jump
-ball7.name = [ VideoRoot 'FocusVideos/bball7.mp4' ] ;
-ball7.eventTimes = ball7Times;
- 
-ball8.name = [ VideoRoot 'FocusVideos/bball8.mp4' ] ;
-ball8.eventTimes = ball8Times;
- 
-ball9.name = [ VideoRoot 'FocusVideos/bball9.mp4' ] ;
-ball9.eventTimes = ball9Times;
- 
-ball10.name = [ VideoRoot 'FocusVideos/bball10.mp4' ] ;
-ball10.eventTimes = ball10Times;
-
-focusMovieList = { ball1 ball2 ball3 ball4 ball5 ball6 ball8 ball9 ball10 };
-
-for i = 1:length(focusMovieList)
-    focusMovieList{i}.duration = 60*5;
-    focusMovieList{i}.delayMax = focusMovieList{i}.duration - trialLength;
+for i = 1:50
+    movieNameString = strcat('bball', int2str(i),'.mp4');
+    focusMovieList(i).eventTimes = [ ];
+    focusMovieList(i).name = [ VideoRoot movieNameString ];
+    focusMovieList(i).duration = 60;
+    focusMovieList(i).delayMax = focusMovieList(i).duration - trialLength;
 end
 
 %% Randomize Targets
@@ -156,12 +125,12 @@ rightVideos = cell(1, numTrials);
 % Ensure that the left and right videos are never the same. 
 for i = 1:numTrials
     leftSelectedVideo = round(rand*(numFocusVideos-1)+1);
-    leftVideos{i} = focusMovieList{leftSelectedVideo};
+    leftVideos{i} = focusMovieList(leftSelectedVideo);
     rightSelectedVideo = leftSelectedVideo;
     while rightSelectedVideo == leftSelectedVideo
         rightSelectedVideo = round(rand*(numFocusVideos-1)+1);
     end
-    rightVideos{i} = focusMovieList{rightSelectedVideo};
+    rightVideos{i} = focusMovieList(rightSelectedVideo);
 end
 
 % To display the same video on both sides, set rightVideos = leftVideos
@@ -617,26 +586,26 @@ try
                 prevSeconds = seconds;
             end
 
-            % SYSTEM EVENTS
-            % If experiment time matches with event times, send event marker
-            if ( eventCounter <= length(leftVideos{n}.eventTimes) && ...
-                videoTime > leftVideos{n}.eventTimes(eventCounter) - 0.1 && ...
-                    videoTime < leftVideos{n}.eventTimes(eventCounter) + 0.1)
-
-                eventlogTimes = [eventlogTimes videoTime];
-
-                if lslBool
-                    eventTime = toc(runStart);
-                    outlet.push_sample(mEventOnset);                    % Send event onset marker
-                    disp(mEventOnset)
-                end
-                
-                if logBool
-                    fprintf(markerfileID, '%d,%.3f,%d \n', mEventOnset, eventTime, eventTime * 1000);
-                end
-
-                eventCounter = eventCounter + 1;
-            end
+%             % SYSTEM EVENTS
+%             % If experiment time matches with event times, send event marker
+%             if ( eventCounter <= length(leftVideos{n}.eventTimes) && ...
+%                 videoTime > leftVideos{n}.eventTimes(eventCounter) - 0.1 && ...
+%                     videoTime < leftVideos{n}.eventTimes(eventCounter) + 0.1)
+% 
+%                 eventlogTimes = [eventlogTimes videoTime];
+% 
+%                 if lslBool
+%                     eventTime = toc(runStart);
+%                     outlet.push_sample(mEventOnset);                    % Send event onset marker
+%                     disp(mEventOnset)
+%                 end
+%                 
+%                 if logBool
+%                     fprintf(markerfileID, '%d,%.3f,%d \n', mEventOnset, eventTime, eventTime * 1000);
+%                 end
+% 
+%                 eventCounter = eventCounter + 1;
+%             end
         end
 %             disp(looptimes(1:q));
             
@@ -867,6 +836,9 @@ catch SE
     psychrethrow(psychlasterror);
 end
 
+save(strcat("LogFiles/", experimentName, ".mat"));
+
 % Close screen and enable MATLAB key press
 sca;
 ListenChar(0);
+
