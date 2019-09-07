@@ -16,7 +16,7 @@ addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
-experimentName = 'experiment_test_log1.txt';      % Log file name
+experimentName = 'dummylog.txt';      % Log file name
 
 % Duration
 trialLength = 60.1;                  % Trial length (s)  --- always add 100 ms for buffer
@@ -89,7 +89,8 @@ mCondition8 = 8;                    % Attend WEAK OPACITY & HIGH frequency
 
 
 %% Movie Loading
-VideoRoot = '/media/hal/DATA/FocusVideos/';
+% VideoRoot = '/media/hal/DATA/FocusVideos/';
+VideoRoot = '/home/hal/Research/HALBCI/Experiments/VideosBBallPilot/FinalFocusVideos/';
 
 for i = 1:50
     movieNameString = strcat('bball', int2str(i),'.mp4');
@@ -98,6 +99,7 @@ for i = 1:50
     focusMovieList(i).duration = 60;
     focusMovieList(i).delayMax = focusMovieList(i).duration - trialLength;
 end
+    focusMovieList(33) = [];
 
 %% Randomize Targets
 numFocusVideos = length(focusMovieList);
@@ -379,7 +381,8 @@ try
         
         if logBool
             fprintf(fileID,'Trial Number: %d\n', n);
-            fprintf(fileID,'Target Movie: %s\n', leftVideos{n}.name);
+             fprintf(fileID,'Left Movie: %s\n', leftVideos{n}.name);
+            fprintf(fileID,'Right Movie (TARGET): %s\n', rightVideos{n}.name);
             fprintf(fileID,'Movie start time: %.3f\n', currentdelay);
             fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreqs(n), targetDisplay(n));        
         end

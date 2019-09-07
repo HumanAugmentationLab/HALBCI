@@ -84,7 +84,8 @@ mCondition5 = 5;                    % Attend SMALL & LOW frequency
 mCondition6 = 6;                    % Attend SMALL & HIGH frequency
 
 %% Movie Loading
-VideoRoot = '/media/hal/DATA/FocusVideos/';
+% VideoRoot = '/media/hal/DATA/FocusVideos/';
+VideoRoot = '/home/hal/Research/HALBCI/Experiments/VideosBBallPilot/FinalFocusVideos/';
 
 for i = 1:50
     movieNameString = strcat('bball', int2str(i),'.mp4');
@@ -93,6 +94,9 @@ for i = 1:50
     focusMovieList(i).duration = 60;
     focusMovieList(i).delayMax = focusMovieList(i).duration - trialLength;
 end
+
+    focusMovieList(33) = [];
+
 
 %% Randomize Targets
 numFocusVideos = length(focusMovieList);
@@ -810,6 +814,7 @@ catch SE
     sca; 
     psychrethrow(psychlasterror);
 end
+save(strcat("LogFiles/", experimentName, ".mat"));
 
 % Close screen and enable MATLAB key press
 sca;
