@@ -13,13 +13,13 @@ oldVisualDebugLevel = Screen('Preference', 'VisualDebugLevel', 3);
 oldSupressAllWarnings = Screen('Preference', 'SuppressAllWarnings', 5);
 % oldSkipSyncTests = Screen('Preference', 'SkipSyncTests', 2);
 addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
-ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
+% ListenChar(2);                      % Disable key presses from showing up in MATLAB script (change with CTRL+C)
 
 %% Experiment Parameters
-experimentName = 'dummylog.txt';      % Log file name
+experimentName = 'dummy.txt';      % Log file name
 
 % Duration
-trialLength = 60.1;                  % Trial length (s)  --- always add 100 ms for buffer
+trialLength = 5.1;                  % Trial length (s)  --- always add 100 ms for buffer
 numTrials = 16;                      % Number of trials per run - must be divisible by # conditions
 
 % Pauses
@@ -43,7 +43,8 @@ backgroundColor = 0;                % 0: black
 scalingCoeff = 1;                   % Alter driving frequency of checkerboard flip
 
 % Checkerboard Display
-Hz = [6 15];                         % Frequencies to display - should go into 60 Hz
+attendSide = 0;                     % LEFT: 0 | RIGHT: 1
+Hz = [12 15];                         % Frequencies to display - should go into 60 Hz
 boardSize = 200;                      % Number of checkers per side 
 color1 = 0;                         % Checker color 1 (0: black)
 color2 = 255;                       % Checker color 2 (255: white)
@@ -92,7 +93,7 @@ mCondition8 = 8;                    % Attend WEAK OPACITY & HIGH frequency
 % VideoRoot = '/media/hal/DATA/FocusVideos/';
 VideoRoot = '/home/hal/Research/HALBCI/Experiments/VideosBBallPilot/FinalFocusVideos/';
 
-for i = 1:50
+for i = 1:49
     movieNameString = strcat('bball', int2str(i),'.mp4');
     focusMovieList(i).eventTimes = [ ];
     focusMovieList(i).name = [ VideoRoot movieNameString ];
@@ -105,9 +106,7 @@ end
 numFocusVideos = length(focusMovieList);
 fourthSize = floor(numTrials/4);
 
-
-% For PilotV4+, always attend RIGHT
-targetSides = ones(1, numTrials);
+targetSides = repelem(attendSide, numTrials);
  
 if mod(numTrials, 8) ~= 0
     error('Trial number must give even number of conditions')
@@ -381,8 +380,9 @@ try
         
         if logBool
             fprintf(fileID,'Trial Number: %d\n', n);
-             fprintf(fileID,'Left Movie: %s\n', leftVideos{n}.name);
-            fprintf(fileID,'Right Movie (TARGET): %s\n', rightVideos{n}.name);
+            fprintf(fileID,'Attend Side (0 = Left, 1 = Right): %d\n', targetSides(1));
+            fprintf(fileID,'Left Movie: %s\n', leftVideos{n}.name);
+            fprintf(fileID,'Right Movie: %s\n', rightVideos{n}.name);
             fprintf(fileID,'Movie start time: %.3f\n', currentdelay);
             fprintf(fileID,'Condition: %d (Frequency: %d | Movie Display: %d)\n', mCondition, targetFreqs(n), targetDisplay(n));        
         end
@@ -680,7 +680,7 @@ try
                 textSize = 24;
                 
                 % Note that the 'ask' function is not robust to backspaces - while it still records input, it clears the screen.
-                message = 'How many times did a player shoot the ball? ';
+                message = 'How many times did the players shoot the ball? ';
                 Screen('DrawText', window, 'Press enter to continue.', textX, textY+space*2, white);
                 numberOfShots = Ask(window, message, white, black, 'GetChar', [textX textY textX+space textY+space], 'left', textSize);
                 Screen('Flip', window);
@@ -688,13 +688,14 @@ try
                 Screen('TextSize', window, textSize);
                 Screen('DrawText', window, 'Rate your focus during this past session by keying in the number of the most accurate statement:', textX, textY, white);
                 Screen('DrawText', window, '1: I did not pay attention in this session', textX, textY+space*2, white);
-                Screen('DrawText', window, '2: I was focused, lost attention, and then caught myself multiple times', textX, textY+space*3, white);
-                Screen('DrawText', window, '3: I did well at the beginning, but my attention faded near the end', textX, textY+space*4, white);
+                Screen('DrawText', window, '2: My mind wandered many times this session', textX, textY+space*3, white);
+                Screen('DrawText', window, '3: My mind wandered a couple of times in this session', textX, textY+space*4, white);
                 Screen('DrawText', window, '4: I was able to maintain my attention the entire time', textX, textY+space*5, white);
                 Screen('DrawText', window, 'Press enter to continue.', textX, textY+space*8, white);
                 
                 
-                mSurveyAdd = Ask(window, 'Response: ', white, black, 'GetChar', [textX textY+space*6 textX+space textY+space*10], 'left', textSize);
+                mSurveyAddstr = Ask(window, 'Response: ', white, black, 'GetChar', [textX textY+space*6 textX+space textY+space*10], 'left', textSize);
+                mSurveyAdd = str2num(mSurveyAddstr);
                 Screen('Flip', window);
 
                 endKey = KbName('Return'); % Pressing right arrow leaves survey
@@ -705,7 +706,7 @@ try
                            
                 if logBool
                     fprintf(fileID, 'Shot Response: %s \n', numberOfShots);
-                    fprintf(fileID, 'Survey Response: %s \n', mSurveyAdd); 
+                    fprintf(fileID, 'Survey Response: %d \n', mSurveyAdd); 
                     fprintf(markerfileID, '%d,%.3f,%d \n', mSurveyAdd + mSurvey, currTime, currTime * 1000);
                 end
 
@@ -755,8 +756,8 @@ try
                     Screen('DrawTexture', window, checkerMedTexture(textureCueR(1)), [], rectCond3, [], filterMode);
                     Screen('DrawTexture', window, checkerWeakTexture(textureCueR(1)), [], rectCond4, [], filterMode);
 
-                    message = 'Imagine one of the flashing checkerboards you just saw would be overlaid on the next movie you watch. Rate the desirability of each checkerboard between 1 and 5 (1: hate it, 5: do not mind it).  _ , _ , _ , _ : ';
-                    wrapMessage = WrapString(message, 110);
+                    message = 'Imagine one of the flashing checkerboards you just saw would be overlaid on the next movie you watch. Rate the desirability of each checkerboard between 1.0 and 5.0 (1.0: hate it, 5.0: do not mind it).  _ , _ , _ , _ : ';
+                    wrapMessage = WrapString(message, 115);
                     DrawFormattedText(window,wrapMessage,textX/3,textY/3,white);
                     Screen('Flip', window);
                     
