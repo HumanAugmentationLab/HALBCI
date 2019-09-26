@@ -18,7 +18,7 @@ addpath(genpath('/home/hal/Research/Matlab/BCILAB/dependencies/liblsl-Matlab'));
 experimentName = 'experiment4-23-2019_ZZ_log5.txt';      % Log file name
 
 % Duration
-trialLength = 5.1;               % Trial length (s)  --- always add 100 ms for buffer
+trialLength = 60.1;               % Trial length (s)  --- always add 100 ms for buffer
 numTrials = 18;                      % Number of trials per run - must be divisible by # conditions
 
 % Pauses
@@ -84,51 +84,33 @@ mCondition5 = 5;                    % Attend WEAK VID & BIG & LOW frequency
 mCondition6 = 6;                    % Attend WEAK VID & BIG & HIGH frequency
 
 %% Movie Loading
-load eventTimes
-VideoRoot = '/home/hal/Research/HALBCI/SandBox/Ava/VideoAttention/';
+% 
+VideoRoot = '/home/hal/Research/HALBCI/SandBox/Anusha/FocusVideos/';
 
-ball1.name = [ VideoRoot 'FocusVideos/bball1.mp4' ] ;
-ball1.eventTimes = ball1Times;
-
-ball2.name = [ VideoRoot 'FocusVideos/bball2.mp4' ] ;
-ball2.eventTimes = ball2Times ;
-
-ball3.name = [ VideoRoot 'FocusVideos/bball3.mp4' ] ;
-ball3.eventTimes = ball3Times;
-
-ball4.name = [ VideoRoot 'FocusVideos/bball4.mp4' ] ;
-ball4.eventTimes = ball4Times;
-
-ball5.name = [ VideoRoot 'FocusVideos/bball5.mp4' ] ;
-ball5.eventTimes = ball5Times;
-
-ball6.name = [ VideoRoot 'FocusVideos/bball6.mp4' ] ;
-ball6.eventTimes = ball6Times;
- 
-% Leave out - camera shifting and time jump
-ball7.name = [ VideoRoot 'FocusVideos/bball7.mp4' ] ;
-ball7.eventTimes = ball7Times;
- 
-ball8.name = [ VideoRoot 'FocusVideos/bball8.mp4' ] ;
-ball8.eventTimes = ball8Times;
- 
-ball9.name = [ VideoRoot 'FocusVideos/bball9.mp4' ] ;
-ball9.eventTimes = ball9Times;
- 
-ball10.name = [ VideoRoot 'FocusVideos/bball10.mp4' ] ;
-ball10.eventTimes = ball10Times;
-
-focusMovieList = { ball1 ball2 ball3 ball4 ball5 ball6 ball8 ball9 ball10 };
-
-for i = 1:length(focusMovieList)
-    focusMovieList{i}.duration = 60*5;
-    focusMovieList{i}.delayMax = focusMovieList{i}.duration - trialLength;
+for i = 1:50
+    movieNameString = strcat('bball', int2str(i),'.mp4');
+    focusMovieList(i).eventTimes = [ ];
+    focusMovieList(i).name = [ VideoRoot movieNameString ];
+    focusMovieList(i).duration = 60;
+    focusMovieList(i).delayMax = focusMovieList(i).duration - trialLength;
 end
 
-%% Randomize Targets
-numFocusVideos = length(focusMovieList);
-thirdSize = floor(numTrials/3);
 
+% % focusMovieList = { ball1 ball2 ball3 ball4 ball5 ball6 ball8 ball9 ball10 };
+% % 
+% % for i = 1:length(focusMovieList)
+% %     focusMovieList{i}.duration = 60*5;
+% %     focusMovieList{i}.delayMax = focusMovieList{i}.duration - trialLength;
+% %     
+% % end
+
+
+
+
+
+%% Randomize Targets
+numFocusVideos = 50;
+thirdSize = floor(numTrials/3);
 
 % For PilotV4+, always attend RIGHT
 targetSides = ones(1, numTrials);
@@ -151,12 +133,12 @@ rightVideos = cell(1, numTrials);
 % Ensure that the left and right videos are never the same. 
 for i = 1:numTrials
     leftSelectedVideo = round(rand*(numFocusVideos-1)+1);
-    leftVideos{i} = focusMovieList{leftSelectedVideo};
+    leftVideos{i} = focusMovieList(leftSelectedVideo);
     rightSelectedVideo = leftSelectedVideo;
     while rightSelectedVideo == leftSelectedVideo
         rightSelectedVideo = round(rand*(numFocusVideos-1)+1);
     end
-    rightVideos{i} = focusMovieList{rightSelectedVideo};
+    rightVideos{i} = focusMovieList(rightSelectedVideo);
 end
 
 % To display the same video on both sides, set rightVideos = leftVideos
@@ -691,15 +673,12 @@ try
                 black = [0 0 0];
                 
                 Screen('TextSize', window, 24);
-                      
-                disp("Got to ask");
-    
+                          
                 % Note that the 'ask' function is not robust to backspaces
                 % - while it still records input, it clears the screen.
                 message = 'How many times did a player shoot the ball? ';
                 Screen('DrawText', window, 'Press enter to continue.', textX, textY+space*2, [255, 255, 255]);
                 numberOfShots = Ask(window, message, white, black, 'GetChar', [textX textY textX+space textY+space], ['left'], [24]);
-                disp("Got to right arrow to continue");
 
                 Screen('Flip', window);                
                 
@@ -735,7 +714,7 @@ try
                 end
 
                 KbReleaseWait;
-               
+             
                 
                  fprintf(fileID, '\n');
             end
@@ -746,6 +725,8 @@ try
                 pause(endTrialPause)
             else
                 pause(endPause)
+                
+                
                 
                 if lslBool
                     outlet.push_sample(mEndRun)
