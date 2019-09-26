@@ -1,0 +1,4 @@
+1) 51=Duck Open
+2) 52=Goose Open
+3) 151=Duck Closed
+4) 152=Goose Closed
