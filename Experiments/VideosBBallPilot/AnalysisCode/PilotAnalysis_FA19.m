@@ -8,9 +8,7 @@ bcilab
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\2019\';
 
 % File name without extension
-% fnameeeg = '20190908153814_GR-VideoCheckSize-01_Test';
-% fnameeeg = '20190908160918_GR-VideoCheckSize-02_Test';
-fnameeeg = '20190908163723_GR-VideoCheckOpacity-03_Test';
+fnameeeg = '20190926121950_OP-VideoCheckSize-Strong_Test';
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
@@ -21,10 +19,9 @@ ogEEG = EEG;
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\2019\';
 
 % Create new marker file using fixmissingmarkersfromlog.m
-% fnameeeg = '20190908163723_GR-VideoCheckOpacity-03_Test_newmarkers.set';
-fnameeeg = '20190907122124_TW-VideoCheckSize-02_RECORD_newmarkers.set';
+fnameeeg = '20190926115036_OP-VideoCheckSize-Med_Test_newmarkers.set';
 EEG = pop_loadset('filename', fnameeeg, 'filepath', direeg);
-
+ogEEG = EEG;
 %% Chop run between start and end markers 
 [~, start_idx] = pop_selectevent(EEG, 'type', 10);
 start_pt = EEG.event(start_idx).latency;
@@ -92,15 +89,18 @@ adetails.markers.epochwindow = [2 60];
 EEG = pop_epoch(EEG,adetails.markers.types, adetails.markers.epochwindow);
 
 %% Epoch into small chunks
+% EEG = ogEEG;
 lastEEG = EEG;
 % Markers for sustained attention
-adetails.markers.types = {'51','52','53','54','55','56'};
-% adetails.markers.types = {'51','52','53','54','55','56','57','58'};
+
+adetails.markers.types = {'51','52','53','54','55','56'};     % Check size
+% adetails.markers.types = {'51','52','53','54','55','56','57','58'};     % Check opacity
 
 evtype = [];
 
+% adetails.markers.epochwindow = [0 10];
 adetails.markers.epochwindow = [0.1 60.1]; % window after standard markers to look at
-adetails.markers.epochsize = 10; % size of miniepochs to chop regular markered epoch up into
+adetails.markers.epochsize = 3; % size of miniepochs to chop regular markered epoch up into
 adetails.markers.numeventsperwindow = floor((adetails.markers.epochwindow(2)-adetails.markers.epochwindow(1))/adetails.markers.epochsize);
 
 disp('Adding EEG markers...')
@@ -132,6 +132,7 @@ end
 
 disp('Epoching EEG...')
 EEG = pop_epoch(EEG,adetails.markers.types, [0 adetails.markers.epochsize-0.002]);
+% EEG = pop_epoch(EEG,adetails.markers.types, [0 adetails.markers.epochsize]);
 
 % Inspect epoched data in frequency domain
 % figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
@@ -150,6 +151,13 @@ pop_eegplot(EEG, 1);
 adetails.reject.strategy = 'interpolate'; % or 'remove'
 
 % Here you can add additional bad electrodes, besides the ones in badelec
+% badelec = [13 17]; % LO all runs
+% badelec = [13 22 26]; % FE Check size med
+% badelec = [13 17 26 27]; % FE strong opacity
+% badelec = [13]; % MD opacity
+% badelec = 27; % BN opacity
+% badelec = [13 17]; % OP opacity
+badelec = [17 26]; % OP med
 
 adetails.reject.channelidx = badelec;
 
@@ -169,6 +177,19 @@ lastEEG = EEG;
 pop_eegplot(EEG, 1, 1, 1);  % removes epochs within original EEG struct
 % EEG = pop_rejepoch(EEG, 21, 1);
 
+% LO med  = [81 82 141 290];
+% FE opac = [1 35 101:102 141 173 201:203 231:233 241:242 315];
+% FE med = [1:4 73 121 141:142 201:202 213 222 237 242 287];
+% FE strong = [1 9 21:22 47:48 61 106 154 161 163:164 181:183 197 201 221 222 238 263 287 288 291:297 299:302 322 344:349 356 357]
+% MD opac = [41 42 61 62 75 77 101 102 104 121 126 128 141 142 161 182 190 221 222 240 261 263 271 272 281 282 301 302]
+% MD med = = [62 63 82 101 104 161 295 211 212 215 221 241 261 282 302 346 358]
+% MD strong = [21 61 101 102 106 107 139 142 143 161 163 164 179 181 182 187 188 201 205 221 241 261 263 281:283 286:290 323];
+% BN opac = [289 290 301]
+% BN med = [161 162 181 221 242 246 301 321 341:343]
+% BN strong = [41 61 62 101 102 141 142 161 162 181 201:203 207 208 226:228 281:284 301 321 342 354]
+% OP opacity = [14 41 101 161 162 181 208 221 241 242 289 301]
+% OP med = [1 341:343]
+
 %% Confirm that the new data look good (can skip)
 pop_eegplot(EEG,1,1,1);
 figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
@@ -187,7 +208,7 @@ EEG = pop_runica(EEG, 'runica');
 % Write ICA to file for later use
 dirpreica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\Pre-ICA\';
 
-pop_saveset(EEG, 'filename', 'tw-VideoCheckSize-02-preica', 'filepath', dirpreica)
+pop_saveset(EEG, 'filename', 'OP-VideoCheckSize-Med-preica', 'filepath', dirpreica)
 
 %% Inspect ICA components
 EEG = pop_selectcomps(EEG);
@@ -195,10 +216,23 @@ EEG = pop_selectcomps(EEG);
 %% Remove ICA components
 % Store numbers of components to reject (set manually)
 lastEEG = EEG;
-rej1 = [3 4 8:11 14 17:18 20 24 25 27:32];
-rej2 = [1 5 8 11 15 17:23 27:32];
-rej3 = [1 4 6 8 10 11 14 16 18:20 22 27 28 31 32]; 
-rej_comps = rej3;
+
+LO_opac = [1 18 23:27 29:30];
+LO_strong = [1 16 21 23:24 26:30];
+LO_med = [1 4 18 19 21:23 25:28:30]; 
+FE_opac = [1 3 5 8:11 14:15 19 21 23 25:30 32];
+FE_strong = [2 5:6 9 11 12 15 16 18 19 23:25 27 29 30];
+FE_med = [1 5:7 11:14 16 18 22 25 27 29];
+MD_opac = [1 6 11 14:18 24:25 28:31];
+MD_strong = [1 3 4 6 8 9 12:14 18 23:24 29 30 32];   
+MD_med = [1 3:7 10 16 17 20 21 24 28:32];
+BN_opac = [1 2 4 11 13 15:17 23 28:30];
+BN_med = [1 3 7 9 13 16 17 23 25 28:30];
+BN_strong = [1 3 4 12 14 15 21 23 24 26:28 30:32];
+OP_opac = [1 7 8 13 14 17:22 24:27 29:31];
+OP_med =  [5 7 10 13 14 18 19 21:25 27:30];
+
+rej_comps = OP_med;
 adetails.reject.icacomponents = rej_comps;
 
 % Running this way will cause a pop-up, which allows you to see the before
@@ -210,7 +244,7 @@ disp('Subtracing ICA component from data...')
 EEG = pop_subcomp(EEG, rej_comps);
 
 dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
-pop_saveset(EEG, 'filename', 'GR-VideoCheckOpacity-03', 'filepath', dirica)
+pop_saveset(EEG, 'filename', 'OP-VideoCheckSize-Med.set', 'filepath', dirica)
 
 %% Plot data after removal of ICA components
 % Reference to original data
@@ -219,25 +253,99 @@ figure; pop_spectopo(lastEEG, 1, [1000*lastEEG.xmin  1000*lastEEG.xmax], 'EEG' ,
 
 figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', [6 10 12 15], 'freqrange',[1 30],'electrodes','on');
+%% Load pre-ICA runs
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\Pre-ICA\';
+EEG = pop_loadset('filename', 'BN-VideoCheckOpacity-preica.set', 'filepath', direeg);
 
 %% Load post-ICA runs
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
-EEG1 = pop_loadset('filename', 'GR-VideoCheckSize-01.set', 'filepath', direeg);
-EEG2 = pop_loadset('filename', 'GR-VideoCheckSize-02.set', 'filepath', direeg);
-EEG3 = pop_loadset('filename', 'GR-VideoCheckOpacity-03.set', 'filepath', direeg);
+% ogEEG = pop_loadset('filename', 'TW-VideoCheckSize-Strong.set', 'filepath', direeg);
+EEG = pop_loadset('filename', 'BN-VideoCheckOpacity.set', 'filepath', direeg);
+
+EEG = ogEEG;
+% EEG3 = pop_loadset('filename', 'GR-VideoCheckOpacity-03.set', 'filepath', direeg);
 
 
 % Combine post-ICA runs
-% allEEG = set_merge(EEG1sub, EEG2sub, EEG3sub);
-% allEEG = exp_eval(allEEG);
+% allEEG = set_merge(EEG1, EEG2);
+% EEG = exp_eval(allEEG);
 
-%% Select by condition
-EEG = EEG2;
+%% CLASSIFICATION:
+% Put some epochs aside for prediction
+% EEG = EEGsmall;
+EEG = ogEEG;
+
+markertype = {'53', '54', '55', '56', '57', '58'};
+% markertype = {'55', '56'};
+
+evtype = [];
+for i = 1:length(EEG.epoch)
+    evtype = [evtype, ""+EEG.epoch(i).eventtype];
+end
+
+adetails.markers.trialevents = evtype(contains(evtype,markertype));
+
+EEG = pop_select(ogEEG, 'trial', find(contains(evtype,markertype)));
+
+markertypes = string(markertype);
+
+keeppertrial = 2;   % ~20% of trials for testing
+test_trials = [];
+
+for i = 1:length(markertypes)
+    marker = markertypes(i);
+    idx = find(contains(adetails.markers.trialevents, marker));
+    test_trials = [test_trials randsample(idx, keeppertrial)];
+end
+
+EEGtrain_epoch = pop_select(EEG, 'notrial', test_trials);
+EEGtest_epoch = pop_select(EEG, 'trial', test_trials);
+
+% Make epoched data 'continuous'
+
+EEG1 = EEGtrain_epoch;
+epochdata = EEG1.data;
+contdata = reshape(epochdata,size(epochdata,1),[],1);
+EEG1.data = contdata;
+EEG1.epoch = [];
+EEG1.event = rmfield(EEG1.event, {'duration', 'epoch'});
+EEG1.event = EEG1.event';
+EEG1.pnts = EEG1.pnts*EEG1.trials;
+EEG1.trials = 1;
+EEG1.times =  0:(1000/EEG1.srate):(1000/EEG1.srate)*EEG1.pnts-1;
+EEG1.xmax = EEG1.times(end)/1000;
+EEGtrain = EEG1;
+
+EEG1 = EEGtest_epoch;
+epochdata = EEG1.data;
+contdata = reshape(epochdata,size(epochdata,1),[],1);
+EEG1.data = contdata;
+EEG1.epoch = [];
+EEG1.event = rmfield(EEG1.event, {'duration', 'epoch'});
+EEG1.event = EEG1.event';
+EEG1.pnts = EEG1.pnts*EEG1.trials;
+EEG1.trials = 1;
+EEG1.times =  0:(1000/EEG1.srate):(1000/EEG1.srate)*EEG1.pnts-1;
+EEG1.xmax = EEG1.times(end)/1000;
+EEGtest = EEG1;
+
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\combineddata\';
+
+pop_saveset(EEGtrain, 'filename', 'MD_VideoCheckOpacity_train', 'filepath', direeg)
+pop_saveset(EEGtest, 'filename', 'MD_VideoCheckOpacity_test', 'filepath', direeg)
+
+% pop_saveset(EEGtest, 'filename', 'ZZZ20190423_EEGtest_small', 'filepath', direeg)
+
+disp('Made data continuous')
+
+%% Bandpower: CHECK SIZE
+% Select by condition (check size)
+% EEG = EEG2;
 adetails.markers.types = {'51','52','53','54','55','56'};
 
 evtype = [];
 for i = 1:length(EEG.epoch)
-    evtype = [evtype, ""+EEG.epoch(i).eventtype{1}];
+    evtype = [evtype, ""+EEG.epoch(i).eventtype];
 end
 unique(evtype)
 adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
@@ -258,66 +366,121 @@ EEGsmallhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialeven
 EEGattlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '53', '55'})));
 EEGatthigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'52', '54', '56'})));
 
-%% NEW: Bandpower
-numtrials = 12;
+% Bandpower (do not crop data)
 posterior_channels = [4 7 8 20 21 32];    % Pz O1 O2 Oz PO4 PO3
-lowbin = [5 7];
-highbin = [14  16];
+lowbin = [11.75  12.25];
+highbin = [14.75  15.25];
 
 clear powsm_lowATTlow powsm_highATTlow powsm_lowATThigh powsm_highATThigh ...
     powmed_lowATTlow powmed_highATTlow powmed_lowATThigh powmed_highATThigh ...
     powbig_lowATTlow powbig_highATTlow powbig_lowATThigh powbig_highATThigh
  
-for i = 1:numtrials
+for i = 1:length(EEGsmalllow.event)
     powsm_lowATTlow(i,:) = bandpower(squeeze(EEGsmalllow.data(posterior_channels,:,i))',EEGsmalllow.srate,lowbin);
     powsm_highATTlow(i,:) = bandpower(squeeze(EEGsmalllow.data(posterior_channels,:,i))',EEGsmalllow.srate,highbin);
-    
+end
+
+for i = 1:length(EEGsmallhigh.event)
     powsm_lowATThigh(i,:) = bandpower(squeeze(EEGsmallhigh.data(posterior_channels,:,i))',EEGsmallhigh.srate,lowbin);
     powsm_highATThigh(i,:) = bandpower(squeeze(EEGsmallhigh.data(posterior_channels,:,i)'),EEGsmallhigh.srate,highbin);
-    
+end
+
+for i = 1:length(EEGmedlow.event)
     powmed_lowATTlow(i,:) = bandpower(squeeze(EEGmedlow.data(posterior_channels,:,i)'),EEGmedlow.srate,lowbin);
     powmed_highATTlow(i,:) = bandpower(squeeze(EEGmedlow.data(posterior_channels,:,i)'),EEGmedlow.srate,highbin);
-    
+end
+
+for i = 1:length(EEGmedhigh.event)
     powmed_lowATThigh(i,:) = bandpower(squeeze(EEGmedhigh.data(posterior_channels,:,i)'),EEGmedhigh.srate,lowbin);
     powmed_highATThigh(i,:) = bandpower(squeeze(EEGmedhigh.data(posterior_channels,:,i)'),EEGmedhigh.srate,highbin);
-    
+end
+
+for i = 1:length(EEGbiglow.event)
     powbig_lowATTlow(i,:) = bandpower(squeeze(EEGbiglow.data(posterior_channels,:,i)'),EEGbiglow.srate,lowbin);
     powbig_highATTlow(i,:) = bandpower(squeeze(EEGbiglow.data(posterior_channels,:,i)'),EEGbiglow.srate,highbin);
-    
+end
+
+for i = 1:length(EEGbighigh.event)
     powbig_lowATThigh(i,:) = bandpower(squeeze(EEGbighigh.data(posterior_channels,:,i)'),EEGbighigh.srate,lowbin);
     powbig_highATThigh(i,:) = bandpower(squeeze(EEGbighigh.data(posterior_channels,:,i)'),EEGbighigh.srate,highbin);
 end
-disp('done');
-%% Plot bandpower
-% Average power over channels (15 trials x 6 conds)
-avgchanATTlow = [mean(powbig_lowATTlow,2) mean(powbig_lowATThigh,2) ...
-    mean(powmed_lowATTlow,2) mean(powmed_lowATThigh,2) ...
-    mean(powsm_lowATTlow,2) mean(powsm_lowATThigh,2) ];
 
-avgchanATThigh = [mean(powbig_highATTlow,2) mean(powbig_highATThigh,2)  ...
+%% BAR PLOT 
+% Average power over channels (15 trials x 6 conds)
+avgchanATTlow = {mean(powbig_lowATTlow,2) mean(powbig_lowATThigh,2) ...
+    mean(powmed_lowATTlow,2) mean(powmed_lowATThigh,2) ...
+    mean(powsm_lowATTlow,2) mean(powsm_lowATThigh,2) };
+
+avgchanATThigh = {mean(powbig_highATTlow,2) mean(powbig_highATThigh,2)  ...
     mean(powmed_highATTlow,2) mean(powmed_highATThigh,2) ...
-    mean(powsm_highATTlow,2) mean(powsm_highATThigh,2)];
+    mean(powsm_highATTlow,2) mean(powsm_highATThigh,2)};
 
 figure; hold on
 bins = [10 20 35 45 60 70];
 
 subplot(2,1,1); hold on 
-bar(bins, mean(avgchanATTlow))          % Average across trials
-binlabels = {'Big Att. Low'; 'Big Att. High'; 'Med Att. Low'; 'Med Att. High'; 'Small Att. Low'; 'Small Att. High'; };
-
-plot(bins, avgchanATTlow, '*', 'LineWidth', 1);
-title('6 Hz Power');
+binlabels = {'Big Att. Low'; 'Big Att. High'; 'Med Att. Low'; 'Med Att. High'; 'Small Att. Low'; 'Small Att. High' };
+title('12 Hz Power');
 xticks(bins)
 xticklabels(binlabels)
 
+barmean = []; stderror = [];
+for b = 1:length(bins)
+    barmean(b) = mean(avgchanATTlow{b}); 
+    stderror(b) =  std(avgchanATTlow{b}) / sqrt(length(avgchanATTlow{b}));
+end
+bar(bins, barmean)          % Average across trials
+errorbar(bins, barmean, stderror, 'k.')
+% for b = 1:length(bins); plot(bins(b), avgchanATTlow{b}, '*', 'LineWidth', 1); end
+
 subplot(2,1,2); hold on
-bar(bins, mean(avgchanATThigh))
 title('15 Hz Power');
 xticks(bins)
 xticklabels(binlabels)
-plot(bins, avgchanATThigh, '*', 'LineWidth', 1);
 
-%% BP opacity (bulky)
+barmean = []; stderror = [];
+for b = 1:length(bins)
+    barmean(b) = mean(avgchanATThigh{b}); 
+    stderror(b) =  std(avgchanATThigh{b}) / sqrt(length(avgchanATThigh{b}));
+end
+bar(bins, barmean)          % Average across trials
+errorbar(bins, barmean, stderror, 'k.')
+% for b = 1:length(bins); plot(bins(b), avgchanATThigh{b}, '*', 'LineWidth', 1); end
+
+sgtitle('OP Bandpower Check Size - Med Opacity')
+%% Prep violin plot
+alldataATThigh = []; grp = [];
+for b = 1:length(bins)
+    alldataATThigh = [alldataATThigh; avgchanATThigh{b}];
+    grp = [grp; repelem(binlabels{b} + "", length(avgchanATThigh{b}))' ];
+end
+
+figure
+% boxplot(alldataATThigh,grp,'Notch','on','Labels',binlabels)
+title('MD Check Size - Med')
+ylabel('15 Hz Power')
+
+
+alldataATTlow = []; grp = [];
+for b = 1:length(bins)
+    alldataATTlow = [alldataATTlow; avgchanATTlow{b}];
+    grp = [grp; repelem(binlabels{b} + "", length(avgchanATThigh{b}))' ];
+end
+%% VIOLIN PLOT
+figure
+violinplot(alldataATTlow,grp,'GroupOrder',binlabels, 'ShowData',true, 'ShowMean',true, 'ShowNotches', false);
+% boxplot(alldataATTlow,grp,'Notch','on','Labels',binlabels)
+title('MD: 12 Hz Power')
+ylabel('Power')
+
+figure
+violinplot(alldataATThigh,grp,'GroupOrder',binlabels, 'ShowData',true, 'ShowMean',true, 'ShowNotches', false);
+title('MD: 15 Hz Power')
+ylabel('Power')
+
+
+%% Bandpower: OPACITY
+% Select opacity conditions 
 % EEG = EEG3;
 adetails.markers.types = {'51','52','53','54','55','56','57','58'};
 
@@ -347,81 +510,95 @@ EEGweakhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevent
 EEGattlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '53', '55', '57'})));
 EEGatthigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'52', '54', '56', '58'})));
 
-%% NEW: Bandpower
-numtrials = 8;
+% Bandpower (do not crop data)
 posterior_channels = [4 7 8 20 21 32];    % Pz O1 O2 Oz PO4 PO3
-lowbin = [5 7];
-highbin = [14  16];
+lowbin = [11.75 12.25];
+highbin = [14.75 15.25];
 
 clear powfull_lowATTlow powfull_highATTlow powfull_lowATThigh powfull_highATThigh ...
     powstrong_lowATTlow powstrong_highATTlow powstrong_lowATThigh powstrong_highATThigh ...
     powmed_lowATTlow powmed_highATTlow powmed_lowATThigh powmed_highATThigh ...
     powweak_lowATTlow powweak_highATTlow powweak_lowATThigh powweak_highATThigh
  
-for i = 1:numtrials
+for i = 1:length(EEGfulllow.epoch)
     powfull_lowATTlow(i,:) = bandpower(squeeze(EEGfulllow.data(posterior_channels,:,i))',EEGfulllow.srate,lowbin);
     powfull_highATTlow(i,:) = bandpower(squeeze(EEGfulllow.data(posterior_channels,:,i))',EEGfulllow.srate,highbin);
-    
+end
+for i = 1:length(EEGfullhigh.epoch)
     powfull_lowATThigh(i,:) = bandpower(squeeze(EEGfullhigh.data(posterior_channels,:,i))',EEGfullhigh.srate,lowbin);
     powfull_highATThigh(i,:) = bandpower(squeeze(EEGfullhigh.data(posterior_channels,:,i)'),EEGfullhigh.srate,highbin);
-    
+end
+for i = 1:length(EEGstronglow.epoch)
     powstrong_lowATTlow(i,:) = bandpower(squeeze(EEGstronglow.data(posterior_channels,:,i)'),EEGstronglow.srate,lowbin);
     powstrong_highATTlow(i,:) = bandpower(squeeze(EEGstronglow.data(posterior_channels,:,i)'),EEGstronglow.srate,highbin);
-    
+end
+for i = 1:length(EEGstronghigh.epoch)
     powstrong_lowATThigh(i,:) = bandpower(squeeze(EEGstronghigh.data(posterior_channels,:,i)'),EEGstronghigh.srate,lowbin);
     powstrong_highATThigh(i,:) = bandpower(squeeze(EEGstronghigh.data(posterior_channels,:,i)'),EEGstronghigh.srate,highbin);
-    
+end
+for i = 1:length(EEGmedlow.epoch)
     powmed_lowATTlow(i,:) = bandpower(squeeze(EEGmedlow.data(posterior_channels,:,i)'),EEGmedlow.srate,lowbin);
     powmed_highATTlow(i,:) = bandpower(squeeze(EEGmedlow.data(posterior_channels,:,i)'),EEGmedlow.srate,highbin);
-    
+end
+for i = 1:length(EEGmedhigh.epoch)
     powmed_lowATThigh(i,:) = bandpower(squeeze(EEGmedhigh.data(posterior_channels,:,i)'),EEGmedhigh.srate,lowbin);
     powmed_highATThigh(i,:) = bandpower(squeeze(EEGmedhigh.data(posterior_channels,:,i)'),EEGmedhigh.srate,highbin);
-    
+end
+for i = 1:length(EEGweaklow.epoch)
     powweak_lowATTlow(i,:) = bandpower(squeeze(EEGweaklow.data(posterior_channels,:,i)'),EEGweaklow.srate,lowbin);
     powweak_highATTlow(i,:) = bandpower(squeeze(EEGweaklow.data(posterior_channels,:,i)'),EEGweaklow.srate,highbin);
-    
+end
+for i = 1:length(EEGweakhigh.epoch)
     powweak_lowATThigh(i,:) = bandpower(squeeze(EEGweakhigh.data(posterior_channels,:,i)'),EEGweakhigh.srate,lowbin);
     powweak_highATThigh(i,:) = bandpower(squeeze(EEGweakhigh.data(posterior_channels,:,i)'),EEGweakhigh.srate,highbin);
 end
 disp('done');
-%% Plot bandpower
-% Average power over channels (15 trials x 6 conds)
-avgchanATTlow = [mean(powfull_lowATTlow,2) mean(powfull_lowATThigh,2) ...
+% Plot bandpower
+% Average power over channels (N trials x 8 conds)
+avgchanATTlow = {mean(powfull_lowATTlow,2) mean(powfull_lowATThigh,2) ...
     mean(powstrong_lowATTlow,2) mean(powstrong_lowATThigh,2) ...
     mean(powmed_lowATTlow,2) mean(powmed_lowATThigh,2) ...
-    mean(powweak_lowATTlow,2) mean(powweak_lowATThigh,2) ];
+    mean(powweak_lowATTlow,2) mean(powweak_lowATThigh,2) };
 
-avgchanATThigh = [mean(powfull_highATTlow,2) mean(powfull_highATThigh,2)  ...
+avgchanATThigh = {mean(powfull_highATTlow,2) mean(powfull_highATThigh,2)  ...
     mean(powstrong_highATTlow,2) mean(powstrong_highATThigh,2) ...
     mean(powmed_highATTlow,2) mean(powmed_highATThigh,2) ...
-    mean(powweak_highATTlow,2) mean(powweak_highATThigh,2)];
+    mean(powweak_highATTlow,2) mean(powweak_highATThigh,2)};
 
+%% Plot
 figure; hold on
 bins = [10 20 35 45 60 70 85 95];
-
-subplot(2,1,1); hold on 
-bar(bins, mean(avgchanATTlow))          % Average across trials
 binlabels = {'Full Att. Low'; 'Full Att. High'; 'Strong Att. Low'; 'Strong Att. High'; 'Med Att. Low'; 'Med Att. High'; 'Weak Att. Low'; 'Weak Att. High'; };
 
-plot(bins, avgchanATTlow, '*', 'LineWidth', 1);
-title('6 Hz Power');
+subplot(2,1,1); hold on 
+title('12 Hz Power');
 xticks(bins)
 xticklabels(binlabels)
 
+barmean = []; stderror = [];
+for b = 1:length(bins)
+    barmean(b) = mean(avgchanATTlow{b}); 
+    stderror(b) =  std(avgchanATTlow{b}) / sqrt(length(avgchanATTlow{b}));
+end
+bar(bins, barmean)          % Average across trials
+errorbar(bins, barmean, stderror, 'k.')
+% for b = 1:length(bins); plot(bins(b), avgchanATTlow{b}, '*', 'LineWidth', 1); end
+% ylim([0 8])
 subplot(2,1,2); hold on
-bar(bins, mean(avgchanATThigh))
 title('15 Hz Power');
 xticks(bins)
 xticklabels(binlabels)
-plot(bins, avgchanATThigh, '*', 'LineWidth', 1);
 
-%% Compare high and low freq trials
-lowevents = {'51', '53'};
-highevents = {'52', '54'};
-
-EEGlow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '51')));
-EEGhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '52')));
-
+barmean = []; stderror = [];
+for b = 1:length(bins)
+    barmean(b) = mean(avgchanATThigh{b}); 
+    stderror(b) =  std(avgchanATThigh{b}) / sqrt(length(avgchanATThigh{b}));
+end
+bar(bins, barmean)          % Average across trials
+errorbar(bins, barmean, stderror, 'k.')
+% for b = 1:length(bins); plot(bins(b), avgchanATThigh{b}, '*', 'LineWidth', 1); end
+% ylim([0 3])
+sgtitle('OP Bandpower Opacity')
 %% Generate spectopo plots for each condition, if epochs trimmed to not include events.
 freqsofinterest = [6 12 15];
     
@@ -431,105 +608,25 @@ figure; pop_spectopo(EEGlow, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
 figure; pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
 
-%% Plot relative powers while attending
-bins = [5 10 20 25]; numbins = size(bins,2);
+%% Look at hemisphere suppression/excitation
 
-% --------------- Attending LOW -------------- %
-lsize = size(EEGlow.data);
+% EEG = pop_loadset('filename', 'TW-VideoCheckOpacity-03.set', 'filepath', direeg);
+% EEG = pop_loadset('filename', 'GR-VideoCheckOpacity-03.set', 'filepath', direeg);
+EEG = pop_loadset('filename', 'MD-VideoCheckOpacity.set', 'filepath', direeg);
+% EEG = pop_loadset('filename', 'BN-VideoCheckOpacity-01.set', 'filepath', direeg);
 
-llp = zeros(1, lsize(3)); hlp = llp;
-llrel = zeros(1, lsize(3)); hlrel = llrel;
-
-% for each epoch calculate relative power of target frequencies
-for i = 1:lsize(3)
-    % spectra: relative powers per frequency (dB)
-    % freq: frequencies corresponding to spectra
-    [spectra, freq, speccomp, contrib, specstd] = spectopo( ...
-        EEGlow.data(lsize(1),:,i), lsize(2), EEGlow.srate);
-    
-    % find low and high index of freq array
-    lowIDX = find(freq>5.5 & freq<6.5);
-    highIDX = find(freq>14.5 & freq<15.5);
-    
-    mean(spectra(lowIDX))
-    mean(spectra(highIDX))
-    
-    % calculate power of low/high freq when attending low/high
-    llp(i) = 10^(mean(spectra(lowIDX))/10);
-    hlp(i) = 10^(mean(spectra(highIDX))/10); 
-    
-    % compute relative power of low vs. high
-    llrel(i) = llp/(llp+hlp); 
-    hlrel(i) = hlp/(llp+hlp);
+evtype = [];
+for i = 1:length(EEG.epoch)
+    evtype = [evtype, ""+EEG.epoch(i).eventtype];
 end
+unique(evtype)
+adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
 
-% --------------- Attending HIGH -------------- %
-hsize = size(EEGhigh.data);
-
-lhp = zeros(1, hsize(3)); hhp = lhp;
-lhrel = zeros(1, hsize(3)); hhrel = lhrel;
-
-for i = 1:hsize(3)
-    [spectra, freq, speccomp, contrib, specstd] = spectopo( ...
-        EEGhigh.data(hsize(1),:,i), hsize(2), EEGhigh.srate);
-    
-    lowIDX = find(freq>5.5 & freq<6.5);
-    highIDX = find(freq>14.5 & freq<15.5);
-    
-    lhp(i) = 10^(mean(spectra(lowIDX))/10);
-    hhp(i) = 10^(mean(spectra(highIDX))/10);
-    
-    lhrel(i) = lhp/(lhp+hhp);
-    hhrel(i) = hhp/(lhp+hhp);
-end
-
-meanpower = [mean(llp) mean(hlp) mean(lhp) mean(hhp)];
-meanrel = [mean(llrel) mean(hlrel) mean(lhrel) mean(hhrel)];
-stds = [std(llrel) std(llrel) std(llrel) std(llrel)];
-
-% plot 
-figure; hold on
-bar(bins, meanpower)
-errorbar(bins, meanpower, stds, 'Color', 'k', 'LineStyle', 'none', 'LineWidth', 2, 'Marker', '.')
-
-%%
-
-% run ica 
-% reject components that have eye blinks and other artifacts
-
-% do this for all runs
-
-% combine all runs
-
-% compare high and low freq trials 
-
-%%
-for i = 1:size(allEEG.event,2)
-    eventtype(i) = str2double(allEEG.event(i).type);
-    eventlatency(i) = allEEG.event(i).latency;
-    eventlatencyms(i) = allEEG.event(i).latency_ms;
-    eventepoch(i) = allEEG.event(i).epoch;
-end
-
-eventtrialslow = eventepoch(eventtype==51 | eventtype==53);
-eventtrialshigh = eventepoch(eventtype==52 | eventtype==54);
-
-%%
-EEGnewlow = pop_select(allEEG, 'trial', evtl);
-EEGnewhigh = pop_select(allEEG, 'trial', evth);
-%%
-EEGlow = EEGnewlow;
-EEGhigh = EEGnewhigh;
-
-
-%% Generate spectopo plots for each condition, if epochs trimmed to not include events.
-
+EEGhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, {'51', '53', '55', '57'})));
 freqsofinterest = [6 12 15];
     
-figure; pop_spectopo(EEGlow, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
-    'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
-
-figure; pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
+figure; title('GR: Attend RIGHT 6 Hz')
+pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
 
 %% separate by marker
@@ -543,83 +640,3 @@ EEG51 = pop_select(allEEG, 'trial', et51);
 EEG54 = pop_select(allEEG, 'trial', et54);
 EEG52 = pop_select(allEEG, 'trial', et52);
 EEG53 = pop_select(allEEG, 'trial', et53);
-%%
-for i = 1:32
-    plow51(i,:) = bandpower(squeeze(EEG51.data(i,:,:)),EEG51.srate,[4 8]);
-    phigh51(i,:) = bandpower(squeeze(EEG51.data(i,:,:)),EEG51.srate,[12 16]);
-    
-    plow52(i,:) = bandpower(squeeze(EEG52.data(i,:,:)),EEG52.srate,[4 8]);
-    phigh52(i,:) = bandpower(squeeze(EEG52.data(i,:,:)),EEG52.srate,[12 16]);
-    
-    plow53(i,:) = bandpower(squeeze(EEG53.data(i,:,:)),EEG53.srate,[4 8]);
-    phigh53(i,:) = bandpower(squeeze(EEG53.data(i,:,:)),EEG53.srate,[12 16]);
-    
-    plow54(i,:) = bandpower(squeeze(EEG54.data(i,:,:)),EEG54.srate,[4 8]);
-    phigh54(i,:) = bandpower(squeeze(EEG54.data(i,:,:)),EEG54.srate,[12 16]);
-end
-%% write over with alpha
-for i = 1:32
-    plow51(i,:) = bandpower(squeeze(EEG51.data(i,:,:)),EEG51.srate,[9 11]);
-    phigh51(i,:) = bandpower(squeeze(EEG51.data(i,:,:)),EEG51.srate,[23 24]);
-    
-    plow52(i,:) = bandpower(squeeze(EEG52.data(i,:,:)),EEG51.srate,[9 11]);
-    phigh52(i,:) = bandpower(squeeze(EEG52.data(i,:,:)),EEG51.srate,[23 24]);
-    
-    plow53(i,:) = bandpower(squeeze(EEG53.data(i,:,:)),EEG51.srate,[9 11]);
-    phigh53(i,:) = bandpower(squeeze(EEG53.data(i,:,:)),EEG51.srate,[23 24]);
-    
-    plow54(i,:) = bandpower(squeeze(EEG54.data(i,:,:)),EEG54.srate,[9 11]);
-    phigh54(i,:) = bandpower(squeeze(EEG54.data(i,:,:)),EEG54.srate,[23 24]);
-end
-    
-%% sloppy means
-
-mplow51 = median(plow51(selchan,:),2);
-mphigh51 = median(phigh51(selchan,:),2);
-mplow54 = median(plow54(selchan,:),2);
-mphigh54 = median(phigh54(selchan,:),2);
-
-mplow52 = median(plow52(selchan,:),2);
-mphigh52 = median(phigh52(selchan,:),2);
-mplow53 = median(plow53(selchan,:),2);
-mphigh53 = median(phigh53(selchan,:),2);
-%%
-figure
-for i = 1:10
-    subplot(2,5,i)
-    bar([mplow51(i),mplow52(i),mplow53(i), mplow54(i)]);
-    title(EEG.chanlocs(selchan(i)).labels)
-end
-
-figure
-for i = 1:10
-    subplot(2,5,i)
-    bar([mphigh51(i),mphigh52(i),mphigh53(i), mphigh54(i)]);
-    title(EEG.chanlocs(selchan(i)).labels)
-end
-
-%% plot power over trials
-selchan = [1, 2, 3, 4, 5, 7, 8, 20, 21, 32]
-figure
-for i = 1:10
-    subplot(2,5,i)
-    plot(1:size(plow51,2),plow51(selchan(i),:),'b'); %left low
-    hold on
-    plot(1:size(plow53,2),plow53(selchan(i),:),'c'); %right low
-    
-    plot(1:size(plow52,2),plow52(selchan(i),:),'r'); %left high
-    plot(1:size(plow54,2),plow54(selchan(i),:),'m'); %right high
-    title(strcat(EEG.chanlocs(selchan(i)).labels, ' : ','Low Freq Band'))
-end
-%%
-figure
-for i = 1:10
-    subplot(2,5,i)
-    plot(1:size(phigh51,2),phigh51(selchan(i),:),'b'); %left low
-    hold on
-    plot(1:size(phigh53,2),phigh53(selchan(i),:),'c'); %right low
-    
-    plot(1:size(phigh52,2),phigh52(selchan(i),:),'r'); %left high
-    plot(1:size(phigh54,2),phigh54(selchan(i),:),'m'); %right high
-    title(strcat(EEG.chanlocs(selchan(i)).labels, ' : ','High Freq Band'))
-end
