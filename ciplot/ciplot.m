@@ -41,5 +41,5 @@ lower=lower'; end
 if find(size(upper)==(max(size(upper))))<2
 upper=upper'; end
 
-plot_handle = fill([x fliplr(x)],[upper fliplr(lower)],colour,'FaceAlpha',alpha,'EdgeColor',[1 1 1])
+plot_handle = fill([x fliplr(x)],[upper fliplr(lower)],colour,'FaceAlpha',alpha,'EdgeAlpha',0)
 

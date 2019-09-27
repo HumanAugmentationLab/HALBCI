@@ -69,10 +69,28 @@ gui_erp(GND,'bin',3);
 GND=decimateGND(GND,5,'boxcar',[-200 800]);
 
 
-uipanel(dat.fig_id,...
-        'Units','normalized', ...
-        'Position',[ 0.719 0.175 0.281 0.42 ],...
-        'shadowcolor','k', ...
-        'highlightcolor',frm_col, ...
-        'foregroundcolor',[.4 0 1 .2], ...
-        'backgroundcolor',[.4 0 1 0]);
+%% Generate plots
+
+% Use Run 1 decimated
+load Run1-4cond-down100.GND -MAT
+
+%%
+ch = [1 1];
+cond = [1 2];
+colors{1} = [.1 .3 .7];
+colors{2} = [.7 .1 .2];
+alphaval = .2;
+leglabels = {'Duck', 'Goose'};
+numlines = length(cond);
+
+figure
+for i = 1:numlines
+LM = squeeze(GND.grands(ch(i),:,cond(i))) - squeeze(GND.grands_stder(ch(i),:,cond(i)));
+UM = GND.grands(ch(i),:,cond(i)) + GND.grands_stder(ch(i),:,cond(i));
+
+ciplot(LM,UM,GND.time_pts,colors{i},alphaval);
+hold on
+end
+for i = 1:numlines
+    plot(GND.time_pts,squeeze(GND.grands(ch(i),:,cond(i))),'Color',colors{i},'LineWidth',2);
+end
