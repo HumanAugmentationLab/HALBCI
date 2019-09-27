@@ -1,0 +1,37 @@
+% This will generate confidence interval plot for time series data
+% get this from the grd file?
+
+time = -200:10:800; %Time in ms
+signals = repmat(sin(time*pi),30,1);
+signals = signals + rand(size(signals)); 
+
+num_conditions = 2;
+colors{1} = 
+alphaval = .4;
+x= time;
+
+for i = 1:num_conditions
+    
+    signals = repmat(3*sin(i* time*pi)+i/pi,30,1);
+    signals = signals + rand(size(signals)); 
+    
+    % set y to values
+    y = signals;
+
+    % Calcuate the confidence interval
+    N = size(y,1);                                      % Number of ‘Experiments’ In Data Set
+    yMean = mean(y);                                    % Mean Of All Experiments At Each Value Of ‘x’
+    ySEM = std(y)/sqrt(N);                              % Compute ‘Standard Error Of The Mean’ Of All Experiments At Each Value Of ‘x’
+    CI95 = tinv([0.025 0.975], N-1);                    % Calculate 95% Probability Intervals Of t-Distribution
+    yCI95 = bsxfun(@times, ySEM, CI95(:));              % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
+
+    %
+    % Plot the confidence interval and mean
+    ciplot(yCI95(1,:)+yMean,yCI95(2,:)+yMean,x,colors{i},alphaval);
+    hold on
+    plot(x,yMean,'Color',colors{i},'LineWidth',3);
+   
+end
+
+
+
