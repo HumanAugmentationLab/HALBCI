@@ -12,6 +12,8 @@ num_conditions = 2;
 colors{1} = [.1 .3 .7];
 colors{2} = [.7 .1 .2];
 alphaval = .2;
+leglabels = {'Duck', 'Goose'};
+
 x= time;
 
 for i = 1:num_conditions
@@ -34,10 +36,16 @@ for i = 1:num_conditions
     ciplot(yCI95(1,:)+yMean(i,:),yCI95(2,:)+yMean(i,:),x,colors{i},alphaval);
     hold on   
 end
+xline(0,'k--','LineWidth',2)
 
 for i = 1:num_conditions
-    plot(x,yMean(i,:),'Color',colors{i},'LineWidth',3);
+    plot(x,yMean(i,:),'Color',colors{i},'LineWidth',2);
 end
+
+set(gca,'FontSize',14)
+legend(leglabels)
+xlabel('Time (ms)');
+ylabel('Signal (uV)');
 
 
 
