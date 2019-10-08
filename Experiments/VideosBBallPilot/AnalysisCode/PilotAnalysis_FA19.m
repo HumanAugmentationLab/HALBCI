@@ -8,7 +8,7 @@ bcilab
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\2019\';
 
 % File name without extension
-fnameeeg = '20190926121950_OP-VideoCheckSize-Strong_Test';
+fnameeeg = '20191006194945_GR-VideoCheckOpacity_Test';
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
@@ -19,7 +19,7 @@ ogEEG = EEG;
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\2019\';
 
 % Create new marker file using fixmissingmarkersfromlog.m
-fnameeeg = '20190926115036_OP-VideoCheckSize-Med_Test_newmarkers.set';
+fnameeeg = '20191006194945_GR-VideoCheckOpacity_Test_newmarkers.set';
 EEG = pop_loadset('filename', fnameeeg, 'filepath', direeg);
 ogEEG = EEG;
 %% Chop run between start and end markers 
@@ -93,8 +93,8 @@ EEG = pop_epoch(EEG,adetails.markers.types, adetails.markers.epochwindow);
 lastEEG = EEG;
 % Markers for sustained attention
 
-adetails.markers.types = {'51','52','53','54','55','56'};     % Check size
-% adetails.markers.types = {'51','52','53','54','55','56','57','58'};     % Check opacity
+% adetails.markers.types = {'51','52','53','54','55','56'};     % Check size
+adetails.markers.types = {'51','52','53','54','55','56','57','58'};     % Check opacity
 
 evtype = [];
 
@@ -120,12 +120,12 @@ for i = 1:length(lastEEG.event)
     else
 %         EEG.event(k) = lastEEG.event(i); % Write into new index
 %         disp(lastEEG.event(i))
-        disp(k)
+%         disp(k)
         EEG.event(k).type = lastEEG.event(i).type;
         EEG.event(k).latency = lastEEG.event(i).latency; 
         EEG.event(k).latency_ms = lastEEG.event(i).latency_ms; 
         EEG.event(k).duration = 0; 
-        disp(EEG.event(k))
+%         disp(EEG.event(k))
         k = k+1;
     end
 end
@@ -156,8 +156,14 @@ adetails.reject.strategy = 'interpolate'; % or 'remove'
 % badelec = [13 17 26 27]; % FE strong opacity
 % badelec = [13]; % MD opacity
 % badelec = 27; % BN opacity
-% badelec = [13 17]; % OP opacity
-badelec = [17 26]; % OP med
+% badelec = [13 17]; % OP opacity, strong
+% badelec = [17 26]; % OP med
+% badelec = [15]; % IF opacity
+% badelec = 19; % CV
+% badelec = [18 30]; % RM 
+% badelec = [1 18 30]; % RM med
+% badelec = [10 31]; % GR med
+badelec = 10; % GR opacity
 
 adetails.reject.channelidx = badelec;
 
@@ -189,6 +195,17 @@ pop_eegplot(EEG, 1, 1, 1);  % removes epochs within original EEG struct
 % BN strong = [41 61 62 101 102 141 142 161 162 181 201:203 207 208 226:228 281:284 301 321 342 354]
 % OP opacity = [14 41 101 161 162 181 208 221 241 242 289 301]
 % OP med = [1 341:343]
+% OP strong = [61 161 162 201 244 261 264 281:282 302 321]
+% IF opac = [13 41 61:62 82 101:102 112:115 122 141 161:162 221 229 241 247 261 281]
+% IF strong = [1 22 41 47:50 82 84 101 121 141 142 161 162 181 187 191 197 221 230 237 241 242 281 282 306 307 341]
+% IF med = [4 21:23 41:42 61 76 83 101 121 141 161 181:182 201 241 261 277 279:281 309:310 321 337:338 341:342 354 359:360]
+% CV_opac = [40 193 194 216 220 298]
+% CV_strong = [241 317]
+% RM_strong = [21 41 61 62 81 101 112 121 141 142 201 221 241 261 341]
+% RM_med = [21 44 81 101 161 181 228:229 355]
+% GR_opac = [1 101:102 150 232]
+% GR_strong = [1 47 73 213 302 309 315 346:347 351];
+% GR_med = [1];
 
 %% Confirm that the new data look good (can skip)
 pop_eegplot(EEG,1,1,1);
@@ -208,7 +225,7 @@ EEG = pop_runica(EEG, 'runica');
 % Write ICA to file for later use
 dirpreica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\Pre-ICA\';
 
-pop_saveset(EEG, 'filename', 'OP-VideoCheckSize-Med-preica', 'filepath', dirpreica)
+pop_saveset(EEG, 'filename', 'GR-VideoCheckOpacity-preica', 'filepath', dirpreica)
 
 %% Inspect ICA components
 EEG = pop_selectcomps(EEG);
@@ -231,8 +248,20 @@ BN_med = [1 3 7 9 13 16 17 23 25 28:30];
 BN_strong = [1 3 4 12 14 15 21 23 24 26:28 30:32];
 OP_opac = [1 7 8 13 14 17:22 24:27 29:31];
 OP_med =  [5 7 10 13 14 18 19 21:25 27:30];
+OP_strong = [1 6 10 11 16 18 19 23:28 30];
+IF_opac = [2 10 12 15 17 18 20 22:25 27:29 31];
+IF_strong = [2 9:15 19:21 24 26 32];
+IF_med = [2 10:11 13:19 22:23 26:28 31:32];
+CV_opac = [2 6 14 18 21 25 30 31];
+CV_med = [1 6 20 22 28 30 31];
+CV_strong = [1 6 11 15:16 20 22 28 30:31];
+RM_opac = [3 6 11:12 15:19 21:22 24:30];
+RM_strong = [1 9 13 14 16:17 19:26 29:32];
+RM_med = [3 6 12:13 15:16 19:23 26:29];
+GR_strong = [1 4:5 14:15 18:19 21:22 24 26:30 32];
+GR_opac = [1 4 9 16:20 23:26 28:31];
 
-rej_comps = OP_med;
+rej_comps = GR_opac;
 adetails.reject.icacomponents = rej_comps;
 
 % Running this way will cause a pop-up, which allows you to see the before
@@ -244,7 +273,7 @@ disp('Subtracing ICA component from data...')
 EEG = pop_subcomp(EEG, rej_comps);
 
 dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
-pop_saveset(EEG, 'filename', 'OP-VideoCheckSize-Med.set', 'filepath', dirica)
+pop_saveset(EEG, 'filename', 'GR-VideoCheckO.set', 'filepath', dirica)
 
 %% Plot data after removal of ICA components
 % Reference to original data
@@ -255,7 +284,7 @@ figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', [6 10 12 15], 'freqrange',[1 30],'electrodes','on');
 %% Load pre-ICA runs
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\Pre-ICA\';
-EEG = pop_loadset('filename', 'BN-VideoCheckOpacity-preica.set', 'filepath', direeg);
+EEG = pop_loadset('filename', 'RM-VideoCheckSize-Strong-preica.set', 'filepath', direeg);
 
 %% Load post-ICA runs
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
@@ -447,18 +476,19 @@ bar(bins, barmean)          % Average across trials
 errorbar(bins, barmean, stderror, 'k.')
 % for b = 1:length(bins); plot(bins(b), avgchanATThigh{b}, '*', 'LineWidth', 1); end
 
-sgtitle('OP Bandpower Check Size - Med Opacity')
-%% Prep violin plot
+sgtitle('GR Bandpower Check Size - Strong Opacity')
+%% VIOLIN PLOT
+
 alldataATThigh = []; grp = [];
 for b = 1:length(bins)
     alldataATThigh = [alldataATThigh; avgchanATThigh{b}];
     grp = [grp; repelem(binlabels{b} + "", length(avgchanATThigh{b}))' ];
 end
 
-figure
+% figure
 % boxplot(alldataATThigh,grp,'Notch','on','Labels',binlabels)
-title('MD Check Size - Med')
-ylabel('15 Hz Power')
+% title('MD Check Size - Med')
+% ylabel('15 Hz Power')
 
 
 alldataATTlow = []; grp = [];
@@ -466,7 +496,7 @@ for b = 1:length(bins)
     alldataATTlow = [alldataATTlow; avgchanATTlow{b}];
     grp = [grp; repelem(binlabels{b} + "", length(avgchanATThigh{b}))' ];
 end
-%% VIOLIN PLOT
+
 figure
 violinplot(alldataATTlow,grp,'GroupOrder',binlabels, 'ShowData',true, 'ShowMean',true, 'ShowNotches', false);
 % boxplot(alldataATTlow,grp,'Notch','on','Labels',binlabels)
@@ -564,8 +594,7 @@ avgchanATThigh = {mean(powfull_highATTlow,2) mean(powfull_highATThigh,2)  ...
     mean(powstrong_highATTlow,2) mean(powstrong_highATThigh,2) ...
     mean(powmed_highATTlow,2) mean(powmed_highATThigh,2) ...
     mean(powweak_highATTlow,2) mean(powweak_highATThigh,2)};
-
-%% Plot
+%% Opacity Plot
 figure; hold on
 bins = [10 20 35 45 60 70 85 95];
 binlabels = {'Full Att. Low'; 'Full Att. High'; 'Strong Att. Low'; 'Strong Att. High'; 'Med Att. Low'; 'Med Att. High'; 'Weak Att. Low'; 'Weak Att. High'; };
@@ -598,7 +627,10 @@ bar(bins, barmean)          % Average across trials
 errorbar(bins, barmean, stderror, 'k.')
 % for b = 1:length(bins); plot(bins(b), avgchanATThigh{b}, '*', 'LineWidth', 1); end
 % ylim([0 3])
-sgtitle('OP Bandpower Opacity')
+sgtitle('GR Bandpower Opacity')
+
+
+
 %% Generate spectopo plots for each condition, if epochs trimmed to not include events.
 freqsofinterest = [6 12 15];
     
@@ -607,7 +639,6 @@ figure; pop_spectopo(EEGlow, 1, [1000*EEGlow.xmin 1000*EEGlow.xmax], 'EEG' ,...
 
 figure; pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
-
 %% Look at hemisphere suppression/excitation
 
 % EEG = pop_loadset('filename', 'TW-VideoCheckOpacity-03.set', 'filepath', direeg);
@@ -628,15 +659,3 @@ freqsofinterest = [6 12 15];
 figure; title('GR: Attend RIGHT 6 Hz')
 pop_spectopo(EEGhigh, 1, [1000*EEGhigh.xmin 1000*EEGhigh.xmax], 'EEG' ,...
     'percent', 100, 'freq', freqsofinterest, 'freqrange',[1 30],'electrodes','on');
-
-%% separate by marker
-et51 = unique(eventepoch(eventtype==51));
-et54 = unique(eventepoch(eventtype==54));
-et52 = unique(eventepoch(eventtype==52));
-et53 = unique(eventepoch(eventtype==53));
-%eventtrialshigh = eventepoch(eventtype==52 | eventtype==54);
-
-EEG51 = pop_select(allEEG, 'trial', et51);
-EEG54 = pop_select(allEEG, 'trial', et54);
-EEG52 = pop_select(allEEG, 'trial', et52);
-EEG53 = pop_select(allEEG, 'trial', et53);

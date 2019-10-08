@@ -8,20 +8,35 @@ direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\ic
 % BN = pop_loadset('filename', 'BN-VideoCheckOpacity.set', 'filepath', direeg);
 % LO = pop_loadset('filename', 'LO-VideoCheckOpacity.set', 'filepath', direeg);
 % FE = pop_loadset('filename', 'FE-VideoCheckOpacity.set', 'filepath', direeg);
+% OP = pop_loadset('filename', 'OP-VideoCheckOpacity.set', 'filepath', direeg);
+% IF = pop_loadset('filename', 'IF-VideoCheckOpacity.set', 'filepath', direeg);
+% CV = pop_loadset('filename', 'CV-VideoCheckOpacity.set', 'filepath', direeg);
+% RM = pop_loadset('filename', 'RM-VideoCheckOpacity.set', 'filepath', direeg);
+% GR = pop_loadset('filename', 'GR-VideoCheckOpacity.set', 'filepath', direeg);
 
 % CHECK SIZE STRONG EXPERIMENT
 % MD = pop_loadset('filename', 'MD-VideoCheckSize-Strong.set', 'filepath', direeg);
 % BN = pop_loadset('filename', 'BN-VideoCheckSize-Strong.set', 'filepath', direeg);
 % LO = pop_loadset('filename', 'LO-VideoCheckSize-Strong.set', 'filepath', direeg);
 % FE = pop_loadset('filename', 'FE-VideoCheckSize-Strong.set', 'filepath', direeg);
+% OP = pop_loadset('filename', 'OP-VideoCheckSize-Strong.set', 'filepath', direeg);
+% IF = pop_loadset('filename', 'IF-VideoCheckSize-Strong.set', 'filepath', direeg);
+% CV = pop_loadset('filename', 'CV-VideoCheckSize-Strong.set', 'filepath', direeg);
+% RM = pop_loadset('filename', 'RM-VideoCheckSize-Strong.set', 'filepath', direeg);
+% GR = pop_loadset('filename', 'GR-VideoCheckSize-Strong.set', 'filepath', direeg);
 
 % CHECK SIZE MEDIUM EXPERIMENT
 MD = pop_loadset('filename', 'MD-VideoCheckSize-Med.set', 'filepath', direeg);
 BN = pop_loadset('filename', 'BN-VideoCheckSize-Med.set', 'filepath', direeg);
 LO = pop_loadset('filename', 'LO-VideoCheckSize-Med.set', 'filepath', direeg);
 FE = pop_loadset('filename', 'FE-VideoCheckSize-Med.set', 'filepath', direeg);
+OP = pop_loadset('filename', 'OP-VideoCheckSize-Med.set', 'filepath', direeg);
+IF = pop_loadset('filename', 'IF-VideoCheckSize-Med.set', 'filepath', direeg);
+CV = pop_loadset('filename', 'CV-VideoCheckSize-Med.set', 'filepath', direeg);
+RM = pop_loadset('filename', 'RM-VideoCheckSize-Med.set', 'filepath', direeg);
+GR = pop_loadset('filename', 'GR-VideoCheckSize-Med.set', 'filepath', direeg);
 
-ALLSUBJ = {MD BN LO FE};
+ALLSUBJ = {MD BN LO FE OP IF CV RM GR};          
 disp('loaded all subject data')
 
 %% Bandpower: OPACITY
@@ -34,9 +49,17 @@ meanpow_lowATThigh = zeros(length(ALLSUBJ), length(binlabels));
 meanpow_highATTlow = zeros(length(ALLSUBJ), length(binlabels));
 meanpow_highATThigh =  zeros(length(ALLSUBJ), length(binlabels));
 
+highstruct.subj = []; highstruct.powval = [];
+lowstruct.subj = [];
+
 for s = 1:length(ALLSUBJ)
     EEG = ALLSUBJ{s};
+        
+    % Populate subject grouping vector
+    highstruct.subj = [highstruct.subj repelem(curr_subj, length(EEG.epoch))];
+    lowstruct.subj = [lowstruct.subj repelem(curr_subj, length(EEG.epoch))];
 
+    % Find relevant marker and indices
     evtype = [];
     for i = 1:length(EEG.epoch)
         evtype = [evtype, ""+EEG.epoch(i).eventtype];
@@ -44,6 +67,7 @@ for s = 1:length(ALLSUBJ)
     unique(evtype)
     adetails.markers.trialevents = evtype(contains(evtype,adetails.markers.types));
 
+    % Crop data for each stimulus and attend condition
     EEGfulllow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '51')));
     EEGfullhigh = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '52')));
     EEGstronglow = pop_select(EEG, 'trial', find(contains(adetails.markers.trialevents, '53')));
@@ -58,7 +82,7 @@ for s = 1:length(ALLSUBJ)
     lowbin = [11.75 12.25];
     highbin = [14.75 15.25];
 
-    clear powfull_lowATTlow powfull_highATTlow powfull_lowATThigh powfull_highATThigh ...
+clear powfull_lowATTlow powfull_highATTlow powfull_lowATThigh powfull_highATThigh ...
         powstrong_lowATTlow powstrong_highATTlow powstrong_lowATThigh powstrong_highATThigh ...
         powmed_lowATTlow powmed_highATTlow powmed_lowATThigh powmed_highATThigh ...
         powweak_lowATTlow powweak_highATTlow powweak_lowATThigh powweak_highATThigh
@@ -110,15 +134,24 @@ for s = 1:length(ALLSUBJ)
     avgchan_highATThigh = {mean(powfull_highATThigh,2) mean(powstrong_highATThigh,2) ...
         mean(powmed_highATThigh,2) mean(powweak_highATThigh,2)};
 
+    % # subjects x # conds
     for b = 1:length(binlabels)
         meanpow_lowATTlow(s, b) = mean(avgchan_lowATTlow{b});
         meanpow_lowATThigh(s, b) = mean(avgchan_lowATThigh{b}); 
         meanpow_highATTlow(s, b) = mean(avgchan_highATTlow{b}); 
         meanpow_highATThigh(s, b) = mean(avgchan_highATThigh{b}); 
-       
     end
-
+    
 end
+
+num_subj = length(ALLSUBJ);
+stderror_lowATTlow = std(meanpow_lowATTlow) / sqrt( num_subj );
+stderror_lowATThigh = std(meanpow_lowATThigh) / sqrt( num_subj );
+stderror_highATTlow = std(meanpow_highATTlow) / sqrt( num_subj );
+stderror_highATThigh = std(meanpow_highATThigh) / sqrt( num_subj );
+        
+disp('populated all opacity power data')
+
 
 %% Bandpower: CHECK SIZE
 
@@ -204,6 +237,12 @@ for s = 1:length(ALLSUBJ)
     end
 end
 
+num_subj = length(ALLSUBJ);
+stderror_lowATTlow = std(meanpow_lowATTlow) / sqrt( num_subj );
+stderror_lowATThigh = std(meanpow_lowATThigh) / sqrt( num_subj );
+stderror_highATTlow = std(meanpow_highATTlow) / sqrt( num_subj );
+stderror_highATThigh = std(meanpow_highATThigh) / sqrt( num_subj );
+        
 disp('populated all check size power data')
 
 %% Plot
@@ -212,22 +251,25 @@ disp('populated all check size power data')
 
 figure; 
 % sgtitle('ALL Subjects: Opacity Experiment'); 
+% sgtitle('ALL Subjects: Check Size Strong Experiment'); 
 sgtitle('ALL Subjects: Check Size Medium Experiment'); 
 
 subplot(1,2,1); hold on
 ylabel('12 Hz Power'); xlabel('Stimuli Type');
 xticks(1:length(binlabels)); xticklabels(binlabels);
 % use error bars to plot the range of subject values
-errorbar(1:length(binlabels), mean(meanpow_lowATTlow), min(meanpow_lowATTlow), max(meanpow_lowATTlow), 'LineWidth', 2)
-errorbar(1:length(binlabels), mean(meanpow_lowATThigh), min(meanpow_lowATThigh), max(meanpow_lowATThigh), 'LineWidth', 2)
+
+
+errorbar(1:length(binlabels), mean(meanpow_lowATTlow), stderror_lowATTlow, 'LineWidth', 2)
+errorbar(1:length(binlabels), mean(meanpow_lowATThigh), stderror_lowATThigh, 'LineWidth', 2)
 legend({'Attend 12 Hz', 'Attend 15 Hz'})
 
 subplot(1,2,2); hold on
 ylabel('15 Hz Power'); xlabel('Stimuli Type');
 xticks(1:length(binlabels)); xticklabels(binlabels);
 % use error bars to plot the range of subject values
-errorbar(1:length(binlabels), mean(meanpow_highATTlow), min(meanpow_highATTlow), max(meanpow_highATTlow), 'LineWidth', 2)
-errorbar(1:length(binlabels), mean(meanpow_highATThigh), min(meanpow_highATThigh), max(meanpow_highATThigh), 'LineWidth', 2)
+errorbar(1:length(binlabels), mean(meanpow_highATTlow), stderror_highATTlow, 'LineWidth', 2)
+errorbar(1:length(binlabels), mean(meanpow_highATThigh), stderror_highATThigh, 'LineWidth', 2)
 legend({'Attend 12 Hz', 'Attend 15 Hz'})
 
 
