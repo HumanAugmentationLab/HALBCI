@@ -31,7 +31,7 @@ for i = 1:num_conditions
     CI95 = tinv([0.025 0.975], N-1);                    % Calculate 95% Probability Intervals Of t-Distribution
     yCI95 = bsxfun(@times, ySEM, CI95(:));              % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
 
-    %
+    % Plot these both first.
     % Plot the confidence interval and mean
     ciplot(yCI95(1,:)+yMean(i,:),yCI95(2,:)+yMean(i,:),x,colors{i},alphaval);
     hold on   
