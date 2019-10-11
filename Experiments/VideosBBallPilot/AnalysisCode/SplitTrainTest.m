@@ -53,7 +53,7 @@ end
 if generate_text_file
     datasetFile = fopen(strcat(direeg, fname_spec, '.txt'),'w');
     % For each marker, figure out how many events there are.
-    marker_values = str2double(cell2mat({EEG.event.type}'));
+    marker_values = str2double(cell2mat({EEG.epoch.eventtype}'));
     marker_types = unique(marker_values);
     marker_frequencies = zeros(size(marker_types))
     
