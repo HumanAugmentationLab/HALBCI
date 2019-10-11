@@ -1,3 +1,6 @@
+%% Load BCILAB
+cd C:\Users\alakmazaheri\Documents\BCI\BCILAB
+bcilab
 %% Load all of post-ica data
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
 
@@ -34,8 +37,8 @@ GR.logfile = 'marker_20191006-GR-VideoCheckOpacity';
 % LO_Med = pop_loadset('filename', 'LO-VideoCheckSize-Med.set', 'filepath', direeg);
 % FE_Med = pop_loadset('filename', 'FE-VideoCheckSize-Med.set', 'filepath', direeg);
 
-ALLSUBJ = {MD BN LO FE OP IF CV RM GR};  
-
+% ALLSUBJ = {MD BN LO FE OP IF CV RM GR};  
+ALLSUBJ = {LO};
 figure; sgtitle('Opacity: Reported Attention vs. Attended Power')
 
 

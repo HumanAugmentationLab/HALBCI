@@ -1,45 +1,60 @@
-% Making all of the power graphics for bball video experiment (fall 2019)
+%% OPACITY EXPERIMENTS
 
 % Load all of post-ica data
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
 
 % OPACITY EXPERIMENT
-% MD = pop_loadset('filename', 'MD-VideoCheckOpacity.set', 'filepath', direeg);
-% BN = pop_loadset('filename', 'BN-VideoCheckOpacity.set', 'filepath', direeg);
-% LO = pop_loadset('filename', 'LO-VideoCheckOpacity.set', 'filepath', direeg);
-% FE = pop_loadset('filename', 'FE-VideoCheckOpacity.set', 'filepath', direeg);
-% OP = pop_loadset('filename', 'OP-VideoCheckOpacity.set', 'filepath', direeg);
-% IF = pop_loadset('filename', 'IF-VideoCheckOpacity.set', 'filepath', direeg);
-% CV = pop_loadset('filename', 'CV-VideoCheckOpacity.set', 'filepath', direeg);
-% RM = pop_loadset('filename', 'RM-VideoCheckOpacity.set', 'filepath', direeg);
-% GR = pop_loadset('filename', 'GR-VideoCheckOpacity.set', 'filepath', direeg);
-
-% CHECK SIZE STRONG EXPERIMENT
-% MD = pop_loadset('filename', 'MD-VideoCheckSize-Strong.set', 'filepath', direeg);
-% BN = pop_loadset('filename', 'BN-VideoCheckSize-Strong.set', 'filepath', direeg);
-% LO = pop_loadset('filename', 'LO-VideoCheckSize-Strong.set', 'filepath', direeg);
-% FE = pop_loadset('filename', 'FE-VideoCheckSize-Strong.set', 'filepath', direeg);
-% OP = pop_loadset('filename', 'OP-VideoCheckSize-Strong.set', 'filepath', direeg);
-% IF = pop_loadset('filename', 'IF-VideoCheckSize-Strong.set', 'filepath', direeg);
-% CV = pop_loadset('filename', 'CV-VideoCheckSize-Strong.set', 'filepath', direeg);
-% RM = pop_loadset('filename', 'RM-VideoCheckSize-Strong.set', 'filepath', direeg);
-% GR = pop_loadset('filename', 'GR-VideoCheckSize-Strong.set', 'filepath', direeg);
-
-% CHECK SIZE MEDIUM EXPERIMENT
-MD = pop_loadset('filename', 'MD-VideoCheckSize-Med.set', 'filepath', direeg);
-BN = pop_loadset('filename', 'BN-VideoCheckSize-Med.set', 'filepath', direeg);
-LO = pop_loadset('filename', 'LO-VideoCheckSize-Med.set', 'filepath', direeg);
-FE = pop_loadset('filename', 'FE-VideoCheckSize-Med.set', 'filepath', direeg);
-OP = pop_loadset('filename', 'OP-VideoCheckSize-Med.set', 'filepath', direeg);
-IF = pop_loadset('filename', 'IF-VideoCheckSize-Med.set', 'filepath', direeg);
-CV = pop_loadset('filename', 'CV-VideoCheckSize-Med.set', 'filepath', direeg);
-RM = pop_loadset('filename', 'RM-VideoCheckSize-Med.set', 'filepath', direeg);
-GR = pop_loadset('filename', 'GR-VideoCheckSize-Med.set', 'filepath', direeg);
+MD = pop_loadset('filename', 'MD-VideoCheckOpacity.set', 'filepath', direeg);
+BN = pop_loadset('filename', 'BN-VideoCheckOpacity.set', 'filepath', direeg);
+LO = pop_loadset('filename', 'LO-VideoCheckOpacity.set', 'filepath', direeg);
+FE = pop_loadset('filename', 'FE-VideoCheckOpacity.set', 'filepath', direeg);
+OP = pop_loadset('filename', 'OP-VideoCheckOpacity.set', 'filepath', direeg);
+IF = pop_loadset('filename', 'IF-VideoCheckOpacity.set', 'filepath', direeg);
+CV = pop_loadset('filename', 'CV-VideoCheckOpacity.set', 'filepath', direeg);
+RM = pop_loadset('filename', 'RM-VideoCheckOpacity.set', 'filepath', direeg);
+GR = pop_loadset('filename', 'GR-VideoCheckOpacity.set', 'filepath', direeg);
 
 ALLSUBJ = {MD BN LO FE OP IF CV RM GR};          
-disp('loaded all subject data')
+disp('Loaded all subject data from opacity exp...');
 
-%% Bandpower: OPACITY
+%% CHECK SIZE EXPERIMENTS
+% Load all of post-ica data
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
+
+MD = pop_loadset('filename', 'MD-VideoCheckSize-Strong.set', 'filepath', direeg);
+BN = pop_loadset('filename', 'BN-VideoCheckSize-Strong.set', 'filepath', direeg);
+LO = pop_loadset('filename', 'LO-VideoCheckSize-Strong.set', 'filepath', direeg);
+FE = pop_loadset('filename', 'FE-VideoCheckSize-Strong.set', 'filepath', direeg);
+OP = pop_loadset('filename', 'OP-VideoCheckSize-Strong.set', 'filepath', direeg);
+IF = pop_loadset('filename', 'IF-VideoCheckSize-Strong.set', 'filepath', direeg);
+CV = pop_loadset('filename', 'CV-VideoCheckSize-Strong.set', 'filepath', direeg);
+RM = pop_loadset('filename', 'RM-VideoCheckSize-Strong.set', 'filepath', direeg);
+GR = pop_loadset('filename', 'GR-VideoCheckSize-Strong.set', 'filepath', direeg);
+
+MD_Med = pop_loadset('filename', 'MD-VideoCheckSize-Med.set', 'filepath', direeg);
+BN_Med = pop_loadset('filename', 'BN-VideoCheckSize-Med.set', 'filepath', direeg);
+LO_Med = pop_loadset('filename', 'LO-VideoCheckSize-Med.set', 'filepath', direeg);
+FE_Med = pop_loadset('filename', 'FE-VideoCheckSize-Med.set', 'filepath', direeg);
+OP_Med = pop_loadset('filename', 'OP-VideoCheckSize-Med.set', 'filepath', direeg);
+IF_Med = pop_loadset('filename', 'IF-VideoCheckSize-Med.set', 'filepath', direeg);
+CV_Med = pop_loadset('filename', 'CV-VideoCheckSize-Med.set', 'filepath', direeg);
+RM_Med = pop_loadset('filename', 'RM-VideoCheckSize-Med.set', 'filepath', direeg);
+GR_Med = pop_loadset('filename', 'GR-VideoCheckSize-Med.set', 'filepath', direeg);
+
+MD.data = cat(3, MD.data, MD_Med.data);
+BN.data = cat(3, BN.data, BN_Med.data);
+LO.data = cat(3, LO.data, LO_Med.data);
+FE.data = cat(3, FE.data, FE_Med.data);
+OP.data = cat(3, OP.data, OP_Med.data);
+IF.data = cat(3, IF.data, IF_Med.data);
+CV.data = cat(3, CV.data, CV_Med.data);
+RM.data = cat(3, RM.data, RM_Med.data);
+GR.data = cat(3, GR.data, GR_Med.data);
+
+ALLSUBJ = {MD BN LO FE OP IF CV RM GR};          
+disp('Loaded all subject data from check size exp...');      
+
+%% Calculate Bandpower: OPACITY
 % Select opacity conditions 
 adetails.markers.types = {'51','52','53','54','55','56','57','58'};
 binlabels = {'Full', 'Strong', 'Medium', 'Weak'};
@@ -50,10 +65,11 @@ meanpow_highATTlow = zeros(length(ALLSUBJ), length(binlabels));
 meanpow_highATThigh =  zeros(length(ALLSUBJ), length(binlabels));
 
 highstruct.subj = []; highstruct.powval = [];
-lowstruct.subj = [];
+lowstruct.subj = []; lowstruct.powval = [];
 
 for s = 1:length(ALLSUBJ)
     EEG = ALLSUBJ{s};
+    curr_subj = EEG.filename(1:2);
         
     % Populate subject grouping vector
     highstruct.subj = [highstruct.subj repelem(curr_subj, length(EEG.epoch))];
@@ -152,8 +168,7 @@ stderror_highATThigh = std(meanpow_highATThigh) / sqrt( num_subj );
         
 disp('populated all opacity power data')
 
-
-%% Bandpower: CHECK SIZE
+%% Calculate Bandpower: CHECK SIZE
 
 % Select by condition (check size)
 adetails.markers.types = {'51','52','53','54','55','56'};
@@ -245,32 +260,99 @@ stderror_highATThigh = std(meanpow_highATThigh) / sqrt( num_subj );
         
 disp('populated all check size power data')
 
-%% Plot
+%% Bandpower Comparison Plot
 % meanpowLOW : 12 Hz power (4 subj x 4  cond)
 % meanpowHIGH : 15 Hz power (4 subj x 4  cond)
 
+blue = [0, 0.4470, 0.7410]; orange = [0.8500, 0.3250, 0.0980];
+lineopac = 0.3;
 figure; 
+
 % sgtitle('ALL Subjects: Opacity Experiment'); 
-% sgtitle('ALL Subjects: Check Size Strong Experiment'); 
-sgtitle('ALL Subjects: Check Size Medium Experiment'); 
+sgtitle('ALL Subjects: Check Size Experiment'); 
 
 subplot(1,2,1); hold on
 ylabel('12 Hz Power'); xlabel('Stimuli Type');
 xticks(1:length(binlabels)); xticklabels(binlabels);
 % use error bars to plot the range of subject values
+e1 = errorbar(1:length(binlabels), mean(meanpow_lowATTlow), stderror_lowATTlow, 'LineWidth', 2, 'Color', blue);
+e2 = errorbar(1:length(binlabels), mean(meanpow_lowATThigh), stderror_lowATThigh, 'LineWidth', 2, 'Color', orange);
+% plot individual subject lines
+for s = 1:length(ALLSUBJ)
+    s1 = plot(meanpow_lowATTlow(s,:), '-', 'Color', blue); hold on;
+    s2 = plot(meanpow_lowATThigh(s,:), '-', 'Color', orange);
+    s1.Color(4) = lineopac; s2.Color(4) = lineopac;
+end
+legend([e1, e2], {'Attend 12 Hz', 'Attend 15 Hz'})
 
-
-errorbar(1:length(binlabels), mean(meanpow_lowATTlow), stderror_lowATTlow, 'LineWidth', 2)
-errorbar(1:length(binlabels), mean(meanpow_lowATThigh), stderror_lowATThigh, 'LineWidth', 2)
-legend({'Attend 12 Hz', 'Attend 15 Hz'})
 
 subplot(1,2,2); hold on
 ylabel('15 Hz Power'); xlabel('Stimuli Type');
 xticks(1:length(binlabels)); xticklabels(binlabels);
 % use error bars to plot the range of subject values
-errorbar(1:length(binlabels), mean(meanpow_highATTlow), stderror_highATTlow, 'LineWidth', 2)
-errorbar(1:length(binlabels), mean(meanpow_highATThigh), stderror_highATThigh, 'LineWidth', 2)
-legend({'Attend 12 Hz', 'Attend 15 Hz'})
+e1 = errorbar(1:length(binlabels), mean(meanpow_highATTlow), stderror_highATTlow, 'LineWidth', 2, 'Color', blue);
+e2 = errorbar(1:length(binlabels), mean(meanpow_highATThigh), stderror_highATThigh, 'LineWidth', 2, 'Color', orange);
+% plot individual subject lines
+for s = 1:length(ALLSUBJ)
+    s1 = plot(meanpow_highATTlow(s,:), '-', 'Color', blue); hold on;
+    s2 = plot(meanpow_highATThigh(s,:), '-', 'Color', orange);
+    s1.Color(4) = lineopac; s2.Color(4) = lineopac;
+end
 
+legend([e1, e2], {'Attend 12 Hz', 'Attend 15 Hz'})
 
+%% Load ergonomics responses
+% Responses: Conds x [MD BN LO FE OP IF CV RM GR]
+full_pref = [1 1 1 1 2 1 1 1 1];
+strong_pref = [1 1 2.5 3.6 2 1 2.5 1.5 1];
+med_pref = [1 1 3.2 4.2 3 5 3.5 2 2];
+weak_pref = [3 2 4.5 4.7 5 5 5 2.5 3];
+opac = [full_pref; strong_pref; med_pref; weak_pref];
+
+% missing GR all
+big_strong_pref = [1 2 3.2 3.9 3 4 2 1 1];
+med_strong_pref = [1 1 1 1.4 1 1 1 1.5 1];
+small_strong_pref = [2 2 3.8 4.6 5 4 4 4 2];
+strong = [big_strong_pref; med_strong_pref; small_strong_pref];
+
+% missing IF
+big_med_pref = [2 2 3 3.5 3       3     3 4 1];
+med_med_pref = [1 1 1 2 1         1    1 1 1];
+small_med_pref = [2 1 4.2 4.6 5   5    4.5 3 3];
+med = [big_med_pref; med_med_pref; small_med_pref];
+
+checksize = (strong + med)/2;
+
+opac_mean = mean(opac, 2);
+checksize_mean = mean(checksize, 2); 
+
+%% Conglomerate plot
+% [full strong med weak] x [rating diff12 diff15 ... classification]
+
+lowdiff = mean(meanpow_lowATTlow) - mean(meanpow_lowATThigh);
+highdiff =  mean(meanpow_highATThigh) - mean(meanpow_highATTlow);
+
+alldata = [ lowdiff' highdiff'];
+mymap = [1 0 0; 1 1 0; 0 1 0];  % color map of red, yellow, green
+
+figure; hold on; subplot(1,3,1);
+% sgtitle('Opacity Experiment');  imagesc(opac_mean); 
+sgtitle('Check Size Experiment');  imagesc(checksize_mean);
+colormap(mymap); caxis([0 4]); % colorbar;
+nx = size(alldata,2); ny = size(alldata,1);
+set(gca,'xtick', linspace(0.5,nx+0.5,nx+1), 'ytick', linspace(0.5,ny+.5,ny+1));
+set(gca,'xgrid', 'on', 'ygrid', 'on', 'gridlinestyle', '-', 'xcolor', 'k', 'ycolor', 'k');
+xticklabels({'Ergonomics'})
+yticklabels({'Full', 'Strong', 'Medium', 'Weak'})
+% yticklabels({'Big', 'Medium', 'Small'})
+
+% montage([ergim lowdiffim highdiffim])
+
+subplot(1,3,[2 3]); imagesc(alldata); 
+colormap(mymap); caxis([0 1]); % colorbar; 
+nx = size(alldata,2); ny = size(alldata,1);
+set(gca,'xtick', linspace(0.5,nx+0.5,nx+1), 'ytick', linspace(0.5,ny+.5,ny+1));
+set(gca,'xgrid', 'on', 'ygrid', 'on', 'gridlinestyle', '-', 'xcolor', 'k', 'ycolor', 'k');
+xticklabels({'12 Hz Power Diff', '15 Hz Power Diff'})
+yticklabels({'', '', '', ''})
 
