@@ -3,6 +3,7 @@ bcilab
 
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\combineddata\';
 
+
 EEGtrainOG = pop_loadset('filename', 'PK20190330_EEGtrain.set', 'filepath', direeg);
 EEGtestOG = pop_loadset('filename', 'PK20190330_EEGtest.set', 'filepath', direeg);
 
