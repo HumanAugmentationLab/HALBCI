@@ -76,29 +76,28 @@ if generate_text_file
     % Grab randomized values from each, specified by epoch number, for each
     % marker index.
     % These marker types correspond directly to the frequency lists.      
-    train_eeg_remove = []
-    test_eeg_remove = []
+    train_eeg_remove = [];
+    test_eeg_remove = [];
     current_index = 0;
     for marker_type = 1:size(marker_types)
         total_event_count = marker_frequencies(marker_type);
         selections = randperm(total_event_count);
-        fprintf(datasetFile, "\nTraining for Marker %d", marker_values(marker_type));
+  %     fprintf(datasetFile, "\nTraining for Marker %d", marker_values(marker_type));
         for training_idx = 1:(training_event_counts(marker_type))
             chosen_epoch = sorted_event_struct(selections(training_idx) + current_index);
             test_eeg_remove = [test_eeg_remove chosen_epoch.epoch];
-            fprintf(datasetFile, "\n%d ", chosen_epoch.epoch);
+            fprintf(datasetFile, "Train %d %d\n", marker_types(marker_type), chosen_epoch.epoch);
         end
         % Split up test set.
-        fprintf(datasetFile, "\nTesting for Marker %d", marker_values(marker_type));
+      %  fprintf(datasetFile, "\nTesting for Marker %d", marker_values(marker_type));
         for testing_idx = 1:testing_event_counts(marker_type)
             chosen_epoch = sorted_event_struct(selections(testing_idx + training_idx) + current_index);
             train_eeg_remove = [train_eeg_remove chosen_epoch.epoch];
-            fprintf(datasetFile, "\n%d ", chosen_epoch.epoch);
+            fprintf(datasetFile, "Test %d %d\n", marker_types(marker_type), chosen_epoch.epoch);
         end
         current_index = current_index + total_event_count;
     end
 end
-
 %% TODO : Parse existing file to create datasets.
 if generate_text_file
     train_eeg_remove = [];
