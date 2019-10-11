@@ -44,7 +44,6 @@ else
     generate_text_file = 1;
 end
 %%
-
 % Load the .set file for the preprocessed data.
 if process_datasets
     ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.set')));
@@ -54,14 +53,14 @@ end
 if generate_text_file
     datasetFile = fopen(strcat(direeg, fname_spec, '.txt'),'w');
     % For each marker, figure out how many events there are.
-    marker_list = str2double(cell2mat({EEG.event.type}'));
-    marker_types = unique(marker_list);
+    marker_values = str2double(cell2mat({EEG.event.type}'));
+    marker_types = unique(marker_values);
     marker_frequencies = zeros(size(marker_types))
     
     % Get frequencies of each marker
-    for marker_index = 1:size(marker_list)
-        disp(marker_list(marker_index));
-        table_index = find(marker_types == marker_list(marker_index));
+    for marker_index = 1:size(marker_values)
+        disp(marker_values(marker_index));
+        table_index = find(marker_types == marker_values(marker_index));
         marker_frequencies(table_index) = marker_frequencies(table_index)+ 1;
     end 
     
@@ -112,6 +111,6 @@ end
 %% Create datasets from the train and test data structures.
 training_EEG_struct = pop_select(EEG, 'notrial', train_eeg_remove)
 testing_EEG_struct = pop_select(EEG, 'notrial', test_eeg_remove)
-
+%% Save the datasets to the file system.
 pop_saveset(EEG, 'filename', fname_train, 'filepath', direeg)
 pop_saveset(EEG, 'filename', fname_test, 'filepath', direeg)
