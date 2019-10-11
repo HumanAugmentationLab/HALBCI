@@ -31,14 +31,14 @@ end
 % TODO Change these to not run if these procedures have already happened.
 if isfile(strcat(direeg, fname_train, '.set')) && isfile(strcat(direeg, fname_test, '.set'))
     disp("Datasets already exist. Will not make new datasets - should be all set to classify.");
-    process_datasets = 1;
+    process_datasets = 0;
 else
     disp("Generating datasets.")
     process_datasets = 1;
 end 
 if isfile(strcat(direeg, fname_spec, '.txt'))
     disp("Text file already exists. Will not make new file. ");
-    generate_text_file = 1;
+    generate_text_file = 0;
 else
     disp("Will generate text file.")
     generate_text_file = 1;
@@ -82,14 +82,12 @@ if generate_text_file
     for marker_type = 1:size(marker_types)
         total_event_count = marker_frequencies(marker_type);
         selections = randperm(total_event_count);
-  %     fprintf(datasetFile, "\nTraining for Marker %d", marker_values(marker_type));
         for training_idx = 1:(training_event_counts(marker_type))
             chosen_epoch = sorted_event_struct(selections(training_idx) + current_index);
             test_eeg_remove = [test_eeg_remove chosen_epoch.epoch];
             fprintf(datasetFile, "Train %d %d\n", marker_types(marker_type), chosen_epoch.epoch);
         end
         % Split up test set.
-      %  fprintf(datasetFile, "\nTesting for Marker %d", marker_values(marker_type));
         for testing_idx = 1:testing_event_counts(marker_type)
             chosen_epoch = sorted_event_struct(selections(testing_idx + training_idx) + current_index);
             train_eeg_remove = [train_eeg_remove chosen_epoch.epoch];
@@ -98,15 +96,20 @@ if generate_text_file
         current_index = current_index + total_event_count;
     end
 end
-%% TODO : Parse existing file to create datasets.
-if generate_text_file
+%% Parse existing file to create datasets.
+if ~generate_text_file
     train_eeg_remove = [];
     test_eeg_remove = [];
     datasetFile = fopen(strcat(direeg, fname_spec, '.txt'),'r');
-    configuration = fscanf(datasetFile, '%c')
-    
+    configuration = textscan(datasetFile, '%s %d %d\n');
+    for index = 1:size(configuration{1, 1}(1))
+        if (configuration{1, 1}(index) == "train") 
+            test_eeg_remove = [test_eeg_remove configuration{1,3}(index)];
+        else
+            train_eeg_remove = [train_eeg_remove configuration{1,3}(index)];
+        end 
+    end    
 end
-
 %% Create datasets from the train and test data structures.
 training_EEG_struct = pop_select(EEG, 'notrial', train_eeg_remove)
 testing_EEG_struct = pop_select(EEG, 'notrial', test_eeg_remove)
