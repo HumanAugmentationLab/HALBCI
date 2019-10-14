@@ -55,9 +55,10 @@ if generate_text_file
     % For each marker, figure out how many events there are.
     marker_values = str2double(cell2mat({EEG.epoch.eventtype}'));
     marker_types = unique(marker_values);
-    marker_frequencies = zeros(size(marker_types))
+    marker_frequencies = zeros(size(marker_types));
     
     % Get frequencies of each marker
+    %for mvi = 1:length(marker_types); marker_frequencies(mvi)= sum(marker_values==marker_types(mvi));  end
     for marker_index = 1:size(marker_values)
         disp(marker_values(marker_index));
         table_index = find(marker_types == marker_values(marker_index));
