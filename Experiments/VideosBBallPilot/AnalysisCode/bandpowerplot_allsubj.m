@@ -160,14 +160,6 @@ clear powfull_lowATTlow powfull_highATTlow powfull_lowATThigh powfull_highATThig
     
 end
 
-num_subj = length(ALLSUBJ);
-stderror_lowATTlow = std(meanpow_lowATTlow) / sqrt( num_subj );
-stderror_lowATThigh = std(meanpow_lowATThigh) / sqrt( num_subj );
-stderror_highATTlow = std(meanpow_highATTlow) / sqrt( num_subj );
-stderror_highATThigh = std(meanpow_highATThigh) / sqrt( num_subj );
-        
-disp('populated all opacity power data')
-
 %% Calculate Bandpower: CHECK SIZE
 
 % Select by condition (check size)
@@ -252,54 +244,136 @@ for s = 1:length(ALLSUBJ)
     end
 end
 
-num_subj = length(ALLSUBJ);
-stderror_lowATTlow = std(meanpow_lowATTlow) / sqrt( num_subj );
-stderror_lowATThigh = std(meanpow_lowATThigh) / sqrt( num_subj );
-stderror_highATTlow = std(meanpow_highATTlow) / sqrt( num_subj );
-stderror_highATThigh = std(meanpow_highATThigh) / sqrt( num_subj );
+%%
+difflow = meanpow_lowATTlow - meanpow_lowATThigh;
+diffhigh = meanpow_highATThigh - meanpow_highATTlow;
+meanlow = mean(difflow); cilow = 1.96*std(difflow)/sqrt(length(ALLSUBJ));
+meanhigh = mean(diffhigh); cihigh = 1.96*std(diffhigh)/sqrt(length(ALLSUBJ));
+figure; ALLSUBJ = 1:9;
+subplot(1,2,1); ylabel('12 Hz Power');
+subplot(1,2,2); ylabel('15 Hz Power');
+dotcolor = [217,235,211]/255; % [107,168,215]/255;
+linecolor = [11,137,1]/255; % [32,80,189]/255;
+fs = 16;
+
+binlabels = {'Full', 'Strong', 'Medium', 'Weak'};
+for s = 1:length(ALLSUBJ)
+    subplot(1,2,1)
+    s1 = plot(difflow(s,:), 'o', 'Color', dotcolor,  'MarkerSize', 8, 'MarkerFaceColor', dotcolor, 'MarkerEdgeColor', 'k'); hold on;
+    subplot(1,2,2)
+    s2 = plot(diffhigh(s,:), 'o', 'Color', dotcolor, 'MarkerSize', 8,  'MarkerFaceColor', dotcolor, 'MarkerEdgeColor', 'k'); hold on;
+end
+
+% binlabels = {'Big', 'Medium', 'Small'};
+subplot(1,2,1); hold on
+e1 = errorbar(1:length(binlabels), meanlow, cilow, 'Color', linecolor, 'LineWidth', 3.5,'CapSize', 18);
+yline(0, 'k', 'LineWidth', 2); ylim([-0.51 6]);
+xlim([0.8 length(binlabels)+0.2]);
+xticks(1:length(binlabels)); xticklabels(binlabels);
+ax = gca;
+ax.YAxis.MinorTick = 'on';
+ax.YAxis.MinorTickValues = -0.5:0.5:6;
+set(gca,'FontSize',fs);
+
+subplot(1,2,2); hold on
+e2 = errorbar(1:length(binlabels), meanhigh, cihigh, 'Color', linecolor, 'LineWidth', 3.5,'CapSize', 18);
+yline(0, 'k', 'LineWidth', 2);
+xlim([0.8 length(binlabels)+0.2]); ylim([-0.51 6])
+xticks(1:length(binlabels)); xticklabels(binlabels);
+ax = gca;
+ax.YAxis.MinorTick = 'on';
+ax.YAxis.MinorTickValues = -0.5:0.5:6;
+set(gca,'FontSize',fs);
+
+
+
+%% Bandpower Comparison Plot
+ALLSUBJ = 1:9;
+stderror_lowATTlow = 1.96*std(meanpow_lowATTlow) / sqrt( num_subj );
+stderror_lowATThigh = 1.96*std(meanpow_lowATThigh) / sqrt( num_subj );
+stderror_highATTlow = 1.96*std(meanpow_highATTlow) / sqrt( num_subj );
+stderror_highATThigh = 1.96*std(meanpow_highATThigh) / sqrt( num_subj );
         
 disp('populated all check size power data')
 
-%% Bandpower Comparison Plot
-% meanpowLOW : 12 Hz power (4 subj x 4  cond)
-% meanpowHIGH : 15 Hz power (4 subj x 4  cond)
+% meanpowLOW : 12 Hz power (4 subj x N  stim cond)
+% meanpowHIGH : 15 Hz power (4 subj x N  stim cond)
 
-blue = [0, 0.4470, 0.7410]; orange = [0.8500, 0.3250, 0.0980];
+linecolor = [0,93,255]/255; color2 = [160,0,149]/255;
+% blue = [0, 0.4470, 0.7410]; orange = [0.8500, 0.3250, 0.0980];
 lineopac = 0.3;
+lw = 3; lw_sub = 2; fs = 14;
 figure; 
 
-% sgtitle('ALL Subjects: Opacity Experiment'); 
-sgtitle('ALL Subjects: Check Size Experiment'); 
+% sgtitle('ALL Subjects: Opacity Experiment');  
+binlabels = {'Full', 'Strong', 'Medium', 'Weak'};
+% sgtitle('ALL Subjects: Check Size Experiment'); 
+% binlabels = {'Big Checker', 'Medium Checker', 'Small Checker'};
 
-subplot(1,2,1); hold on
-ylabel('12 Hz Power'); xlabel('Stimuli Type');
+subplot(1,2,1); ylim([0 7]); set(gca,'FontSize',fs); hold on
+ylabel('12 Hz Power'); % xlabel('Stimuli Type');
 xticks(1:length(binlabels)); xticklabels(binlabels);
 % use error bars to plot the range of subject values
-e1 = errorbar(1:length(binlabels), mean(meanpow_lowATTlow), stderror_lowATTlow, 'LineWidth', 2, 'Color', blue);
-e2 = errorbar(1:length(binlabels), mean(meanpow_lowATThigh), stderror_lowATThigh, 'LineWidth', 2, 'Color', orange);
 % plot individual subject lines
 for s = 1:length(ALLSUBJ)
-    s1 = plot(meanpow_lowATTlow(s,:), '-', 'Color', blue); hold on;
-    s2 = plot(meanpow_lowATThigh(s,:), '-', 'Color', orange);
+    s1 = plot(meanpow_lowATTlow(s,:), '-', 'Color', linecolor, 'LineWidth', lw_sub); hold on;
+    s2 = plot(meanpow_lowATThigh(s,:), '-', 'Color', color2, 'LineWidth', lw_sub);
     s1.Color(4) = lineopac; s2.Color(4) = lineopac;
 end
+e1 = errorbar(1:length(binlabels), mean(meanpow_lowATTlow), stderror_lowATTlow, 'LineWidth', lw, 'Color', linecolor);
+e2 = errorbar(1:length(binlabels), mean(meanpow_lowATThigh), stderror_lowATThigh, 'LineWidth', lw, 'Color', color2);
 legend([e1, e2], {'Attend 12 Hz', 'Attend 15 Hz'})
+xlim([0.9 4.1]);
 
-
-subplot(1,2,2); hold on
-ylabel('15 Hz Power'); xlabel('Stimuli Type');
+subplot(1,2,2); ylim([0 12]); set(gca,'FontSize',fs); hold on
+ylabel('15 Hz Power'); % xlabel('Stimuli Type');
 xticks(1:length(binlabels)); xticklabels(binlabels);
 % use error bars to plot the range of subject values
-e1 = errorbar(1:length(binlabels), mean(meanpow_highATTlow), stderror_highATTlow, 'LineWidth', 2, 'Color', blue);
-e2 = errorbar(1:length(binlabels), mean(meanpow_highATThigh), stderror_highATThigh, 'LineWidth', 2, 'Color', orange);
 % plot individual subject lines
 for s = 1:length(ALLSUBJ)
-    s1 = plot(meanpow_highATTlow(s,:), '-', 'Color', blue); hold on;
-    s2 = plot(meanpow_highATThigh(s,:), '-', 'Color', orange);
+    s1 = plot(meanpow_highATTlow(s,:), '-', 'Color', linecolor, 'LineWidth', lw_sub); hold on;
+    s2 = plot(meanpow_highATThigh(s,:), '-', 'Color', color2, 'LineWidth', lw_sub);
     s1.Color(4) = lineopac; s2.Color(4) = lineopac;
 end
+e1 = errorbar(1:length(binlabels), mean(meanpow_highATTlow), stderror_highATTlow, 'LineWidth', lw, 'Color', linecolor);
+e2 = errorbar(1:length(binlabels), mean(meanpow_highATThigh), stderror_highATThigh, 'LineWidth', lw, 'Color', color2);
+xlim([0.9 4.1]);
 
 legend([e1, e2], {'Attend 12 Hz', 'Attend 15 Hz'})
+
+%% T-tests on opacity
+
+[~, p_lowfull, ~, ~] = ttest(meanpow_lowATTlow(:,1), meanpow_lowATThigh(:,1));
+[~, p_lowstrong, ~, ~] = ttest(meanpow_lowATTlow(:,2), meanpow_lowATThigh(:,2));
+[~, p_lowmed, ~, ~] = ttest(meanpow_lowATTlow(:,3), meanpow_lowATThigh(:,3));
+[~, p_lowweak, ~, ~] = ttest(meanpow_lowATTlow(:,4), meanpow_lowATThigh(:,4));
+
+p_low = [p_lowfull p_lowstrong p_lowmed p_lowweak]
+[~,~,~,p_lowadj] = fdr_bh(p_low)
+
+[~, p_highfull, ~, ~] = ttest(meanpow_highATTlow(:,1), meanpow_highATThigh(:,1));
+[~, p_highstrong, ~, ~] = ttest(meanpow_highATTlow(:,2), meanpow_highATThigh(:,2));
+[~, p_highmed, ~, ~] = ttest(meanpow_highATTlow(:,3), meanpow_highATThigh(:,3));
+[~, p_highweak, ~, ~] = ttest(meanpow_highATTlow(:,4), meanpow_highATThigh(:,4));
+
+p_high = [p_highfull p_highstrong p_highmed p_highweak]
+[~,~,~,p_highadj] = fdr_bh(p_high)
+
+%% T-test on check size
+[~, p_lowbig, ~, ~] = ttest(meanpow_lowATTlow(:,1), meanpow_lowATThigh(:,1));
+[~, p_lowmed, ~, ~] = ttest(meanpow_lowATTlow(:,2), meanpow_lowATThigh(:,2));
+[~, p_lowsm, ~, ~] = ttest(meanpow_lowATTlow(:,3), meanpow_lowATThigh(:,3));
+
+p_low = [p_lowbig p_lowmed p_lowsm]
+[~,~,~,p_lowadj] = fdr_bh(p_low)
+
+[~, p_highbig, ~, ~] = ttest(meanpow_highATTlow(:,1), meanpow_highATThigh(:,1));
+[~, p_highmed, ~, ~] = ttest(meanpow_highATTlow(:,2), meanpow_highATThigh(:,2));
+[~, p_highsm, ~, ~] = ttest(meanpow_highATTlow(:,3), meanpow_highATThigh(:,3));
+
+p_high = [p_highbig p_highmed p_highsm]
+[~,~,~,p_highadj] = fdr_bh(p_high)
+
 
 %% Load ergonomics responses
 % Responses: Conds x [MD BN LO FE OP IF CV RM GR]
@@ -326,18 +400,21 @@ checksize = (strong + med)/2;
 opac_mean = mean(opac, 2);
 checksize_mean = mean(checksize, 2); 
 
-%% Conglomerate plot
+%% Conglomerate matrix
 % [full strong med weak] x [rating diff12 diff15 ... classification]
 
 lowdiff = mean(meanpow_lowATTlow) - mean(meanpow_lowATThigh);
 highdiff =  mean(meanpow_highATThigh) - mean(meanpow_highATTlow);
 
-alldata = [ lowdiff' highdiff'];
+% alldata_opac = [opac_mean lowdiff' highdiff']
+alldata_checksize = [checksize_mean lowdiff' highdiff']
+
+%% Conglomerate plot
 mymap = [1 0 0; 1 1 0; 0 1 0];  % color map of red, yellow, green
 
 figure; hold on; subplot(1,3,1);
-% sgtitle('Opacity Experiment');  imagesc(opac_mean); 
-sgtitle('Check Size Experiment');  imagesc(checksize_mean);
+sgtitle('Opacity Experiment');  imagesc(opac_mean); 
+% sgtitle('Check Size Experiment');  imagesc(checksize_mean);
 colormap(mymap); caxis([0 4]); % colorbar;
 nx = size(alldata,2); ny = size(alldata,1);
 set(gca,'xtick', linspace(0.5,nx+0.5,nx+1), 'ytick', linspace(0.5,ny+.5,ny+1));

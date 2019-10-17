@@ -1,4 +1,4 @@
-% Responses:
+% Load Responses:
 % Conds x [MD BN LO FE OP IF CV RM GR]
 full_pref = [1 1 1 1 2 1 1 1 1];
 strong_pref = [1 1 2.5 3.6 2 1 2.5 1.5 1];
@@ -24,25 +24,30 @@ checksize = (strong + med)/2;
 % 3 cond x 9 subj
 
 opac_mean = mean(opac, 2);
-opac_stderror = std(opac, 0, 2) / sqrt( length(opac) );
+opac_stderror = 1.96* std(opac, 0, 2) / sqrt( length(opac) );
 
 checksize_mean = mean(checksize, 2);
-checksize_stderror = std(checksize, 0, 2) / sqrt( length(strong) + length(med) );
+checksize_stderror = 1.96* std(checksize, 0, 2) / sqrt( length(strong) + length(med) );
  
 %% Plot bar for each experiment
+fs = 16; lw = 2;
+
 figure; bar( opac_mean ); hold on;
-er = errorbar(1:length(opac_mean), opac_mean, opac_stderror, 'LineWidth', 2);
-er.Color = [0 0 0]; er.LineStyle = 'none'; er.LineWidth = 1;
+er = errorbar(1:length(opac_mean), opac_mean, opac_stderror, 'LineWidth', lw);
+er.Color = [0 0 0]; er.LineStyle = 'none'; er.LineWidth = lw;
 title("Opacity Preferences");  ylim([0 5])
 xlabel("Conditions"), ylabel("Preference: 1 - hate, 5 - do not mind")
 xticklabels( ["Fully Opaque", "Strong Opacity", "Medium Opacity", "Weak Opacity"])
+set(gca,'FontSize',fs)
 
 figure; bar( checksize_mean ); hold on
-er = errorbar(1:length(checksize_mean), checksize_mean, checksize_stderror, 'LineWidth', 2);
-er.Color = [0 0 0]; er.LineStyle = 'none';  er.LineWidth = 1;
+er = errorbar(1:length(checksize_mean), checksize_mean, checksize_stderror, 'LineWidth', lw);
+er.Color = [0 0 0]; er.LineStyle = 'none';  er.LineWidth = lw;
 title("Check Size Preferences");  ylim([0 5])
 xlabel("Conditions"), ylabel("Preference: 1 - hate, 5 - do not mind")
-xticklabels( ["Big Check", "Medium Check", "Small Check"])
+xticklabels( ["Big Checker", "Medium Checker", "Small Checker"])
+set(gca,'FontSize',fs)
+
 
 %% Run linear regression on opacity
 alpha_values = [255 125 85 50]';
@@ -58,6 +63,19 @@ legend({'Average Ergonomics Rating', 'Linear Regression'})
 %% Run ANOVA and t tests on check size
 [p,tbl,stats] = anova1(checksize');
 
-[h_bm, p_bm, ci_bm, stats_bm] = ttest2(checksize(1,:), checksize(2,:));
-[h_bs, p_bs, ci_bs, stats_bs]  = ttest2(checksize(1,:), checksize(3,:));
-[h_ms, p_ms, ci_ms, stats_ms]  = ttest2(checksize(2,:), checksize(3,:));
+[h_bm, p_bm, ci_bm, stats_bm] = ttest(checksize(1,:), checksize(2,:));
+[h_bs, p_bs, ci_bs, stats_bs]  = ttest(checksize(1,:), checksize(3,:));
+[h_ms, p_ms, ci_ms, stats_ms]  = ttest(checksize(2,:), checksize(3,:));
+
+[~,~,~,padj] = fdr_bh([p_bm p_bs p_ms])
+
+%% Run ANOVA and t tests on check size
+% [p,tbl,stats] = anova1(opac');
+[h_fs, p_fs, ci_fs, stats_fs]  = ttest(opac(1,:), opac(2,:));
+[h_fm, p_fm, ci_fm, stats_fm]  = ttest(opac(1,:), opac(3,:));
+[h_fw, p_fw, ci_fw, stats_fw]  = ttest(opac(1,:), opac(4,:));
+[h_sm, p_sm, ci_sm, stats_sm]  = ttest(opac(2,:), opac(3,:));
+[h_sw, p_sw, ci_sw, stats_sw]  = ttest(opac(2,:), opac(4,:));
+[h_mw, p_mw, ci_mw, stats_mw]  = ttest(opac(3,:), opac(4,:));
+
+[~,~,~,padj] = fdr_bh([p_fs p_fm p_fw p_sm p_sw p_mw])

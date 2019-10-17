@@ -12,34 +12,19 @@ direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\ic
 % RM = pop_loadset('filename', 'RM-VideoCheckOpacity.set', 'filepath', direeg);
 % GR = pop_loadset('filename', 'GR-VideoCheckOpacity.set', 'filepath', direeg);
 
-% CHECK SIZE STRONG EXPERIMENT
-MD_Strong = pop_loadset('filename', 'MD-VideoCheckSize-Strong.set', 'filepath', direeg);
-BN_Strong = pop_loadset('filename', 'BN-VideoCheckSize-Strong.set', 'filepath', direeg);
-LO_Strong = pop_loadset('filename', 'LO-VideoCheckSize-Strong.set', 'filepath', direeg);
-FE_Strong = pop_loadset('filename', 'FE-VideoCheckSize-Strong.set', 'filepath', direeg);
-OP_Strong = pop_loadset('filename', 'OP-VideoCheckSize-Strong.set', 'filepath', direeg);
-IF_Strong = pop_loadset('filename', 'IF-VideoCheckSize-Strong.set', 'filepath', direeg);
-CV_Strong = pop_loadset('filename', 'CV-VideoCheckSize-Strong.set', 'filepath', direeg);
-RM_Strong = pop_loadset('filename', 'RM-VideoCheckSize-Strong.set', 'filepath', direeg);
-GR_Strong = pop_loadset('filename', 'GR-VideoCheckSize-Strong.set', 'filepath', direeg);
+% CHECK SIZE EXPERIMENT
+MD = pop_loadset('filename', 'MD-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+BN = pop_loadset('filename', 'BN-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+LO = pop_loadset('filename', 'LO-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+FE = pop_loadset('filename', 'FE-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+OP = pop_loadset('filename', 'OP-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+IF = pop_loadset('filename', 'IF-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+CV = pop_loadset('filename', 'CV-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+RM = pop_loadset('filename', 'RM-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+GR = pop_loadset('filename', 'GR-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
 
-% CHECK SIZE MEDIUM EXPERIMENT
-MD_Med = pop_loadset('filename', 'MD-VideoCheckSize-Med.set', 'filepath', direeg);
-BN_Med = pop_loadset('filename', 'BN-VideoCheckSize-Med.set', 'filepath', direeg);
-LO_Med = pop_loadset('filename', 'LO-VideoCheckSize-Med.set', 'filepath', direeg);
-FE_Med = pop_loadset('filename', 'FE-VideoCheckSize-Med.set', 'filepath', direeg);
-OP_Med = pop_loadset('filename', 'OP-VideoCheckSize-Med.set', 'filepath', direeg);
-IF_Med = pop_loadset('filename', 'IF-VideoCheckSize-Med.set', 'filepath', direeg);
-CV_Med = pop_loadset('filename', 'CV-VideoCheckSize-Med.set', 'filepath', direeg);
-RM_Med = pop_loadset('filename', 'RM-VideoCheckSize-Med.set', 'filepath', direeg);
-GR_Med = pop_loadset('filename', 'GR-VideoCheckSize-Med.set', 'filepath', direeg);
 
-% ANOVA: Opacity
-% ALLSUBJ = {MD BN LO FE OP IF CV RM GR};          
-
-% ANOVA: Check Size -- keep Strong/Med order for ANOVA struct
-ALLSUBJ = {MD_Strong MD_Med BN_Strong BN_Med LO_Strong LO_Med FE_Strong FE_Med OP_Strong OP_Med IF_Strong IF_Med CV_Strong CV_Med RM_Strong RM_Med GR_Strong GR_Med};   
-
+ALLSUBJ = {MD BN LO FE OP IF CV RM GR};          
 disp('loaded all subject data')
 
 %% ANOVA: OPACITY
@@ -48,8 +33,9 @@ adetails.markers.types = {'51','52','53','54','55','56','57','58'};
 
 
 % Create empty anova struct
-clear anovastruct
-anovastruct.subj = []; anovastruct.cond = []; anovastruct.att = []; anovastruct.pow_val = []; anovastruct.freq = [];
+clear highstruct lowstruct
+highstruct.subj = []; highstruct.cond = []; highstruct.att = []; highstruct.pow_val = [];
+lowstruct.subj = []; lowstruct.cond = []; lowstruct.att = []; lowstruct.pow_val = [];
 
 
 for s = 1:length(ALLSUBJ)
@@ -115,15 +101,21 @@ for s = 1:length(ALLSUBJ)
        end
        
         % calculate mean across channels (avg over epochs x avg over chan)
-        anovastruct.pow_val = [anovastruct.pow_val; mean(mean(powlowbin, 2));  mean(mean(powhighbin, 2))];
-        anovastruct.freq = [anovastruct.freq; 12; 15];
-        anovastruct.subj = [anovastruct.subj; curr_subj; curr_subj];                
-        anovastruct.cond = [anovastruct.cond; cond; cond];
+        highstruct.pow_val = [highstruct.pow_val; mean(mean(powhighbin, 2))];
+        lowstruct.pow_val = [lowstruct.pow_val; mean(mean(powlowbin, 2))];
+        
+        highstruct.subj = [highstruct.subj; curr_subj];     
+        lowstruct.subj = [lowstruct.subj; curr_subj];              
+
+        highstruct.cond = [highstruct.cond; cond];
+        lowstruct.cond = [lowstruct.cond; cond];
        
        if mod(c,2) == 1
-           anovastruct.att = [anovastruct.att; "Attend"; "Not Attend"];
+           lowstruct.att = [lowstruct.att; "Attend"];
+           highstruct.att = [highstruct.att;"Not Attend"];
        else
-           anovastruct.att = [anovastruct.att; "Not Attend"; "Attend"];
+           lowstruct.att = [lowstruct.att; "Not Attend"];
+           highstruct.att = [highstruct.att;"Attend"];
        end
        
         
@@ -134,8 +126,10 @@ end
 adetails.markers.types = {'51','52','53','54','55','56'};
 
 % Create empty anova struct
-clear anovastruct;
-anovastruct.opacity = []; anovastruct.subj = []; anovastruct.cond = []; anovastruct.att = []; anovastruct.pow_val = []; anovastruct.freq = [];
+clear highstruct lowstruct;
+% anovastruct.opacity = []; anovastruct.freq = [];
+highstruct.subj = []; highstruct.cond = []; highstruct.att = []; highstruct.pow_val = []; 
+lowstruct.subj = []; lowstruct.cond = []; lowstruct.att = []; lowstruct.pow_val = []; 
 
 for s = 1:length(ALLSUBJ)
     EEG = ALLSUBJ{s};
@@ -143,11 +137,11 @@ for s = 1:length(ALLSUBJ)
     % ----------------- Set subject name -------------- %
     curr_subj = EEG.filename(1:2) + "";    
     % ----------------- Set opacity condition -------------- %
-    if mod(s,2) == 1
-        curr_opac = "Strong";
-    else
-        curr_opac = "Med";
-    end
+%     if mod(s,2) == 1
+%         curr_opac = "Strong";
+%     else
+%         curr_opac = "Med";
+%     end
         
     % ----------------- Crop EEG for various conditions -------------- %
     % Find relevant marker and indices
@@ -198,31 +192,52 @@ for s = 1:length(ALLSUBJ)
        end
        
         % calculate mean across channels (# epochs x 1)
-        anovastruct.pow_val = [anovastruct.pow_val; mean(mean(powlowbin, 2)); mean(mean(powhighbin, 2))];
-        anovastruct.subj = [anovastruct.subj; curr_subj; curr_subj];                
-        anovastruct.freq = [anovastruct.freq; 12; 15];
-        anovastruct.opacity = [anovastruct.opacity; curr_opac; curr_opac];        
-        anovastruct.cond = [anovastruct.cond; cond; cond];
+        lowstruct.pow_val = [lowstruct.pow_val; mean(mean(powlowbin, 2))];
+        highstruct.pow_val = [highstruct.pow_val; mean(mean(powhighbin, 2))];
+        
+        lowstruct.subj = [lowstruct.subj; curr_subj];                
+        highstruct.subj = [highstruct.subj; curr_subj];  
+        
+%         anovastruct.opacity = [anovastruct.opacity; curr_opac; curr_opac];        
+        lowstruct.cond = [lowstruct.cond; cond];                    
+        highstruct.cond = [highstruct.cond; cond];
         
 
        % ----------------- Set attention condition -------------- %
        if mod(c,2) == 1
-           anovastruct.att = [anovastruct.att; "Attend"; "Not Attend"];
+           lowstruct.att = [lowstruct.att; "Attend"];
+           highstruct.att = [highstruct.att; "Not Attend"];
+
        else
-           anovastruct.att = [anovastruct.att; "Not Attend"; "Attend"];
+           lowstruct.att = [lowstruct.att; "Not Attend"];
+           highstruct.att = [highstruct.att; "Attend"];
        end
     end
 end
 
 %% Results: OPACITY
-anovastruct = anova_opac;
+% highstruct = anova_opac;
 
-p_opac = anovan(anovastruct.pow_val, {anovastruct.subj anovastruct.freq anovastruct.cond anovastruct.att}, ...
+p_low = anovan(lowstruct.pow_val, ...
+    {lowstruct.subj lowstruct.cond lowstruct.att}, ...
     'random', 1, 'model','full','varnames',...
-    {'Subject','Frequency', 'Opacity','Attend Condition'})
+    {'Subject','Opacity','Attend Condition'})
+
+p_high = anovan(highstruct.pow_val, ...
+    {highstruct.subj highstruct.cond highstruct.att}, ...
+    'random', 1, 'model','full','varnames',...
+    {'Subject','Opacity','Attend Condition'})
+
+
+
 %% Results: CHECK SIZE
-anovastruct = anova_checksize;
-p_checksize = anovan(anovastruct.pow_val, ...
-    {anovastruct.subj anovastruct.opacity anovastruct.freq anovastruct.cond anovastruct.att}, ...
-    'random', 1, 'model','interaction','varnames',...
-    {'Subject','Opacity','Frequency','Check Size','Attend Condition'})
+
+p_low = anovan(lowstruct.pow_val, ...
+    {lowstruct.subj lowstruct.cond lowstruct.att}, ...
+    'random', 1, 'model','full','varnames',...
+    {'Subject','Checker Size','Attend Condition'})
+
+p_high = anovan(highstruct.pow_val, ...
+    {highstruct.subj highstruct.cond highstruct.att}, ...
+    'random', 1, 'model','full','varnames',...
+    {'Subject','Checker Size','Attend Condition'})
