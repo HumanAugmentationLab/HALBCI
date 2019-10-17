@@ -231,12 +231,17 @@ save(classificationdatafile, 'validationAccuracy','testAccuracy','testAccuracy',
     'conditions','markersForConditions','subjects','fnameeeg', 'allPartitionedModel','allTrainedClassifier');
 
 %% Load data
-%direeg = 'K:HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
-%load(strcat(direeg,'Classification\','ClassificationAccuracy-Checker-SVMlog2019-10-14_at_13-43.mat'))
+direeg = 'K:HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
+%fnameeeg = 'VideoCheckOpacity';% Base of file name
+
+%load(strcat(direeg,'Classification\','ClassificationAccuracy-VideoCheckOpacity-SVMlog-search5pout-2019-10-14_at_16-29.mat'))
+
+load(strcat(direeg,'Classification\','ClassificationAccuracy-Checker-SVMlog-search5pout-2019-10-14_at_16-10.mat'))
+
 
 %%
-%cond2plot = [2  4 5 6];
-cond2plot = [2 3 4];
+cond2plot = [2  4 5 6];
+%cond2plot = [2 3 4];
 
 figure;
 subplot(2,1,1)
@@ -278,4 +283,62 @@ plot(checklda(1,:),'r','LineWidth',2)
 plot(checklda(2,:),'r--','LineWidth',2)
 grid on
 legend('SVM train','SVM test','LDA train','LDA test')
+
+
+%%  Alpha values and classification rates
+alphacheck = [255 125 85 50]./255;
+
+%% Preferences by classification rates
+% Conds x [MD BN LO FE OP IF CV RM GR]
+full_pref = [1 1 1 1 2 1 1 1 1];
+strong_pref = [1 1 2.5 3.6 2 1 2.5 1.5 1];
+med_pref = [1 1 3.2 4.2 3 5 3.5 2 2];
+weak_pref = [3 2 4.5 4.7 5 5 5 2.5 3];
+opac = [full_pref; strong_pref; med_pref; weak_pref];
+
+subjects = {'BN','CV','FE', 'GR','IF','LO','MD','OP','RM'}; % 
+alorder = [2 7 4 9 6 3 1 5 8];
+newopac = opac(:,alorder);
+
+cond2plot = [2  4 5 6];
+
+valaccsel = validationAccuracy(:,cond2plot)';
+
+
+figure
+scatter(reshape(newopac,1,36),reshape(valaccsel,1,36),'ko');
+hold on;
+for i = 1:4
+scatter(newopac(i,:),valaccsel(i,:),'filled'); 
+end
+
+corr(reshape(newopac,1,36),reshape(valaccsel,1,36),'ko')
+
+
+p = polyfit(reshape(newopac,1,36),reshape(valaccsel,1,36), 1);
+f = polyval(p, reshape(newopac,1,36));
+%[r2, rmse] = rsquare(mean(newopac),f)
+
+%% 
+checksize_mean
+checksize_acc_train = mean(validationAccuracy(:,cond2plot))
+checksize_acc_test = mean(testAccuracy(:,cond2plot))
+
+%%
+opacity_mean = opac_mean'
+opacity_acc_train = mean(validationAccuracy(:,cond2plot))
+opacity_acc_test = mean(testAccuracy(:,cond2plot))
+%%
+prefs = [opacity_mean checksize_mean];
+acctrain = [opacity_acc_train checksize_acc_train];
+acctest = [opacity_acc_test checksize_acc_test];
+%%
+figure
+scatter(checksize_mean,checksize_acc_train,'b','filled')
+hold on
+scatter(checksize_mean,checksize_acc_test,'c','filled')
+scatter(opacity_mean,opacity_acc_train,'r','filled')
+scatter(opacity_mean,opacity_acc_test,'m','filled')
+
+save('preferenceVSaccuracy.mat','opacity_acc_test','opacity_mean','opacity_acc_train','prefs','checksize_acc_test','checksize_acc_train','checksize_mean','acctest','acctrain')
 
