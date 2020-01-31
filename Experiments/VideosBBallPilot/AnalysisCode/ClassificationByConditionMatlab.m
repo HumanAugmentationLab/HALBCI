@@ -1,51 +1,51 @@
-% Classification of SSVEP Video Data
+%% Classification of SSVEP Video Data
 clear
+direeg = 'K:HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
+
+% list of subject names in alphabetical order
+subjects = {'AI','BN','CV','DC','FE','GR','HL','IF','JR','LO','LT','MD','OP','QP','RM','VM'}; 
+
+%% Run classification
 
 train_probability = .8;
-
-direeg = 'K:HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
-fnameeeg = 'VideoCheckOpacity';% Base of file name
-% fnameeeg = 'VideoCheckSize-CombinedStrongMedium'; % 
-subjects = {'BN','CV','FE', 'GR','IF','LO','MD','OP','RM'}; % 
 
 % fnameeeg = 'Run1-OpenClosed-Filt1to46-epochplus100closed-ica-pruned-rej6epochs'; %just for testing
 % direeg = 'C:\Users\saman\Documents\MATLAB\TMSdataTEMP'; %testing local
 % subjects = {'ZZ'};%
 % add something about train or test and put in loop
 
-% conditions = {'Compare All','Big Checker','Medium Checker','Small Checker'};
-% markersForConditions{1,1} = {'51','53','55'};
-% markersForConditions{1,2} = {'52','54','56'};
-% markersForConditions{2,1} = {'51'};
-% markersForConditions{2,2} = {'52'};
-% markersForConditions{3,1} = {'53'};
-% markersForConditions{3,2} = {'54'};
-% markersForConditions{4,1} = {'55'};
-% markersForConditions{4,2} = {'56'};
-
-
-conditions = {'Compare All', 'Full','Compare Video Only', 'Strong','Medium','Weak'};
-markersForConditions{1,1} = {'51','53','55','57'};
-markersForConditions{1,2} = {'52','54','56','58'};
-
+% For checker size classification
+fnameeeg = 'VideoCheckSize-CombinedStrongMedium'; % 
+conditions = {'Compare All','Big Checker','Medium Checker','Small Checker'};
+markersForConditions{1,1} = {'51','53','55'};
+markersForConditions{1,2} = {'52','54','56'};
 markersForConditions{2,1} = {'51'};
 markersForConditions{2,2} = {'52'};
+markersForConditions{3,1} = {'53'};
+markersForConditions{3,2} = {'54'};
+markersForConditions{4,1} = {'55'};
+markersForConditions{4,2} = {'56'};
 
-markersForConditions{3,1} = {'53','55','57'};
-markersForConditions{3,2} = {'54','56','58'};
+% For checker opacity classification
 
-markersForConditions{4,1} = {'53'};
-markersForConditions{4,2} = {'54'};
-markersForConditions{5,1} = {'55'};
-markersForConditions{5,2} = {'56'};
-markersForConditions{6,1} = {'57'};
-markersForConditions{6,2} = {'58'};
+% fnameeeg = 'VideoCheckOpacity';% Base of file name
+% conditions = {'Compare All', 'Full','Compare Video Only', 'Strong','Medium','Weak'};
+% markersForConditions{1,1} = {'51','53','55','57'};
+% markersForConditions{1,2} = {'52','54','56','58'};
+% 
+% markersForConditions{2,1} = {'51'};
+% markersForConditions{2,2} = {'52'};
+% 
+% markersForConditions{3,1} = {'53','55','57'};
+% markersForConditions{3,2} = {'54','56','58'};
+% 
+% markersForConditions{4,1} = {'53'};
+% markersForConditions{4,2} = {'54'};
+% markersForConditions{5,1} = {'55'};
+% markersForConditions{5,2} = {'56'};
+% markersForConditions{6,1} = {'57'};
+% markersForConditions{6,2} = {'58'};
 
-
-
-% conditions = {'open vs closed'};
-% markersForConditions{1,1} = {'51','52'};
-% markersForConditions{1,2} = {'151','152'};
 
 fnameTTidx = '-ttidx.txt'; % End root of test train indices (so we don't double dip)
 
@@ -59,7 +59,7 @@ FreqBins = [11.75  12.25; 14.75  15.25];
 %Parameters for classification
 k = 5; % k-fold cross validation
 
-selectedChannels = 1:32;%
+selectedChannels = 1:32;
 %selectedChannels = [4 7 8 20 21 32];
 
 
@@ -95,9 +95,7 @@ for s = 1:length(subjects)
     
     %EEGtrain = eeg_epoch2continuous(EEG);
     
-    % Create features in data that have already been preprocessed and
-    % epoched
-    
+    % Create features in data that have already been preprocessed and epoched
     
 
     %% test and train generation of features
@@ -170,22 +168,23 @@ for s = 1:length(subjects)
     testselectedepochs = testepochsofinterest > 0;
     testresponse = testepochsofinterest(testselectedepochs);
     
-    % Build classifier
+    %%%%%%%%%%%%%%%%%%% Build classifier %%%%%%%%%%%%%%%%%%%
+
 %      trainedClassifier = fitcsvm(features(selectedepochs,:),response,'KernelScale','auto','Standardize',true,...
 %     'OutlierFraction',0.05);
      
     %SVM, fit everything, assume 5% outliers
-%     trainedClassifier = fitcsvm(features(selectedepochs,:),response, 'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName',...
-%     'expected-improvement-plus'),'OutlierFraction',0.05);
+    trainedClassifier = fitcsvm(features(selectedepochs,:),response, 'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName',...
+    'expected-improvement-plus'),'OutlierFraction',0.05);
 
 %     trainedClassifier(s,c) = fitcdiscr(features(selectedepochs,:),response, 'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName',...
 %     'expected-improvement-plus'),'OutlierFraction',0.05);
 
 
-    trainedClassifier = fitcdiscr(features(selectedepochs,:),response,...
-    'OptimizeHyperparameters','auto',...
-    'HyperparameterOptimizationOptions',struct('Holdout',0.3,...
-    'AcquisitionFunctionName','expected-improvement-plus'));
+%     trainedClassifier = fitcdiscr(features(selectedepochs,:),response,...
+%     'OptimizeHyperparameters','auto',...
+%     'HyperparameterOptimizationOptions',struct('Holdout',0.3,...
+%     'AcquisitionFunctionName','expected-improvement-plus'));
 
      % k-fold cross validation
      group = response; %Not sure why this is getting renamed
@@ -225,23 +224,40 @@ for s = 1:length(subjects)
 end
 
 %% Save data
-classifname = '-LDAlog-search5pout';
+% classifname = '-LDAlog-search5pout';
+classifname = '-SVMlog-search5pout';
 classificationdatafile = strcat(direeg,'Classification\','ClassificationAccuracy-',fnameeeg,classifname,'-',datestr(now,'yyyy-mm-dd_at_HH-MM'),'.mat');
 save(classificationdatafile, 'validationAccuracy','testAccuracy','testAccuracy',...
     'conditions','markersForConditions','subjects','fnameeeg', 'allPartitionedModel','allTrainedClassifier');
 
-%% Load data
-direeg = 'K:HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
+%% Load data (can start here! result of above process)
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
 %fnameeeg = 'VideoCheckOpacity';% Base of file name
 
-%load(strcat(direeg,'Classification\','ClassificationAccuracy-VideoCheckOpacity-SVMlog-search5pout-2019-10-14_at_16-29.mat'))
+% load check opacity data and calculate mean train/test
+load(strcat(direeg,'Classification\','ClassificationAccuracy-VideoCheckOpacity-SVMlog-search5pout-2020-01-26_at_19-10.mat'))
+cond2plot = [2 4 5 6]; % Conditions for classifying opacity
+opacity_acc_train = validationAccuracy(:,cond2plot);
+opacity_acc_test = testAccuracy(:,cond2plot);
+opacity_acc_train_mean = mean(opacity_acc_train);
+opacity_acc_test_mean = mean(opacity_acc_test);
 
-load(strcat(direeg,'Classification\','ClassificationAccuracy-Checker-SVMlog-search5pout-2019-10-14_at_16-10.mat'))
+% load check size data and calculate mean train/test
+load(strcat(direeg,'Classification\','ClassificationAccuracy-VideoCheckSize-CombinedStrongMedium-SVMlog-search5pout-2020-01-27_at_19-37.mat'))
+cond2plot = [2 3 4];  % Conditions for classifying check size
+checksize_acc_train = validationAccuracy(:,cond2plot);
+checksize_acc_test = testAccuracy(:,cond2plot);
+checksize_acc_train_mean = mean(checksize_acc_train);
+checksize_acc_test_mean = mean(checksize_acc_test);
 
+% load ergonomic preference ratings
+load('K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\ergonomic_ratings.mat')
+check_mean = checksize_mean';
+opacity_mean = opac_mean';
 
-%%
-cond2plot = [2  4 5 6];
-%cond2plot = [2 3 4];
+%% plot condition vs. classification rate
+cond2plot = [2  4 5 6]; % Conditions for classifying opacity
+% cond2plot = [2 3 4];  % Conditions for classifying check size
 
 figure;
 subplot(2,1,1)
@@ -273,8 +289,7 @@ xlim([0.9 length(conditions(cond2plot))+.1]);
 title('Test Accuracy')
 set(gca,'FontSize',14)
 
-
-%%
+%% compare classifiers (can skip)
 figure
 plot(checksvm(1,:),'b','LineWidth',2)
 hold on
@@ -284,61 +299,68 @@ plot(checklda(2,:),'r--','LineWidth',2)
 grid on
 legend('SVM train','SVM test','LDA train','LDA test')
 
-
-%%  Alpha values and classification rates
+%% alpha values and classification rates (can skip)
 alphacheck = [255 125 85 50]./255;
 
-%% Preferences by classification rates
-% Conds x [MD BN LO FE OP IF CV RM GR]
-full_pref = [1 1 1 1 2 1 1 1 1];
-strong_pref = [1 1 2.5 3.6 2 1 2.5 1.5 1];
-med_pref = [1 1 3.2 4.2 3 5 3.5 2 2];
-weak_pref = [3 2 4.5 4.7 5 5 5 2.5 3];
-opac = [full_pref; strong_pref; med_pref; weak_pref];
-
-subjects = {'BN','CV','FE', 'GR','IF','LO','MD','OP','RM'}; % 
-alorder = [2 7 4 9 6 3 1 5 8];
+%% plot all ergonomic ratings vs. opac classification rates (can skip)
+numsubj = length(subjects);
+alorder = 1:numsubj;
 newopac = opac(:,alorder);
+ 
+cond2plot = [2  4 5 6]; % Conditions for classifying opacity
 
-cond2plot = [2  4 5 6];
+n = numsubj*length(cond2plot);
 
-valaccsel = validationAccuracy(:,cond2plot)';
-
+valaccsel = opacity_acc_train';
 
 figure
-scatter(reshape(newopac,1,36),reshape(valaccsel,1,36),'ko');
+scatter(reshape(newopac,1,n),reshape(valaccsel,1,n),'ko');
 hold on;
 for i = 1:4
 scatter(newopac(i,:),valaccsel(i,:),'filled'); 
 end
 
-corr(reshape(newopac,1,36),reshape(valaccsel,1,36),'ko')
+% corr(reshape(newopac,1,n),reshape(valaccsel,1,n),'ko')
+
+p = polyfit(reshape(newopac,1,n),reshape(valaccsel,1,n), 1);
+f = polyval(p, reshape(newopac,1,n));
+[r2, rmse] = rsquare(reshape(newopac,1,n),f)
 
 
-p = polyfit(reshape(newopac,1,36),reshape(valaccsel,1,36), 1);
-f = polyval(p, reshape(newopac,1,36));
-%[r2, rmse] = rsquare(mean(newopac),f)
-
-%% 
-checksize_mean
-checksize_acc_train = mean(validationAccuracy(:,cond2plot))
-checksize_acc_test = mean(testAccuracy(:,cond2plot))
-
-%%
-opacity_mean = opac_mean'
-opacity_acc_train = mean(validationAccuracy(:,cond2plot))
-opacity_acc_test = mean(testAccuracy(:,cond2plot))
-%%
-prefs = [opacity_mean checksize_mean];
-acctrain = [opacity_acc_train checksize_acc_train];
-acctest = [opacity_acc_test checksize_acc_test];
-%%
+%% plot accuracy vs. erg rating means and save
 figure
-scatter(checksize_mean,checksize_acc_train,'b','filled')
+scatter(check_mean,checksize_acc_train_mean,'b','filled')
 hold on
-scatter(checksize_mean,checksize_acc_test,'c','filled')
-scatter(opacity_mean,opacity_acc_train,'r','filled')
-scatter(opacity_mean,opacity_acc_test,'m','filled')
+scatter(check_mean,checksize_acc_test_mean,'c','filled')
+scatter(opacity_mean,opacity_acc_train_mean,'r','filled')
+scatter(opacity_mean,opacity_acc_test_mean,'m','filled')
+
+prefs = [opacity_mean check_mean];
+acctrain = [opacity_acc_train_mean checksize_acc_train_mean];
+acctest = [opacity_acc_test_mean checksize_acc_test_mean];
 
 save('preferenceVSaccuracy.mat','opacity_acc_test','opacity_mean','opacity_acc_train','prefs','checksize_acc_test','checksize_acc_train','checksize_mean','acctest','acctrain')
 
+%% calculate dropoff
+% average dropoff across subjects
+pref = [check_mean check_mean opacity_mean opacity_mean];
+acc = 100*[checksize_acc_train_mean checksize_acc_test_mean ...
+    opacity_acc_train_mean opacity_acc_test_mean];
+
+% calculate for all subjects individually
+% pref = [reshape(checksize, 1, 48) reshape(checksize, 1, 48) ...
+%     reshape(opac, 1, 64) reshape(opac, 1, 64)];
+% acc = 100*[reshape(checksize_acc_train, 1, 48) reshape(checksize_acc_test, 1, 48) ...
+%     reshape(opacity_acc_train, 1, 64) reshape(opacity_acc_test, 1, 64)];
+
+p = polyfit(pref, acc, 1);
+f = polyval(p, pref);
+[r2, rmse] = rsquare(acc,f);
+
+figure; plot(pref,acc,'ko');
+hold on; plot(pref,f,'r-');
+
+title(strcat(['R2 = ' num2str(r2) '; RMSE = ' num2str(rmse)]))
+
+ylim([50 90])
+text(2.5, 85, sprintf('accuracy = %.3f * erg + %.3f', p(1), p(2)));
