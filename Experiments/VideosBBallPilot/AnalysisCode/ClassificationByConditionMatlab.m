@@ -175,17 +175,17 @@ for s = 1:length(subjects)
 %     'OutlierFraction',0.05);
      
     %SVM, fit everything, assume 5% outliers
-    trainedClassifier = fitcsvm(features(selectedepochs,:),response, 'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName',...
-    'expected-improvement-plus'),'OutlierFraction',0.05);
+%     trainedClassifier = fitcsvm(features(selectedepochs,:),response, 'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName',...
+%     'expected-improvement-plus'),'OutlierFraction',0.05);
 
 %     trainedClassifier(s,c) = fitcdiscr(features(selectedepochs,:),response, 'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName',...
 %     'expected-improvement-plus'),'OutlierFraction',0.05);
 
 
-%     trainedClassifier = fitcdiscr(features(selectedepochs,:),response,...
-%     'OptimizeHyperparameters','auto',...
-%     'HyperparameterOptimizationOptions',struct('Holdout',0.3,...
-%     'AcquisitionFunctionName','expected-improvement-plus'));
+    trainedClassifier = fitcdiscr(features(selectedepochs,:),response,...
+    'OptimizeHyperparameters','auto',...
+    'HyperparameterOptimizationOptions',struct('Holdout',0.3,...
+    'AcquisitionFunctionName','expected-improvement-plus'));
 
      % k-fold cross validation
      group = response; %Not sure why this is getting renamed
@@ -303,6 +303,12 @@ legend('SVM train','SVM test','LDA train','LDA test')
 %% alpha values and classification rates (can skip)
 alphacheck = [255 125 85 50]./255;
 
+%% regression
+p = anovan(lowstruct.pow_val, ...
+    {lowstruct.subj lowstruct.cond lowstruct.att}, ...
+    'random', 1, 'model','interaction','varnames',...
+    {'Subject','Checker Size','Attend Condition'})
+
 %% plot all ergonomic ratings vs. opac classification rates (can skip)
 numsubj = length(subjects);
 alorder = 1:numsubj;
@@ -342,17 +348,31 @@ acctest = [opacity_acc_test_mean checksize_acc_test_mean];
 
 save('preferenceVSaccuracy.mat','opacity_acc_test','opacity_mean','opacity_acc_train','prefs','checksize_acc_test','checksize_acc_train','checksize_mean','acctest','acctrain')
 
+
+%% regression model
+
+% calculate for all subjects individually
+pref = [reshape(checksize, 1, 48) reshape(checksize, 1, 48) ...
+    reshape(opac, 1, 64) reshape(opac, 1, 64)];
+acc = 100*[reshape(checksize_acc_train, 1, 48) reshape(checksize_acc_test, 1, 48) ...
+    reshape(opacity_acc_train, 1, 64) reshape(opacity_acc_test, 1, 64)];
+
+% reshape orders column first (1st entry from all subjects, 2nd entry from all...)
+subj = repmat(1:16, 1, 14);
+stim_size = repmat( [repelem("Big", 16) repelem("Med", 16) repelem("Small", 16)], 1, 2);
+stim_opac = repmat( [repelem("Full", 16) repelem("Strong", 16) repelem("Med", 16) repelem("Weak", 16)], 1, 2);
+stim = [stim_size stim_opac];
+
+p = anovan(acc, {subj, pref, stim}, ...
+    'random', 1, 'continuous', 2, 'model','interaction','varnames',...
+    {'Subject','Ergonomic Rating','Stimulus'});
+
 %% calculate dropoff
 % average dropoff across subjects
 pref = [check_mean check_mean opacity_mean opacity_mean];
 acc = 100*[checksize_acc_train_mean checksize_acc_test_mean ...
     opacity_acc_train_mean opacity_acc_test_mean];
 
-% calculate for all subjects individually
-% pref = [reshape(checksize, 1, 48) reshape(checksize, 1, 48) ...
-%     reshape(opac, 1, 64) reshape(opac, 1, 64)];
-% acc = 100*[reshape(checksize_acc_train, 1, 48) reshape(checksize_acc_test, 1, 48) ...
-%     reshape(opacity_acc_train, 1, 64) reshape(opacity_acc_test, 1, 64)];
 
 p = polyfit(pref, acc, 1);
 f = polyval(p, pref);

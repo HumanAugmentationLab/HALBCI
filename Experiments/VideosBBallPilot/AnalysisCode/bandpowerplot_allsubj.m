@@ -14,44 +14,42 @@ CV = pop_loadset('filename', 'CV-VideoCheckOpacity.set', 'filepath', direeg);
 RM = pop_loadset('filename', 'RM-VideoCheckOpacity.set', 'filepath', direeg);
 GR = pop_loadset('filename', 'GR-VideoCheckOpacity.set', 'filepath', direeg);
 
-ALLSUBJ = {MD BN LO FE OP IF CV RM GR};          
+% Post SFN
+JR = pop_loadset('filename', 'JR-VideoCheckOpacity.set', 'filepath', direeg);
+AI = pop_loadset('filename', 'AI-VideoCheckOpacity.set', 'filepath', direeg);
+QP = pop_loadset('filename', 'QP-VideoCheckOpacity.set', 'filepath', direeg);
+LT = pop_loadset('filename', 'LT-VideoCheckOpacity.set', 'filepath', direeg);
+HL = pop_loadset('filename', 'HL-VideoCheckOpacity.set', 'filepath', direeg);
+DC = pop_loadset('filename', 'DC-VideoCheckOpacity.set', 'filepath', direeg);
+VM = pop_loadset('filename', 'VM-VideoCheckOpacity.set', 'filepath', direeg);
+
+
+ALLSUBJ = {MD BN LO FE OP IF CV RM GR JR AI QP LT HL DC VM};          
 disp('Loaded all subject data from opacity exp...');
 
 %% CHECK SIZE EXPERIMENTS
 % Load all of post-ica data
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
 
-MD = pop_loadset('filename', 'MD-VideoCheckSize-Strong.set', 'filepath', direeg);
-BN = pop_loadset('filename', 'BN-VideoCheckSize-Strong.set', 'filepath', direeg);
-LO = pop_loadset('filename', 'LO-VideoCheckSize-Strong.set', 'filepath', direeg);
-FE = pop_loadset('filename', 'FE-VideoCheckSize-Strong.set', 'filepath', direeg);
-OP = pop_loadset('filename', 'OP-VideoCheckSize-Strong.set', 'filepath', direeg);
-IF = pop_loadset('filename', 'IF-VideoCheckSize-Strong.set', 'filepath', direeg);
-CV = pop_loadset('filename', 'CV-VideoCheckSize-Strong.set', 'filepath', direeg);
-RM = pop_loadset('filename', 'RM-VideoCheckSize-Strong.set', 'filepath', direeg);
-GR = pop_loadset('filename', 'GR-VideoCheckSize-Strong.set', 'filepath', direeg);
+MD = pop_loadset('filename', 'MD-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+BN = pop_loadset('filename', 'BN-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+LO = pop_loadset('filename', 'LO-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+FE = pop_loadset('filename', 'FE-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+OP = pop_loadset('filename', 'OP-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+IF = pop_loadset('filename', 'IF-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+CV = pop_loadset('filename', 'CV-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+RM = pop_loadset('filename', 'RM-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+GR = pop_loadset('filename', 'GR-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+JR = pop_loadset('filename', 'JR-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+AI = pop_loadset('filename', 'AI-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+QP = pop_loadset('filename', 'QP-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+LT = pop_loadset('filename', 'LT-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+HL = pop_loadset('filename', 'HL-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+DC = pop_loadset('filename', 'DC-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+VM = pop_loadset('filename', 'VM-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
 
-MD_Med = pop_loadset('filename', 'MD-VideoCheckSize-Med.set', 'filepath', direeg);
-BN_Med = pop_loadset('filename', 'BN-VideoCheckSize-Med.set', 'filepath', direeg);
-LO_Med = pop_loadset('filename', 'LO-VideoCheckSize-Med.set', 'filepath', direeg);
-FE_Med = pop_loadset('filename', 'FE-VideoCheckSize-Med.set', 'filepath', direeg);
-OP_Med = pop_loadset('filename', 'OP-VideoCheckSize-Med.set', 'filepath', direeg);
-IF_Med = pop_loadset('filename', 'IF-VideoCheckSize-Med.set', 'filepath', direeg);
-CV_Med = pop_loadset('filename', 'CV-VideoCheckSize-Med.set', 'filepath', direeg);
-RM_Med = pop_loadset('filename', 'RM-VideoCheckSize-Med.set', 'filepath', direeg);
-GR_Med = pop_loadset('filename', 'GR-VideoCheckSize-Med.set', 'filepath', direeg);
 
-MD.data = cat(3, MD.data, MD_Med.data);
-BN.data = cat(3, BN.data, BN_Med.data);
-LO.data = cat(3, LO.data, LO_Med.data);
-FE.data = cat(3, FE.data, FE_Med.data);
-OP.data = cat(3, OP.data, OP_Med.data);
-IF.data = cat(3, IF.data, IF_Med.data);
-CV.data = cat(3, CV.data, CV_Med.data);
-RM.data = cat(3, RM.data, RM_Med.data);
-GR.data = cat(3, GR.data, GR_Med.data);
-
-ALLSUBJ = {MD BN LO FE OP IF CV RM GR};          
+ALLSUBJ = {MD BN LO FE OP IF CV RM GR JR AI QP LT HL DC VM};          
 disp('Loaded all subject data from check size exp...');      
 
 %% Calculate Bandpower: OPACITY
@@ -244,19 +242,25 @@ for s = 1:length(ALLSUBJ)
     end
 end
 
-%%
+%% Bandpower difference plot
 difflow = meanpow_lowATTlow - meanpow_lowATThigh;
 diffhigh = meanpow_highATThigh - meanpow_highATTlow;
 meanlow = mean(difflow); cilow = 1.96*std(difflow)/sqrt(length(ALLSUBJ));
 meanhigh = mean(diffhigh); cihigh = 1.96*std(diffhigh)/sqrt(length(ALLSUBJ));
-figure; ALLSUBJ = 1:9;
+figure;
 subplot(1,2,1); ylabel('12 Hz Power');
 subplot(1,2,2); ylabel('15 Hz Power');
-dotcolor = [217,235,211]/255; % [107,168,215]/255;
-linecolor = [11,137,1]/255; % [32,80,189]/255;
+
+% opacity - green
+% dotcolor = [217,235,211]/255; 
+% linecolor = [11,137,1]/255;
+
+% size - blue
+dotcolor = [107,168,215]/255;
+linecolor = [32,80,189]/255;
+
 fs = 16;
 
-binlabels = {'Full', 'Strong', 'Medium', 'Weak'};
 for s = 1:length(ALLSUBJ)
     subplot(1,2,1)
     s1 = plot(difflow(s,:), 'o', 'Color', dotcolor,  'MarkerSize', 8, 'MarkerFaceColor', dotcolor, 'MarkerEdgeColor', 'k'); hold on;
@@ -264,10 +268,13 @@ for s = 1:length(ALLSUBJ)
     s2 = plot(diffhigh(s,:), 'o', 'Color', dotcolor, 'MarkerSize', 8,  'MarkerFaceColor', dotcolor, 'MarkerEdgeColor', 'k'); hold on;
 end
 
-% binlabels = {'Big', 'Medium', 'Small'};
+% binlabels = {'Full', 'Strong', 'Medium', 'Weak'};
+binlabels = {'Big', 'Medium', 'Small'};
+
 subplot(1,2,1); hold on
 e1 = errorbar(1:length(binlabels), meanlow, cilow, 'Color', linecolor, 'LineWidth', 3.5,'CapSize', 18);
-yline(0, 'k', 'LineWidth', 2); ylim([-0.51 6]);
+yline(0, 'k', 'LineWidth', 2); 
+ylim([-0.51 6]);
 xlim([0.8 length(binlabels)+0.2]);
 xticks(1:length(binlabels)); xticklabels(binlabels);
 ax = gca;
@@ -278,16 +285,15 @@ set(gca,'FontSize',fs);
 subplot(1,2,2); hold on
 e2 = errorbar(1:length(binlabels), meanhigh, cihigh, 'Color', linecolor, 'LineWidth', 3.5,'CapSize', 18);
 yline(0, 'k', 'LineWidth', 2);
-xlim([0.8 length(binlabels)+0.2]); ylim([-0.51 6])
+xlim([0.8 length(binlabels)+0.2]); 
+ylim([-0.51 6])
 xticks(1:length(binlabels)); xticklabels(binlabels);
 ax = gca;
 ax.YAxis.MinorTick = 'on';
 ax.YAxis.MinorTickValues = -0.5:0.5:6;
 set(gca,'FontSize',fs);
 
-
-
-%% Bandpower Comparison Plot
+%% (SKIP) Bandpower Comparison Plot
 ALLSUBJ = 1:9;
 stderror_lowATTlow = 1.96*std(meanpow_lowATTlow) / sqrt( num_subj );
 stderror_lowATThigh = 1.96*std(meanpow_lowATThigh) / sqrt( num_subj );
