@@ -1,10 +1,11 @@
 %% Classification of SSVEP Video Data
 clear
-direeg = 'K:HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
+direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
 
 % list of subject names in alphabetical order
-subjects = {'AI','BN','CV','DC','FE','GR','HL','IF','JR','LO','LT','MD','OP','QP','RM','VM'}; 
+%subjects = {'AI','BN','CV','DC','FE','GR','HL','IF','JR','LO','LT','MD','OP','QP','RM','VM'}; 
 
+subjects = {'MD'}
 %% Run classification
 
 train_probability = .8;
@@ -19,8 +20,8 @@ fnameeeg = 'VideoCheckSize-CombinedStrongMedium'; %
 conditions = {'Compare All','Big Checker','Medium Checker','Small Checker'};
 markersForConditions{1,1} = {'51','53','55'};
 markersForConditions{1,2} = {'52','54','56'};
-markersForConditions{2,1} = {'51'};
-markersForConditions{2,2} = {'52'};
+markersForConditions{2,1} = {'51'}; %Big checker, attend low freq
+markersForConditions{2,2} = {'52'}; %Big checker, attend high freq
 markersForConditions{3,1} = {'53'};
 markersForConditions{3,2} = {'54'};
 markersForConditions{4,1} = {'55'};
@@ -110,7 +111,7 @@ for s = 1:length(subjects)
         testbpfeat = [];
         for ch = 1:length(selectedChannels)
             bpfeat(:,ch) =  bandpower(squeeze(EEGtrain.data(selectedChannels(ch),:,:)),EEGtrain.srate,FreqBins(fb,:));
-            testbpfeat(:,ch) =  bandpower(squeeze(EEGtest.data(selectedChannels(ch),:,:)),EEGtest.srate,FreqBins(fb,:));
+            testbpfeat(:,ch) =  bandpower(squeeze(EEGtest.data(selectedCsehannels(ch),:,:)),EEGtest.srate,FreqBins(fb,:));
 
         end
         features = [features bpfeat];
