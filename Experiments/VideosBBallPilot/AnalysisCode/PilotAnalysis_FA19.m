@@ -8,7 +8,7 @@ bcilab
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\2019\';
 
 % File name without extension
-fnameeeg = '20191006194945_GR-VideoCheckOpacity_Test';
+fnameeeg = '20191121162238_JR-VideoCheckOpacity_Test';
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
@@ -19,7 +19,8 @@ ogEEG = EEG;
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\2019\';
 
 % Create new marker file using fixmissingmarkersfromlog.m
-fnameeeg = '20191006194945_GR-VideoCheckOpacity_Test_newmarkers.set';
+fnameeeg = '20191118162721_AI-VideoCheckOpacity_Test_newmarkers.set';
+
 EEG = pop_loadset('filename', fnameeeg, 'filepath', direeg);
 ogEEG = EEG;
 %% Chop run between start and end markers 
@@ -29,7 +30,7 @@ start_pt = EEG.event(start_idx).latency;
 [~, end_idx] = pop_selectevent(EEG, 'type', 100);
 end_pt = EEG.event(end_idx).latency;
 
-% eeg_cropped = eeg_eegrej(EEG, [1 start_pt-1]);
+% EEG = eeg_eegrej(EEG, [1 start_pt-1]);
 disp('Cropping start and end of raw data...')
 EEG = eeg_eegrej(EEG, [1 start_pt-1; end_pt+1 EEG.pnts*EEG.srate]);
 
@@ -163,7 +164,21 @@ adetails.reject.strategy = 'interpolate'; % or 'remove'
 % badelec = [18 30]; % RM 
 % badelec = [1 18 30]; % RM med
 % badelec = [10 31]; % GR med
-badelec = 10; % GR opacity
+% badelec = 10; % GR opacity
+% badelec = [13 17]; % VM strong
+% badelec = [13 17 31]; % VM med
+% badelec = [28]; % DC med
+% badelec = 8; % DC opac
+% badelec = [6 9 20 30]; % LT strong
+% badelec = [9 10 20 30]; % LT opac
+% badelec = [20 21]; % LT med
+% badelec = [16 28 31]; % QP Strong
+% badelec = [16]; % QP opac, med
+% badelec = [15 17 18 31]; % AI med
+badelec = [8 17 19 32]; % AI opac
+% badelec = [14 25 27 30]; % JR strong
+% badelec = [8]; % JR med
+% badelec = [14 19 23]; % JR opac
 
 adetails.reject.channelidx = badelec;
 
@@ -206,6 +221,27 @@ pop_eegplot(EEG, 1, 1, 1);  % removes epochs within original EEG struct
 % GR_opac = [1 101:102 150 232]
 % GR_strong = [1 47 73 213 302 309 315 346:347 351];
 % GR_med = [1];
+% VM_strong = [40 60 121 139 161 182 201 202 227 242:243 263:264];
+% VM_med = [41 59:60 62 81 84:85 101 124 141 145 171 181:185 222 243 261 303 321 323 346]
+% VM_opac = [43 64 81 121:123 139 181 185 199 283 297 299:300 304:309 319:320];
+% DC_opac = [221 301];
+% DC_med = [1 9 49 82 241];
+% DC_strong = [20 40 60 80 100 120 140 160 180 200 220 230 240 260 280 300 320 340];
+% HL_med = [21 41 61 81 101 121 141 161 181 201 202 221 222 241 261 299 301 321 336 341];
+% HL_opac = [21 24 37 39 41 55 61 81 104 121 141 145 161 179 181 182 198 199 201 221 222 241 261 281 282 301 302 307];
+% HL_strong = [1 21 41 61 141 161 199 201 241 261 262 282 301 302];
+% LT_strong = [61 101 141 162 181 198 199 201 202 209 215 221 227 233 261 276 281 282 304 321 322 355];
+% LT_opac = [2 45 61 62 93 121 143 144 161 162 176 177 181 201:203 221 222 261 281 282];
+% LT_med = [81 228 280 312 358];
+% QP_strong = 290;
+% QP_opac = [22:24 62:64 103 121 123 143 144 182 221:224 243:244 282 303];
+% QP_med = [42 201 202 322];
+% AI_med = [106 109];
+% AI_strong = [231 291];
+AI_opac = [81 183 204 249 261 298 300 301 312];
+% JR_strong = [101 122 140 141 161 221 222 301 302 321 341];
+% JR_med = [101 165 166 181];
+% JR_opac = [41 61 101 102 121 122 124 141 145:147 150 301];
 
 %% Confirm that the new data look good (can skip)
 pop_eegplot(EEG,1,1,1);
@@ -225,7 +261,7 @@ EEG = pop_runica(EEG, 'runica');
 % Write ICA to file for later use
 dirpreica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\Pre-ICA\';
 
-pop_saveset(EEG, 'filename', 'GR-VideoCheckOpacity-preica', 'filepath', dirpreica)
+pop_saveset(EEG, 'filename', 'AI-VideoCheckOpacity-preica', 'filepath', dirpreica)
 
 %% Inspect ICA components
 EEG = pop_selectcomps(EEG);
@@ -260,8 +296,29 @@ RM_strong = [1 9 13 14 16:17 19:26 29:32];
 RM_med = [3 6 12:13 15:16 19:23 26:29];
 GR_strong = [1 4:5 14:15 18:19 21:22 24 26:30 32];
 GR_opac = [1 4 9 16:20 23:26 28:31];
+VM_strong = [1 6 9 14:18 20 23:24 26 29];
+VM_med = [2 7 9:11 13 16:17 19:21 23 27:29];
+VM_opac = [1:3 8:9 15 17 20 25 29:30 32];
+DC_opac = [1 3:6 8 12 17 23 25 27 30 32];
+DC_med = [2 4 13:14 22:23 25 29:31];
+DC_strong = [1 12 13 15 21 24 26 27 30:32];
+HL_med = [2 7 13 17 18 20 22:24 26:29 31 32];
+HL_opac = [1 3 4 6 9 12 14 16:18 26 29 30 32];
+HL_strong = [1 6 13 15:16 22 24 27 31];
+LT_strong = [1 4:6 9 11 14 17:18 21:28];
+LT_opac = [1 2 8 10 13 14 16 20:23 25 27:30];
+LT_med = [2:6 14 17:18 20 22 24 26 27 30]; % ICA1 has extremely high power values
+QP_strong = [1 13:14 19:21 28:29];
+QP_opac = [1 3 5 8 16 18:21 23:26 28 30];
+QP_med = [1 4 10 12 14 20 24:26 28:29]; 
+AI_med = [1 6:10 14:16 18 20:24 26:28]; 
+AI_strong = [3 10:11 20 22 26:27 30:31];
+AI_opac = [1 12 14:16 19:20 22 26 27];
+JR_strong = [2 5:7 9:16 26:28];
+JR_med = [5 7 10 14 16 21 22 25 27 30 31];
+JR_opac = [3 5 9 10 12 13 15:17 19 21:23 25 27 29];
 
-rej_comps = GR_opac;
+rej_comps = AI_opac;
 adetails.reject.icacomponents = rej_comps;
 
 % Running this way will cause a pop-up, which allows you to see the before
@@ -273,7 +330,7 @@ disp('Subtracing ICA component from data...')
 EEG = pop_subcomp(EEG, rej_comps);
 
 dirica = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
-pop_saveset(EEG, 'filename', 'GR-VideoCheckO.set', 'filepath', dirica)
+pop_saveset(EEG, 'filename', 'AI-VideoCheckOpacity.set', 'filepath', dirica)
 
 %% Plot data after removal of ICA components
 % Reference to original data
@@ -284,7 +341,7 @@ figure; pop_spectopo(EEG, 1, [1000*EEG.xmin  1000*EEG.xmax], 'EEG' ,...
     'percent', 100, 'freq', [6 10 12 15], 'freqrange',[1 30],'electrodes','on');
 %% Load pre-ICA runs
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\Pre-ICA\';
-EEG = pop_loadset('filename', 'RM-VideoCheckSize-Strong-preica.set', 'filepath', direeg);
+EEG = pop_loadset('filename', 'AI-VideoCheckOpacity-preica.set', 'filepath', direeg);
 
 %% Load post-ICA runs
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';

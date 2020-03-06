@@ -2,29 +2,44 @@
 direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\icafiles\FA19\';
 
 % OPACITY EXPERIMENT
-% MD = pop_loadset('filename', 'MD-VideoCheckOpacity.set', 'filepath', direeg);
-% BN = pop_loadset('filename', 'BN-VideoCheckOpacity.set', 'filepath', direeg);
-% LO = pop_loadset('filename', 'LO-VideoCheckOpacity.set', 'filepath', direeg);
-% FE = pop_loadset('filename', 'FE-VideoCheckOpacity.set', 'filepath', direeg);
-% OP = pop_loadset('filename', 'OP-VideoCheckOpacity.set', 'filepath', direeg);
-% IF = pop_loadset('filename', 'IF-VideoCheckOpacity.set', 'filepath', direeg);
-% CV = pop_loadset('filename', 'CV-VideoCheckOpacity.set', 'filepath', direeg);
-% RM = pop_loadset('filename', 'RM-VideoCheckOpacity.set', 'filepath', direeg);
-% GR = pop_loadset('filename', 'GR-VideoCheckOpacity.set', 'filepath', direeg);
+MD = pop_loadset('filename', 'MD-VideoCheckOpacity.set', 'filepath', direeg);
+BN = pop_loadset('filename', 'BN-VideoCheckOpacity.set', 'filepath', direeg);
+LO = pop_loadset('filename', 'LO-VideoCheckOpacity.set', 'filepath', direeg);
+FE = pop_loadset('filename', 'FE-VideoCheckOpacity.set', 'filepath', direeg);
+OP = pop_loadset('filename', 'OP-VideoCheckOpacity.set', 'filepath', direeg);
+IF = pop_loadset('filename', 'IF-VideoCheckOpacity.set', 'filepath', direeg);
+CV = pop_loadset('filename', 'CV-VideoCheckOpacity.set', 'filepath', direeg);
+RM = pop_loadset('filename', 'RM-VideoCheckOpacity.set', 'filepath', direeg);
+GR = pop_loadset('filename', 'GR-VideoCheckOpacity.set', 'filepath', direeg);
+JR = pop_loadset('filename', 'JR-VideoCheckOpacity.set', 'filepath', direeg);
+AI = pop_loadset('filename', 'AI-VideoCheckOpacity.set', 'filepath', direeg);
+QP = pop_loadset('filename', 'QP-VideoCheckOpacity.set', 'filepath', direeg);
+LT = pop_loadset('filename', 'LT-VideoCheckOpacity.set', 'filepath', direeg);
+HL = pop_loadset('filename', 'HL-VideoCheckOpacity.set', 'filepath', direeg);
+DC = pop_loadset('filename', 'DC-VideoCheckOpacity.set', 'filepath', direeg);
+VM = pop_loadset('filename', 'VM-VideoCheckOpacity.set', 'filepath', direeg);
+
 
 % CHECK SIZE EXPERIMENT
-MD = pop_loadset('filename', 'MD-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
-BN = pop_loadset('filename', 'BN-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
-LO = pop_loadset('filename', 'LO-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
-FE = pop_loadset('filename', 'FE-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
-OP = pop_loadset('filename', 'OP-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
-IF = pop_loadset('filename', 'IF-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
-CV = pop_loadset('filename', 'CV-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
-RM = pop_loadset('filename', 'RM-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
-GR = pop_loadset('filename', 'GR-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% MD = pop_loadset('filename', 'MD-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% BN = pop_loadset('filename', 'BN-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% LO = pop_loadset('filename', 'LO-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% FE = pop_loadset('filename', 'FE-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% OP = pop_loadset('filename', 'OP-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% IF = pop_loadset('filename', 'IF-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% CV = pop_loadset('filename', 'CV-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% RM = pop_loadset('filename', 'RM-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% GR = pop_loadset('filename', 'GR-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% JR = pop_loadset('filename', 'JR-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% AI = pop_loadset('filename', 'AI-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% QP = pop_loadset('filename', 'QP-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% LT = pop_loadset('filename', 'LT-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% HL = pop_loadset('filename', 'HL-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% DC = pop_loadset('filename', 'DC-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
+% VM = pop_loadset('filename', 'VM-VideoCheckSize-CombinedStrongMedium.set', 'filepath', direeg);
 
 
-ALLSUBJ = {MD BN LO FE OP IF CV RM GR};          
+ALLSUBJ = {MD BN LO FE OP IF CV RM GR JR AI QP LT HL DC VM};          
 disp('loaded all subject data')
 
 %% ANOVA: OPACITY
@@ -220,12 +235,12 @@ end
 
 p_low = anovan(lowstruct.pow_val, ...
     {lowstruct.subj lowstruct.cond lowstruct.att}, ...
-    'random', 1, 'model','full','varnames',...
+    'random', 1, 'model','interaction','varnames',...
     {'Subject','Opacity','Attend Condition'})
 
 p_high = anovan(highstruct.pow_val, ...
     {highstruct.subj highstruct.cond highstruct.att}, ...
-    'random', 1, 'model','full','varnames',...
+    'random', 1, 'model','interaction','varnames',...
     {'Subject','Opacity','Attend Condition'})
 
 
@@ -234,10 +249,10 @@ p_high = anovan(highstruct.pow_val, ...
 
 p_low = anovan(lowstruct.pow_val, ...
     {lowstruct.subj lowstruct.cond lowstruct.att}, ...
-    'random', 1, 'model','full','varnames',...
+    'random', 1, 'model','interaction','varnames',...
     {'Subject','Checker Size','Attend Condition'})
 
 p_high = anovan(highstruct.pow_val, ...
     {highstruct.subj highstruct.cond highstruct.att}, ...
-    'random', 1, 'model','full','varnames',...
+     'random', 1,'model','interaction','varnames',...
     {'Subject','Checker Size','Attend Condition'})

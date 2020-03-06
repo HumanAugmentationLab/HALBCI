@@ -8,10 +8,10 @@ direeg = 'K:HumanAugmentationLab\EEGdata\EnobioTests\VideoSSVEP\Preprocessed\ica
 %fnameeeg = 'VideoCheckOpacity';% Base of file name
 finnameeeg = {'VideoCheckSize-Strong','VideoCheckSize-Med'};
 foutnameeeg = 'VideoCheckSize-CombinedStrongMedium'; % 
-subjects = {'BN','CV','FE', 'GR','IF','LO','MD','OP','RM'}; %
+subjects = {'JR','AI','QP','LT','HL','DC','VM'}; %
 
 fnameTTidx = '-ttidx.txt'; % End root of test train indices (so we don't double dip)
-
+train_probability = 0.8;
 
 for s = 1:length(subjects)
     
@@ -24,12 +24,14 @@ for s = 1:length(subjects)
     
     for f = 1:length(finnameeeg)
         clear EEGpart
-
         EEGpart = pop_loadset(fullfile(direeg,strcat(subjects{s},'-',finnameeeg{f},'.set'))); 
     
-    
-    
         iotesttraintext = fullfile(direeg,strcat(subjects{s},'-',finnameeeg{f}, fnameTTidx));
+        
+        if ~isfile(iotesttraintext)
+           [train_eeg_remove, test_eeg_remove] = makeIndexForTrainTest(EEGpart,train_probability,iotesttraintext);    
+        end
+        
         if isfile(iotesttraintext)
             disp("Loading individual text file");
             train_eeg_remove = []; test_eeg_remove = [];    
@@ -45,14 +47,12 @@ for s = 1:length(subjects)
         else
             error('Does not have individual text files. Run this first')
             %disp(strcat('Will generate text file.',iotesttraintext));
-            %[train_eeg_remove, test_eeg_remove] = makeIndexForTrainTest(EEG,train_probability,iotesttraintext);    
         end
         
         if f == 1
             EEG = EEGpart;
             
             % Write the combined text file
-            
             for line = 1:length(configuration{1,3})
                 fprintf(datasetFileout,'%s %d %d\n',configuration{1,1}{line},configuration{1,2}(line),configuration{1,3}(line));
             end
