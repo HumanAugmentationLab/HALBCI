@@ -1,11 +1,13 @@
 %% Directory for EEG data (K drive is \fsvs01\Research\)
-direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\Testing SSVEP\';
+%direeg = 'K:\HumanAugmentationLab\EEGdata\EnobioTests\Testing SSVEP\';
+direeg = 'K:\EEGdata\EnobioTests\2019';
 
 % File name without extension
 disp('loading SSVEP experiment data...')
 % fnameeeg = ('20170727114720_PatientW1-8v15_Record');
 % fnameeeg = ('20170727113703_PatientW1-12v15_Record');
-fnameeeg = ('20170727112030_PatientW1-15v20_Record');
+%fnameeeg = ('20170727112030_PatientW1-15v20_Record');
+fnameeeg = ('20190907122124_TW-VideoCheckSize-02_RECORD');
 
 % Load the .easy file version of the data
 ioeasy = io_loadset(fullfile(direeg,strcat(fnameeeg,'.easy'))); %requires .info file
