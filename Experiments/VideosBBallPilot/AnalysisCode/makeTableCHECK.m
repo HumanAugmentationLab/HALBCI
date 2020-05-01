@@ -98,9 +98,9 @@ for s = 1:length(ALLSUBJ)
             case 54
                 attendCond = 15; checkCond = "Medium";
             case 55
-                attendCond = 12; checkCond = "Strong";
+                attendCond = 12; checkCond = "Small";
             case 56
-                attendCond = 15; checkCond = "Strong";
+                attendCond = 15; checkCond = "Small";
         end
         
         for i = 1:length(curr_trial.epoch)
